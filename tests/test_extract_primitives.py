@@ -109,6 +109,9 @@ def test_parse_indian_magnitudes():
     assert cells.parse_magnitude(" 12.5 LAKH ") == 1_250_000
     assert cells.parse_magnitude("1,234 lakh") == 123_400_000
     assert cells.parse_magnitude("5 crore") == 50_000_000
+    assert cells.parse_magnitude("1.1 lakh") == 110_000
+    assert cells.parse_magnitude("0.29 crore") == 2_900_000
+    assert cells.parse_magnitude("1,23,456 lakh") == 12_345_600_000
 
 
 @pytest.mark.parametrize("bad", ["", "9.02", "crore", "9.02 million", "1.234567 lakh", "abc lakh"])
