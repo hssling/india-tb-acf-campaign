@@ -787,3 +787,28 @@ Deviations from this plan are logged here, each with its date. Anything explorat
 **18 November 2026.** None.
 
 **18 November 2026 (after registration).** Rajya Sabha Unstarred Question 420 (3 February 2026; 2025 January–December notifications by State, Ni-kshay as on 21 January 2026) was obtained after registration. It is used only as an exploratory Q2 cross-check against Question 1216's 2025 column, State by State, and is labelled exploratory; it does not change Q4. Question 1900's 2024 (January–December) column is likewise compared with Question 1216's 2024 column as an exploratory check; its pre-specified 2025 cross-check (§9.5.5) is unchanged.
+
+**19 November 2026 (after registration; before any notification count was read).** Inventory context rule (clarification of §5.2). `context_verbatim` is read literally from §5.2. For a figure in prose, it is the figure's own sentence only. For a figure in a table cell, it is the table title, the column heading and the row label, in that order. No lead-in sentence or section heading is added. `definition_class` and `scope` (§7.2) are assigned from this context alone. The reason is that the rule used at first allowed a judgement for each row, and that judgement changed the scope of some rows.
+
+**19 November 2026 (after registration; before any notification count was read).** District denominator: reconstruction from official notices (deviation from §9.3).
+
+- **Reason.** The LGD modification report gives no date and no type of change for any row. This is so in the Excel download of 18 November 2026 and in the PDF download of 19 November 2026; the LGD download page offers no other format of this report. Under §9.3, none of its 154 rows can be reversed, so 19 of the 35 coarsened units would have no denominator.
+- **What is unchanged.** The reference date (7 December 2024, with changes dated on or after 8 December 2024 undone), the starting list, the reversal operations, the exposure share, units, caps and the S6a/S6b sensitivity analyses are as in §9.3–§9.4.
+- **Evidence for each change.** The date and type of each change are taken from an official source. A source qualifies if it is one of the following:
+  - the LGD public page for that district;
+  - a State government gazette notification or government order that creates, abolishes, renames, splits or merges a district, or moves it between States;
+  - a release of the Press Information Bureau, the Ministry of Home Affairs or the State government that cites such a notification.
+
+  The source must name the district and give a date: the effective date if one is stated, otherwise the date of the notification. News reports and encyclopaedias may be used to find an official source but never count as evidence. Every source is recorded with its URL and access date, and is read online; nothing is downloaded without the author's permission.
+- **Procedure for each State with modification rows.**
+  1. List every district creation, abolition, split, merger or move between States dated 8 December 2024 to 18 November 2026 for which an official source is found.
+  2. The count at the reference date is the current count, minus districts created, plus districts abolished or merged away, with moves reversed, using those changes only.
+  3. Every modification row of the State must then be accounted for. A row is accounted for by one of the changes in step 1, or by an official source showing that the district existed under that code before 8 December 2024; such a row is treated as a change that does not alter the count, such as a rename or a change of headquarters or code.
+  4. If any row of the State cannot be accounted for, the State stays not computable.
+- **Check.** Where an official source states a State's number of districts at a date between 1 November 2024 and 7 December 2024, it is compared with the reconstructed count. A mismatch is reported; it does not change the count.
+- **Reporting.** Both Q4 analyses are reported:
+  - the registered analysis on the units computable under §9.3 as written;
+  - the analysis on the units computable under this rule.
+
+  The paper presents the second as the main Q4 analysis and labels it a deviation. It states which conclusions differ between the two.
+- **Order of work.** This rule is fixed, committed and pushed before any notification count in a parliamentary answer or India TB Report is read.
