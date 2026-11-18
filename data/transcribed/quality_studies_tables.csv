@@ -1,0 +1,287 @@
+study,url,accessed,table_id,row_group,row_label,column_label,printed_cell
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 1,,INDIA,% Screened among population** (at least 10%),9.3
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 1,,INDIA,% Tested among screened (at least 4.75%),1.0
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 1,,INDIA,% Diagnosed among tested (at least 5%),3.7
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 1,,INDIA,NNS (max. 1538),2824
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Asthma & COPD,Number screened,30232
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Asthma & COPD,Number tested,636
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Asthma & COPD,% Tested,2.1
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Asthma & COPD,Number diagnosed,16
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Asthma & COPD,% Diagnosed,2.5
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Asthma & COPD,NNS,1890
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,COVID recovered,Number screened,616088
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,COVID recovered,Number tested,9209
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,COVID recovered,% Tested,1.5
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,COVID recovered,Number diagnosed,174
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,COVID recovered,% Diagnosed,1.9
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,COVID recovered,NNS,3541
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,CVDs,Number screened,19603
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,CVDs,Number tested,119
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,CVDs,% Tested,0.6
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,CVDs,Number diagnosed,21
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,CVDs,% Diagnosed,17.6
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,CVDs,NNS,933
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,DM and HTN,Number screened,448106
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,DM and HTN,Number tested,11496
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,DM and HTN,% Tested,2.6
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,DM and HTN,Number diagnosed,356
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,DM and HTN,% Diagnosed,3.1
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,DM and HTN,NNS,1259
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Immunosuppressives,Number screened,3484
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Immunosuppressives,Number tested,336
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Immunosuppressives,% Tested,9.6
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Immunosuppressives,Number diagnosed,11
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Immunosuppressives,% Diagnosed,3.3
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Immunosuppressives,NNS,317
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Renal & Liver disease,Number screened,47319
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Renal & Liver disease,Number tested,131
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Renal & Liver disease,% Tested,0.3
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Renal & Liver disease,Number diagnosed,0
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Renal & Liver disease,% Diagnosed,0.0
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Renal & Liver disease,NNS,0
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Cancer,Number screened,1302
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Cancer,Number tested,12
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Cancer,% Tested,0.9
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Cancer,Number diagnosed,0
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Cancer,% Diagnosed,0.0
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Cancer,NNS,0
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Palliative Care,Number screened,523
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Palliative Care,Number tested,114
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Palliative Care,% Tested,21.8
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Palliative Care,Number diagnosed,0
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Palliative Care,% Diagnosed,0.0
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,Palliative Care,NNS,0
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,High malnutrition,Number screened,1245564
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,High malnutrition,Number tested,16100
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,High malnutrition,% Tested,1.3
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,High malnutrition,Number diagnosed,1063
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,High malnutrition,% Diagnosed,6.6
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Clinical,High malnutrition,NNS,1172
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Elderly >60 years,Number screened,128638
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Elderly >60 years,Number tested,3581
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Elderly >60 years,% Tested,2.8
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Elderly >60 years,Number diagnosed,209
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Elderly >60 years,% Diagnosed,5.8
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Elderly >60 years,NNS,615
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Children <10 years,Number screened,104757
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Children <10 years,Number tested,127
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Children <10 years,% Tested,0.1
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Children <10 years,Number diagnosed,4
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Children <10 years,% Diagnosed,3.1
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Children <10 years,NNS,26189
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Occupation*,Number screened,1366444
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Occupation*,Number tested,25012
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Occupation*,% Tested,1.8
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Occupation*,Number diagnosed,815
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Occupation*,% Diagnosed,3.3
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Occupation*,NNS,1677
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Unorganised labour,Number screened,2455829
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Unorganised labour,Number tested,49045
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Unorganised labour,% Tested,2.0
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Unorganised labour,Number diagnosed,1170
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Unorganised labour,% Diagnosed,2.4
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Unorganised labour,NNS,2099
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Homeless &Night shelters,Number screened,46862
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Homeless &Night shelters,Number tested,2582
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Homeless &Night shelters,% Tested,5.5
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Homeless &Night shelters,Number diagnosed,89
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Homeless &Night shelters,% Diagnosed,3.4
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Homeless &Night shelters,NNS,527
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,NACO/SACS identified HRG for HIV,Number screened,883885
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,NACO/SACS identified HRG for HIV,Number tested,9076
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,NACO/SACS identified HRG for HIV,% Tested,1.0
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,NACO/SACS identified HRG for HIV,Number diagnosed,403
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,NACO/SACS identified HRG for HIV,% Diagnosed,4.4
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,NACO/SACS identified HRG for HIV,NNS,2193
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Old age homes & Orphanages,Number screened,42810
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Old age homes & Orphanages,Number tested,1878
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Old age homes & Orphanages,% Tested,4.4
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Old age homes & Orphanages,Number diagnosed,113
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Old age homes & Orphanages,% Diagnosed,6.0
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Old age homes & Orphanages,NNS,379
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Prisons inmates,Number screened,117665
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Prisons inmates,Number tested,6358
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Prisons inmates,% Tested,5.4
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Prisons inmates,Number diagnosed,164
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Prisons inmates,% Diagnosed,2.6
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Prisons inmates,NNS,717
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Asylums & Refugee camps,Number screened,36465
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Asylums & Refugee camps,Number tested,1007
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Asylums & Refugee camps,% Tested,2.8
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Asylums & Refugee camps,Number diagnosed,41
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Asylums & Refugee camps,% Diagnosed,4.1
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Asylums & Refugee camps,NNS,889
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Slum,Number screened,18321022
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Slum,Number tested,146781
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Slum,% Tested,0.8
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Slum,Number diagnosed,5118
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Slum,% Diagnosed,3.5
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Slum,NNS,3580
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Street children,Number screened,429
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Street children,Number tested,86
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Street children,% Tested,20.0
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Street children,Number diagnosed,4
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Street children,% Diagnosed,4.7
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Socio-economic,Street children,NNS,107
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Difficult to reach villages,Number screened,15829483
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Difficult to reach villages,Number tested,153403
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Difficult to reach villages,% Tested,1.0
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Difficult to reach villages,Number diagnosed,6922
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Difficult to reach villages,% Diagnosed,4.5
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Difficult to reach villages,NNS,2287
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Population consuming raw milk and uncooked meat,Number screened,330522
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Population consuming raw milk and uncooked meat,Number tested,3593
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Population consuming raw milk and uncooked meat,% Tested,1.1
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Population consuming raw milk and uncooked meat,Number diagnosed,254
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Population consuming raw milk and uncooked meat,% Diagnosed,7.1
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Population consuming raw milk and uncooked meat,NNS,1301
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Tribal areas huts & hostels,Number screened,3264889
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Tribal areas huts & hostels,Number tested,14629
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Tribal areas huts & hostels,% Tested,0.4
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Tribal areas huts & hostels,Number diagnosed,927
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Tribal areas huts & hostels,% Diagnosed,6.3
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Tribal areas huts & hostels,NNS,3522
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Villages seeking care from traditional healers,Number screened,1898795
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Villages seeking care from traditional healers,Number tested,11285
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Villages seeking care from traditional healers,% Tested,0.6
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Villages seeking care from traditional healers,Number diagnosed,531
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Villages seeking care from traditional healers,% Diagnosed,4.7
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Villages seeking care from traditional healers,NNS,3576
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Villages with high case load,Number screened,877331
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Villages with high case load,Number tested,12899
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Villages with high case load,% Tested,1.5
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Villages with high case load,Number diagnosed,546
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Villages with high case load,% Diagnosed,4.2
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Geographic,Villages with high case load,NNS,1607
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Unknown,Others,Number screened,68780092
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Unknown,Others,Number tested,436000
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Unknown,Others,% Tested,0.6
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Unknown,Others,Number diagnosed,17737
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Unknown,Others,% Diagnosed,4.1
+GHA2023,https://pmc.ncbi.nlm.nih.gov/articles/PMC10515680/,2026-11-19,Table 2,Unknown,Others,NNS,3878
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Total,,Screened n (%)col,581 633 (100.0)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Total,,Presumptive TB n (%)row,11 357 (2.0)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Total,,Tested n (%)row,7527 (66.3)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Total,,Diagnoseda n (%)row,117 a (1.6)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Total,,NNS,4971
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Gender,Male,Screened n (%)col,293260 (50.4)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Gender,Male,Presumptive TB n (%)row,5798 (2.0)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Gender,Male,Tested n (%)row,3961 (68.3)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Gender,Male,Diagnoseda n (%)row,90 (2.3)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Gender,Male,NNS,3258
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Gender,Female,Screened n (%)col,284612 (48.9)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Gender,Female,Presumptive TB n (%)row,5526 (1.9)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Gender,Female,Tested n (%)row,3549 (64.4)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Gender,Female,Diagnoseda n (%)row,27 (0.8)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Gender,Female,NNS,9208
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Gender,Other,Screened n (%)col,48 (<0.1)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Gender,Other,Presumptive TB n (%)row,1 (2.1)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Gender,Other,Tested n (%)row,1 (100.0)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Gender,Other,Diagnoseda n (%)row,0 (0.0)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Gender,Other,NNS,–
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Gender,Missing,Screened n (%)col,3713 (0.6)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Gender,Missing,Presumptive TB n (%)row,32 (0.9)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Gender,Missing,Tested n (%)row,16 (50.0)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Gender,Missing,Diagnoseda n (%)row,0 (0.0)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Gender,Missing,NNS,–
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Elderly,Yes (>60y),Screened n (%)col,63645 (10.9)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Elderly,Yes (>60y),Presumptive TB n (%)row,3311 (5.2)b
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Elderly,Yes (>60y),Tested n (%)row,2258 (68.2)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Elderly,Yes (>60y),Diagnoseda n (%)row,32 (1.4)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Elderly,Yes (>60y),NNS,1989
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Elderly,No,Screened n (%)col,512 127 (88.0)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Elderly,No,Presumptive TB n (%)row,8007 (1.6)ref
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Elderly,No,Tested n (%)row,5239 (65.4)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Elderly,No,Diagnoseda n (%)row,85 (1.6)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Elderly,No,NNS,6025
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Elderly,Missing,Screened n (%)col,5861 (1.0)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Elderly,Missing,Presumptive TB n (%)row,30 (0.5)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Elderly,Missing,Tested n (%)row,30 (100.0)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Elderly,Missing,Diagnoseda n (%)row,0 (0.0)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Elderly,Missing,NNS,–
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Residence,Rural,Screened n (%)col,349300 (60.1)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Residence,Rural,Presumptive TB n (%)row,7590 (2.2)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Residence,Rural,Tested n (%)row,4994 (65.8)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Residence,Rural,Diagnoseda n (%)row,57 (1.1)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Residence,Rural,NNS,6128
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Residence,Urban,Screened n (%)col,232300 (39.9)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Residence,Urban,Presumptive TB n (%)row,3766 (1.6)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Residence,Urban,Tested n (%)row,2532 (67.2)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Residence,Urban,Diagnoseda n (%)row,60 (2.4)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Residence,Urban,NNS,3872
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Residence,Missing,Screened n (%)col,33 (<0.1)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Residence,Missing,Presumptive TB n (%)row,1 (3.0)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Residence,Missing,Tested n (%)row,1 (100.0)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Residence,Missing,Diagnoseda n (%)row,0 (0.0)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Residence,Missing,NNS,–
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Type of high-risk population,Socioeconomically,Screened n (%)col,188 961 (32.5)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Type of high-risk population,Socioeconomically,Presumptive TB n (%)row,2893 (1.5)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Type of high-risk population,Socioeconomically,Tested n (%)row,1910 (66.0)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Type of high-risk population,Socioeconomically,Diagnoseda n (%)row,56 (2.9)b
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Type of high-risk population,Socioeconomically,NNS,3374
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Type of high-risk population,Clinically,Screened n (%)col,88 804 (15.3)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Type of high-risk population,Clinically,Presumptive TB n (%)row,3621 (4.1)b
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Type of high-risk population,Clinically,Tested n (%)row,2504 (69.2)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Type of high-risk population,Clinically,Diagnoseda n (%)row,26 (1.0)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Type of high-risk population,Clinically,NNS,3416
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Type of high-risk population,Geographically,Screened n (%)col,238 297 (41.0)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Type of high-risk population,Geographically,Presumptive TB n (%)row,3049 (1.3)ref
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Type of high-risk population,Geographically,Tested n (%)row,2178 (71.4)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Type of high-risk population,Geographically,Diagnoseda n (%)row,13 (0.6)ref
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Type of high-risk population,Geographically,NNS,18331
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Type of high-risk population,Not classifiablec,Screened n (%)col,63 011 (10.8)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Type of high-risk population,Not classifiablec,Presumptive TB n (%)row,1794 (2.8)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Type of high-risk population,Not classifiablec,Tested n (%)row,935 (52.1)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Type of high-risk population,Not classifiablec,Diagnoseda n (%)row,22 (2.4)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Type of high-risk population,Not classifiablec,NNS,2864
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Facility-based high-risk group,Yes,Screened n (%)col,55 743 (9.6)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Facility-based high-risk group,Yes,Presumptive TB n (%)row,1399 (2.5)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Facility-based high-risk group,Yes,Tested n (%)row,915 (65.4)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Facility-based high-risk group,Yes,Diagnoseda n (%)row,8 (0.9)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Facility-based high-risk group,Yes,NNS,6968
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Facility-based high-risk group,No,Screened n (%)col,501 619 (86.2)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Facility-based high-risk group,No,Presumptive TB n (%)row,8832 (1.8)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Facility-based high-risk group,No,Tested n (%)row,5976 (67.7)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Facility-based high-risk group,No,Diagnoseda n (%)row,93 (1.6)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Facility-based high-risk group,No,NNS,5394
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Facility-based high-risk group,Not classifiable,Screened n (%)col,24 271 (4.2)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Facility-based high-risk group,Not classifiable,Presumptive TB n (%)row,1126 (4.6)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Facility-based high-risk group,Not classifiable,Tested n (%)row,636 (56.5)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Facility-based high-risk group,Not classifiable,Diagnoseda n (%)row,16 (2.5)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 2,Facility-based high-risk group,Not classifiable,NNS,1517
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Total,,Tested N,7527
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Total,,Rapid molecular diagnostic test n (%)row,1989 (26.4)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Gender,Male,Tested N,3961
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Gender,Male,Rapid molecular diagnostic test n (%)row,1150 (29.0)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Gender,Female,Tested N,3549
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Gender,Female,Rapid molecular diagnostic test n (%)row,835 (23.5)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Gender,Other,Tested N,1
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Gender,Other,Rapid molecular diagnostic test n (%)row,1 (100.0)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Gender,Missing,Tested N,16
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Gender,Missing,Rapid molecular diagnostic test n (%)row,3 (18.8)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Elderly,Yes (>60y),Tested N,2258
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Elderly,Yes (>60y),Rapid molecular diagnostic test n (%)row,657 (29.1)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Elderly,No,Tested N,5239
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Elderly,No,Rapid molecular diagnostic test n (%)row,1329 (25.4)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Elderly,Missing,Tested N,30
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Elderly,Missing,Rapid molecular diagnostic test n (%)row,3 (10.0)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Residence,Rural,Tested N,4994
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Residence,Rural,Rapid molecular diagnostic test n (%)row,902 (18.1) a
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Residence,Urban,Tested N,2532
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Residence,Urban,Rapid molecular diagnostic test n (%)row,1087 (42.9)ref
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Residence,Missing,Tested N,1
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Residence,Missing,Rapid molecular diagnostic test n (%)row,0 (0.0)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Type of high-risk population,Socioeconomically,Tested N,1910
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Type of high-risk population,Socioeconomically,Rapid molecular diagnostic test n (%)row,784 (41.0)ref
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Type of high-risk population,Clinically,Tested N,2504
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Type of high-risk population,Clinically,Rapid molecular diagnostic test n (%)row,783 (31.3)a
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Type of high-risk population,Geographically,Tested N,2178
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Type of high-risk population,Geographically,Rapid molecular diagnostic test n (%)row,114 (5.2) a
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Type of high-risk population,Not classifiableb,Tested N,935
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Type of high-risk population,Not classifiableb,Rapid molecular diagnostic test n (%)row,308 (32.9)
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Facility-based high-risk group,Yes,Tested N,915
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Facility-based high-risk group,Yes,Rapid molecular diagnostic test n (%)row,395 (43.2)ref
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Facility-based high-risk group,No,Tested N,5976
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Facility-based high-risk group,No,Rapid molecular diagnostic test n (%)row,1340 (22.4)a
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Facility-based high-risk group,Not classifiable,Tested N,636
+PGPH2025,https://pmc.ncbi.nlm.nih.gov/articles/PMC12574901/,2026-11-19,Table 3,Facility-based high-risk group,Not classifiable,Rapid molecular diagnostic test n (%)row,254 (39.9)
