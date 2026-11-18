@@ -190,6 +190,7 @@ Press releases enter only where they are official (PIB or a Ministry). News cove
 | `page_or_para` | PDF page and table, or paragraph |
 | `table_id` | The table heading or number, if any |
 | `pub_date` | The document's date |
+| `note` | Flags set by the rules of this plan (for example, a mixed-phase scope, §7.2), and any extraction remark |
 
 Blanks stay blank. No field is filled by inference from another document.
 
@@ -236,10 +237,14 @@ Every check is applied to every source in which its inputs appear. Its result is
 Every figure is turned into an interval [lo, hi] before any check or comparison.
 
 - **Half-unit.** h is half a unit in the last printed digit. A figure printed as an integer count has h = 0. "9.02 crore" has h = 0.005 crore, and "3.7%" has h = 0.05%.
-- **Qualifier.** It is read from the one to three words directly before the figure, or a "+" directly after it. Matching is case-insensitive and uses whole words (§7.2), except that the symbols "~" and "+" match as characters. The first matching rule wins:
-  - **at_least:** "more than", "over", "above", "exceeding", "at least", or a "+" directly after the figure;
+- **Qualifier.** It is read from the one to three words directly before the figure, and from two symbols. Words match case-insensitively as whole words (§7.2). The figure is the number as printed, with its magnitude word if any ("25 crore").
+  - **"+"** counts only when it follows the figure immediately, with no space, and is not followed by a digit (after any spaces). Regex: `\d[\d,.]*(?: ?(?:lakhs?|crores?))?\+(?!\s*\d)`. So "25 crore+" and "25+ crore" qualify, and "3+2", "3+ 2" and "3 + 2" do not.
+  - **"~"** counts only when it precedes the figure immediately, with or without one space. Regex: `~ ?\d`.
+
+  The first matching rule wins:
+  - **at_least:** "more than", "over", "above", "exceeding", "at least", or "+" as above;
   - **at_most:** "up to", "less than", "under", "below", "at most";
-  - **about:** "nearly", "around", "approximately", "about", "almost", "close to", "~";
+  - **about:** "nearly", "around", "approximately", "about", "almost", "close to", or "~" as above;
   - **exact:** no qualifier word.
 - **Interval.**
   - exact: [v − h, v + h];
@@ -309,7 +314,7 @@ Keywords match whole words (regex `\b…\b`), except the stems notif, diagnos, d
   3. "reached", "covered", "visited" or "contacted" → population reached;
   4. otherwise → unspecified.
 - **`tested`:**
-  1. "tests", "testing done", "investigation", "investigations" or "number of test" → tests done;
+  1. "tests", "testing done", "investigations" or "number of test" → tests done. "investigations" counts only when none of "person", "persons", "patient", "patients", "individual", "individuals", "contact" or "contacts" appears in the same definition text;
   2. "tested" together with "person", "persons", "people", "individual", "individuals", "patient", "patients" or "presumptive" → people tested;
   3. otherwise → unspecified.
 - **`tb_cases`:**
@@ -317,11 +322,13 @@ Keywords match whole words (regex `\b…\b`), except the stems notif, diagnos, d
   2. "diagnos" or "detect" → diagnosed;
   3. otherwise (including "reported" alone) → unspecified.
 - **Scope:**
-  1. "100 day", "100-day", "100 days", "347" (as a number of districts), "phase 1", "phase i" or "phase-i" → phase 1;
+  1. "100 day", "100-day", "100 days", "347" (as a number of districts), "phase 1", "phase i" or "phase-i" → phase 1. "347" matches only when it is not part of a longer number (digits joined by a comma or full stop) or a word. Regex: `(?<![\w,.])347(?![\d,.]*\d)`. It matches "347 districts" and "347." at the end of a sentence, but not "1,347", "2.347", "3470" or "347,000";
   2. "expanded", "extended", "expansion", "all districts", "phase 2", "phase ii", "phase-ii" or "second phase" → expanded campaign;
   3. "Abhiyan", "Abhiyaan", "campaign" or "campaigns" → unspecified;
   4. "active case finding" or "ACF" without any word of rules 1–3 → programme-wide;
   5. otherwise → unspecified.
+
+  A figure whose text contains both a phase 1 and a phase 2 keyword (for example "Phase I/II" or "phase 1 and 2") takes the first class by rule order, and is flagged in its `note`. A combined phase also counts as both. It is detected by the regex `\bphase[\s-]*(?:i|1)\s*(?:/|&|-|and)\s*(?:ii|2)\b`, which matches "Phase I/II", "phase 1 and 2", "Phase-I & II" and "phase 1-2", but not "phase 12".
 
 Other quantities have no definition classes. Each assignment is recorded with the keyword that matched.
 
@@ -516,7 +523,7 @@ Question 1216 reports cases notified in a table about the TB Mukt Bharat Abhiyan
 
   A median 2024 ratio above 1.05 does not fail the guard. It is expected from late reports and is reported descriptively.
 - **If the guard fails.** The primary Q4 analysis is the January–October contrast (§9.5.3), with the fallback trend sources of §9.6. The full-year contrast is then reported descriptively only (§10.7). This consequence is pre-specified and is not a deviation.
-- **State discrepancies.** Whatever the medians, any State whose ratio lies outside 0.95 to 1.05 in either year is recorded as a Q2 discrepancy (§7.4).
+- **State discrepancies.** Whatever the medians, any State whose ratio lies outside 0.95 to 1.05 in either year is recorded as a Q2 discrepancy (§7.4). 2024 rows above 1.05 are labelled late-report-consistent in the note column of `outputs/q2_discrepancies.csv`, but are still entered.
 - **Failure of Question 1216's own extraction checks** (§9.6) counts as a failed guard for every purpose in this plan, whatever the state of Question 3467.
 - **If the guard cannot be applied.** This is the case if Question 1216 passes its extraction checks but either Question 3467 fails its extraction checks (§9.6) or fewer than 10 States have both values for either year. The full-year contrast then remains primary, and the paper states that the guard could not be run.
 - **Recording.** The ratios, the medians and the decision are recorded in `data/source_choices.csv` before the freeze (§5.4).

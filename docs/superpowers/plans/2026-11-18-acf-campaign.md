@@ -187,7 +187,7 @@
   - `data/source_choices.csv`;
   - tests.
 
-**`figures_inventory.csv` columns** (analysis plan §5.2): `fig_id, quantity, value, value_printed, qualifier, unit, definition_verbatim, context_verbatim, definition_class, scope, series_type, window_label, window_start, window_end, as_on, as_on_basis, geography, source_file, source_url, page_or_para, table_id, pub_date`.
+**`figures_inventory.csv` columns** (analysis plan §5.2): `fig_id, quantity, value, value_printed, qualifier, unit, definition_verbatim, context_verbatim, definition_class, scope, series_type, window_label, window_start, window_end, as_on, as_on_basis, geography, source_file, source_url, page_or_para, table_id, pub_date, note`.
 
 **Rules:**
 - Check every table against its printed national total. For the Q4 source tables, apply the extraction checks of analysis plan §9.6 and record each pass or failure in `source_choices.csv`.
@@ -201,6 +201,8 @@
     - a Q4 table whose state rows differ from its printed total by 2 fails, and one that differs by 1 passes;
     - a missing needed column fails;
     - a table with no printed total skips the sum check and reports it;
+    - a failed trend source gives a missing year for every state and no substitute;
+    - a failed outcome table gives contrast not computable;
   - `test_inventory_rows_sourced`: no empty `source_file` or `page_or_para`;
   - `test_window_fields_present`.
 - [ ] **Step 2:** RED, implement, GREEN.
