@@ -178,7 +178,7 @@ def test_window_fields_present():
             assert r["window_end"] and not r["as_on"]
         if r["window_start"] or r["window_end"]:
             assert r["series_type"] in ("period", "cumulative")
-    pg = [r for r in rows if r["fig_id"].startswith("PGPH")]
+    pg = [r for r in rows if r["fig_id"].startswith("PGPH") and "restates" not in r["note"]]
     assert {(r["window_start"], r["window_end"]) for r in pg} == \
         {("2023-01-01", "2023-09-30")}
     gha = [r for r in rows if r["fig_id"].startswith("GHA")]
@@ -320,3 +320,33 @@ def test_remaining_pgph_figures_enter():
 def test_curly_apostrophe_in_methods_wording():
     assert "district’s population" in q.GHA_M["pct_screened"]
     assert "'" not in q.GHA_M["pct_screened"]
+
+
+def test_pgph_restatements_of_gha_2021_enter():
+    rows = {r["fig_id"]: r for r in _prose()}
+    a = rows["PGPH2025.disc-2021-screened.sentence.other_pct_population_screened"]
+    assert a["value"] == "9" and a["qualifier"] == "about" and a["value_printed"] == "nine percent"
+    assert a["context_verbatim"].startswith("First, in 2021, based on secondary")
+    assert a["window_label"] == "2021" and a["window_start"] == ""
+    b = rows["PGPH2025.disc-2021-tested.sentence.other_pct_tested_among_screened"]
+    assert (b["value"], b["window_label"]) == ("1", "2021")
+    c = rows["PGPH2025.intro-2021.sentence.other_pct_population_screened"]
+    assert c["value"] == "9" and c["value_printed"] == "≈9%"
+    for r in (a, b, c):
+        assert r["source_file"] == q.PG_URL and r["page_or_para"]
+        assert "restates Shewade et al. GHA 2023" in r["note"]
+        assert r["window_start"] == "" and r["window_end"] == ""
+    assert rows["PGPH2025.disc-mapped-observed.sentence.other_pct_population_mapped_high_risk"]
+
+
+def test_exclusions_have_reasons():
+    with open(ROOT / "data/extracted/inventory_scope_decisions.csv", newline="",
+              encoding="utf-8") as f:
+        dec = [r for r in csv.DictReader(f) if r["source_file"] in q.OWN_FILES
+               and r["kind"] == "exclusion"]
+    cats = {r["category"] for r in dec}
+    assert {"benchmark targets", "other literature", "clinical detail",
+            "analysis assumption", "subgroup strata"} <= cats
+    assert "restated figures of other sources" not in cats
+    for r in dec:
+        assert r["decision"] == "not entered" and len(r["reason"]) > 30, r

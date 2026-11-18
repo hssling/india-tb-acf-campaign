@@ -342,7 +342,7 @@ def _ctx_cell(title: str, col: str, row: str) -> str:
 
 def _inv(*, doc, loc, row, col, quantity, printed, unit, definition, context, source_file,
          page, table_id="", period="", wstart="", wend="", pub, note="", prose=False,
-         occurrence=1, geography="India") -> dict:
+         occurrence=1, geography="India", value=None) -> dict:
     man = _manifest() if source_file == SUPP else None
     url = man[source_file]["url"] if man else source_file
     qual = R.qualifier(context, printed, occurrence) if prose else "exact"
@@ -364,7 +364,8 @@ def _inv(*, doc, loc, row, col, quantity, printed, unit, definition, context, so
     key = ".".join(x for x in (doc, _slug(loc), _slug(row), _slug(col),
                                quantity.replace(":", "_")) if x)
     return {
-        "fig_id": key, "quantity": quantity, "value": _value(printed),
+        "fig_id": key, "quantity": quantity,
+        "value": _value(printed) if value is None else value,
         "value_printed": printed, "qualifier": qual, "unit": unit,
         "definition_verbatim": definition, "context_verbatim": context,
         "definition_class": dcls, "scope": scope, "series_type": "period",
@@ -543,6 +544,41 @@ def _pg_specs() -> list[dict]:
                           printed=p, unit=unit, definition=defn, context=sent,
                           source_file=PG_URL, page=page, pub=PG_PUB, prose=True,
                           note=note, **PGW))
+
+    def restate(loc, page, sent, items, cites, period=""):
+        """Figures of this paper that restate another study's results (no cycle dates)."""
+        for q, p, unit, defn, val in items:
+            S.append(dict(doc="PGPH2025", loc=loc, row="", col="sentence", quantity=q,
+                          printed=p, unit=unit, definition=defn, context=sent,
+                          source_file=PG_URL, page=page, pub=PG_PUB, prose=True,
+                          period=period, value=val,
+                          note=_pnote(pm, f"restates {cites}; the sentence does not give "
+                                      "the cycle dates")))
+
+    gha = "Shewade et al. GHA 2023 (S1 Table of this paper)"
+    restate("intro-2021", "Introduction",
+            "Though ≈9% (revised target 10% for scale) of district population was reported "
+            "to be screened, we were not sure whether these were high-risk populations.",
+            [("other:pct_population_screened", "≈9%", "percent",
+              "of district population was reported to be screened", None)], gha)
+    restate("disc-2021-screened", "Discussion, 'Comparison with previous evidence'",
+            "First, in 2021, based on secondary aggregate Ni-kshay data, nearly nine percent "
+            "(cut-off 10%) of the population was reported to be screened indicating "
+            "acceptable scale (S1 Table).",
+            [("other:pct_population_screened", "nine percent", "percent",
+              "of the population was reported to be screened", "9")], gha, "2021")
+    restate("disc-2021-tested", "Discussion, 'Comparison with previous evidence'",
+            "Second, in 2021, 1% of screened were tested against the target of 4.75% "
+            "(S1 Table).",
+            [("other:pct_tested_among_screened", "1%", "percent",
+              "of screened were tested", None)], gha, "2021")
+    prose("disc-mapped-observed", "Discussion, 'Comparison with previous evidence'",
+          "Even if we assume that the ACF tool was used in all ACF days and the mapped "
+          "high-risk population was reduced to 11% (instead of 18.3% observed), the "
+          "estimated scale of ACF will increase only to 17.5%, still way lower than the "
+          "target of 90%.",
+          [("other:pct_population_mapped_high_risk", "18.3%", "percent",
+            "instead of 18.3% observed")])
 
     # Abstract
     prose("abs-screened", "Abstract",
@@ -742,18 +778,29 @@ def scope_decisions() -> list[dict]:
              "the 75% of the mapped high-risk population taken as the denominator is an "
              "analysis parameter, not a figure of the cascade; its product, 7 837 170, is "
              "entered"),
-            ("PGPH2025", PG_URL, "11%, 90%, 5%, 95%, 5%, 95%, 1538; 10%, 4.75%, 5%",
-             "PGPH Abstract and Methods; GHA Methods and Table 1 headings",
+            ("PGPH2025", PG_URL, "11%, 90%, 5%, 95%, 5%, 95%, 1538",
+             "PGPH Abstract and Methods, indicator targets", "benchmark targets",
+             "evaluation thresholds of the national ACF guidance, not campaign or ACF "
+             "inputs or outputs (as the KPI target columns of the campaign documents are "
+             "not entered); they stay in the column headings and denominator_methods of "
+             "data/extracted/quality_studies.csv"),
+            ("GHA2023", GHA_URL, "10%, 4.75%, 5%, 1538",
+             "GHA Methods and Table 1 column headings, indicator targets",
              "benchmark targets",
-             "benchmark values of the national ACF guidance (norms), not figures of the "
-             "studies' own cascades; they stay in the column headings and "
-             "denominator_methods of data/extracted/quality_studies.csv. Open for a "
-             "ruling under Part A's rule 3, which admits targets stated as ACF targets"),
-            ("PGPH2025", PG_URL, "nearly nine percent; 1%; about 9%; 35",
-             "Introduction and Discussion, comparisons with 2021 and a systematic review",
-             "restated figures of other sources",
-             "the GHA 2021 figures are entered from the GHA sources with their own window; "
-             "the systematic review's NNS of 35 is not a figure of either study")):
+             "evaluation thresholds of the national ACF guidance, not campaign or ACF "
+             "inputs or outputs (as the KPI target columns of the campaign documents are "
+             "not entered); they stay in the column headings and denominator_methods of "
+             "data/extracted/quality_studies.csv"),
+            ("PGPH2025", PG_URL, "11%, 17.5%, 90%",
+             "Discussion, scenario of a reduced mapped population",
+             "hypothetical scenario",
+             "an assumed mapped share and the scale it would give: a projection, not a "
+             "reported figure; the observed 18.3% in the same sentence is entered"),
+            ("PGPH2025", PG_URL, "35",
+             "Discussion, systematic review of contact screening", "other literature",
+             "NNS of a systematic review of low- and middle-income countries, not a figure "
+             "of either study or of Indian programme data"),
+    ):
         rows.append({"kind": "exclusion", "doc": doc, "source_file": f, "page": "",
                      "figures": figs, "where": where, "category": cat,
                      "decision": "not entered", "reason": why})
