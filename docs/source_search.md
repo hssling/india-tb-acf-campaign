@@ -217,3 +217,11 @@ The GHA 2023 PDF on PMC (stated on the page as 3.3 MB) is not needed, because th
   - the Taylor & Francis article page is behind bot protection.
 
   Metadata for the parliamentary answers therefore come from the Open Government Data mirrors and from search-engine indexes of the PDFs, and the log marks which is which.
+
+## 8. Document added after the search
+
+Added on 18 November 2026, before registration: Rajya Sabha Unstarred Question 3477, answered 1 April 2025, on the activities of the TB Mukt Bharat Abhiyaan campaign.
+
+- It was obtained by the author together with the parliamentary answers that give 2024 State notifications (Rajya Sabha Unstarred Questions 1216 and 3467).
+- Only its wording was read, with all counts masked.
+- It may contain national campaign figures, so it is included in the figure inventory for Q1 and Q2 and read at extraction. It is not used for the dose-response question.

@@ -31,7 +31,9 @@
 - Import pdfplumber only under `src/extract/`. Analysis modules must import without it.
 - `data_raw/` and `manuscript/` are git-ignored. `outputs/` is tracked. Only `outputs/scratch/` is ignored. Write every CSV and JSON with LF line endings (`newline="\n"`, `lineterminator="\n"`). The repository has `.gitattributes` with `* text=auto eol=lf`.
 - Every extracted row carries `source_file`, `pdf_page` (or paragraph) and `table_id`.
-- Every count carries its `window_start`, `window_end` and `as_on` date. Only counts with the same window and an `as_on` within 60 days after the window end may be compared.
+- Every count carries its `window_start`, `window_end` and `as_on` date. Only counts with the same window may be compared, under one of two cut-off rules (analysis plan §9.5):
+  - two tables: each `as_on` within 60 days after its own window end;
+  - a single-document contrast: one shared `as_on` within 60 days after the end of the later window.
 
 **State names and code reuse**
 - Canonical state names come from `src/states.py`, copied from tb_state_score with attribution. Unknown names raise an error.
@@ -52,12 +54,22 @@
 - Report no P values. Every estimate has a 95% interval and its n.
 - No manuscript or committed text may narrate its drafting history or carry internal process IDs.
 
-**Q4 fixed values (spec §9)**
-- Outcome: log(N_JanOct2025 / N_JanOct2024).
-- Weights: w = 1/(1/a + 1/b).
-- Trend points: 2019, 2022, 2023 and 2024. 2020 and 2021 are excluded. A state with no 2019 value falls back to 2022–2024.
-- Exposure: phase-1 district share, with the state denominator as the LGD count at December 2024.
-- Bootstrap: 10,000 draws over states, seed 20261118.
+**Q4 fixed values (analysis plan §9–§10, which governs where it differs from spec §9)**
+- **Primary outcome:** ln(N2025 / N2024), the full calendar years, from the "No. of TB cases notified" columns of RS Unstarred Q. 1216 (10 Feb 2026). It is one document with one shared cut-off.
+- **Weights:** w = 1/(1/N2024 + 1/N2025).
+- **Trend points:** 2019, 2022, 2023 and 2024; 2020 and 2021 are excluded.
+  - 2019 comes from the India TB Report 2020, and 2022 from the India TB Report 2023.
+  - 2023 and 2024 come from Q1216.
+  - Fallback, for 2023 and 2024 together, used if the guard fails or Q1216 fails extraction: 2023 from the India TB Report 2024, and 2024 from RS Q. 3467 (1 Apr 2025).
+  - A state with no 2019 value uses the points from 2022 onward.
+- **Guard:** each state's Q1216 2023 and 2024 counts are divided by its Q3467 "notified" counts.
+  - If the median ratio for either year lies outside [0.95, 1.05], Q1216 is judged not to be total notifications. The January–October pair (S8) then becomes primary, with the fallback trend, and the full-year contrast is reported descriptively.
+  - Any state outside [0.95, 1.05] is a Q2 discrepancy.
+  - If Q3467 fails extraction, or fewer than 10 states have both values, the guard is not run, and the full-year contrast stays primary; the paper says so.
+- **S8, the January–October pair:** LS Starred Q. 261 (2024 Jan–Oct) against RS Q. 1093 (2025 Jan–Oct). It carries the lag analyses S8(a), a uniform scaling of the 2025 counts with weights fixed, and S8(b), the ln r covariate.
+- **Placebo:** 2023 (Q1216, or the India TB Report 2024 under the fallback) against 2022 (India TB Report 2023), with the benchmark ln(N2022/N2019)/3.
+- **Exposure:** the phase-1 district share, with the state denominator as the LGD count reconstructed at 7 Dec 2024. States with more campaign districts than LGD districts are capped at 1 and flagged (E5).
+- **Bootstrap:** 10,000 draws over states sorted alphabetically by coarsened canonical name, seed 20261118.
 
 ## Review Focus
 
@@ -161,7 +173,7 @@
 **Files:**
 - Create:
   - `src/extract/itr.py`, which reads ACF tables and annual state notifications from India TB Reports 2019–2024;
-  - `src/extract/pq.py`, which reads parliamentary-answer tables (state January–October windows and state ACF tables);
+  - `src/extract/pq.py`, which reads parliamentary-answer tables: the full-year Q1216 and Q3467 tables, the state January–October windows, and state ACF tables. RS Q. 3477 (1 Apr 2025, campaign activities) is read for the figure inventory;
   - `src/extract/campaign.py`, which reads the CTD campaign PDF and official PIB figures;
   - `src/extract/quality_studies.py`, which reads the published GHA 2023 and PGPH 2025 indicators with their stated denominators;
   - `data/extracted/*.csv`;
@@ -169,7 +181,7 @@
   - `data/source_choices.csv`;
   - tests.
 
-**`figures_inventory.csv` columns:** `fig_id, quantity, value, unit, definition_verbatim, window_start, window_end, as_on, geography, source_file, page_or_para, pub_date, table_id`.
+**`figures_inventory.csv` columns** (analysis plan §5.2): `fig_id, quantity, value, value_printed, qualifier, unit, definition_verbatim, context_verbatim, definition_class, scope, series_type, window_label, window_start, window_end, as_on, as_on_basis, geography, source_file, source_url, page_or_para, table_id, pub_date`.
 
 **Rules:**
 - Check every table against its printed national total.
@@ -191,13 +203,17 @@
 
 **Interfaces:**
 - Produces:
-  - `comparable(a: dict, b: dict) -> tuple[bool, str]`: same quantity definition class, same window, same coverage (public plus private), and each `as_on` within 60 days of its window end;
-  - `jan_oct_pairs(rows) -> dict[state, (a, b)]`.
+  - `comparable(a: dict, b: dict) -> tuple[bool, str]`. It requires all of these:
+    - the same quantity in the same words from the same source (analysis plan §9.5);
+    - windows of the same length and calendar span;
+    - either each `as_on` within 60 days of its own window end, or, for a single-document contrast, one shared `as_on` within 60 days after the end of the later window;
+  - `full_year_pairs(rows) -> dict[state, (N2024, N2025)]` for the primary contrast, and `jan_oct_pairs(rows) -> dict[state, (a, b)]` for S8.
 
 - [ ] **Step 1:** Write the tests:
   - `test_window_mismatch_refused`;
   - `test_asof_beyond_60_days_refused`;
-  - `test_public_only_vs_total_refused`.
+  - `test_different_wording_or_source_refused`;
+  - `test_single_document_shared_cutoff_accepted`: two columns of one document with one shared `as_on` 40 days after the end of the later window are accepted. The same columns with a shared `as_on` 70 days after it are refused.
 - [ ] **Step 2:** RED, implement, GREEN.
 - [ ] **Step 3:** Commit.
 
@@ -239,15 +255,30 @@
 - Create: `src/q4_dose_response.py`, `outputs/q4_states.csv`, `outputs/q4_summary.csv` and tests.
 
 **Interfaces:**
-- Consumes: `compare.jan_oct_pairs`, the extracted annual notifications, and the exposure from the `source_search.md` sources.
-- Produces: `excess(state) -> float | None`, `wls(x, y, w) -> (slope, se, n)`, and `bootstrap_ci(...)`.
+- Consumes: `compare.full_year_pairs`, `compare.jan_oct_pairs`, the extracted annual notifications, the Q3467 table for the guard, and the exposure from the `source_search.md` sources.
+- Produces:
+  - `excess(state) -> float | None`;
+  - `wls(x, y, w) -> (slope, se, n)`;
+  - `guard(q1216, q3467) -> (status, medians, flagged_states)`, where status is pass, fail or not_run;
+  - `bootstrap_ci(...)`.
 
-**Rules:** state the spread of exposure (SD and range) and n. If spec §9.2 fails, write only the descriptive table and the reason.
+**Order of analyses:**
+1. The guard.
+2. The primary analysis: the full-year contrast, or the January–October contrast if the guard fails, with the fallback trend.
+3. S1–S7.
+4. S8 (the January–October contrast, if it is not already primary) with its lag analyses S8(a) and S8(b).
+5. The placebo.
+
+**Rules:** state the spread of exposure (SD and range) and n. If the comparability conditions of analysis plan §9.5 fail for the primary contrast, write only the descriptive table and the reason.
 
 - [ ] **Step 1:** Write the tests:
   - `test_zero_count_not_computable`;
   - `test_trend_points_exclude_2020_2021`;
-  - `test_trend_fallback_2022_2024`;
+  - `test_trend_fallback_2022_2024` (a state with no 2019 value uses the points from 2022 onward);
+  - `test_guard_median_ratio_bounds`:
+    - median ratios inside [0.95, 1.05] for both years pass, and a median outside it for either year fails;
+    - a failed guard switches the primary to the January–October contrast and the trend to the fallback sources;
+    - fewer than 10 states with both values gives not_run, with the full-year contrast still primary;
   - `test_wls_known_values`;
   - `test_bootstrap_seeded_reproducible`;
   - `test_placebo_uses_gate_choice`.

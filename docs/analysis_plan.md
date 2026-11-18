@@ -73,7 +73,7 @@ The following files were downloaded on 18 November 2026 into `data_raw/`, which 
 | `AU1216_WFw8li.pdf` | Rajya Sabha, Unstarred Question 1216, answered 10 February 2026 (Rajya Sabha question archive, sansad.in) | 218,634 | `099d2f12e0ba26740dd37cede0baeef6c7edfde62ed28afcaf67529beb419780` | Q4 primary: full-year 2024 and 2025 (§9.5.1); trend points 2023 and 2024 (§9.6); placebo (§10.6) |
 | `AU3467_mVGJLD.pdf` | Rajya Sabha, Unstarred Question 3467, answered 1 April 2025 (Rajya Sabha question archive, sansad.in) | 161,654 | `1c33f53107151fcc705b0a69c82c91e1a3bd06c44bf935d539e8ec0c3f53a925` | Guard (§9.5.2); fallback trend point 2024 (§9.6) |
 | `AU3001_ZXEQ3g.pdf` | Rajya Sabha, Unstarred Question 3001 (drug-resistant TB) | 134,970 | `9f5dbd8be0fdb8914bc2adef8655c78471c2b4674895b85b184b161dd8ba332a` | Not used |
-| `AU3477_SSspdQ.pdf` | Rajya Sabha, Unstarred Question 3477 (campaign activities) | 99,336 | `628c03cbb3951f20c97bb422849e70a34962b303f7c1977d4e81e1eb4cc1613a` | Not used |
+| `AU3477_SSspdQ.pdf` | Rajya Sabha, Unstarred Question 3477 (campaign activities), answered 1 April 2025 | 99,336 | `628c03cbb3951f20c97bb422849e70a34962b303f7c1977d4e81e1eb4cc1613a` | Q1–Q2: figure inventory (§5.3); not used for Q4 |
 
 The download URLs of the Rajya Sabha answers are recorded in the source manifest when the fetch script is written.
 
@@ -202,7 +202,13 @@ The search of design §9.6 was run on 18 November 2026 and is closed:
 - date window: 1 December 2022 to 18 November 2026;
 - record: `data/search_log.csv`, 149 rows (56 include = yes, 1 provisional, 92 include = no, each with a reason).
 
-The inventory is built from the documents marked include = yes, plus documents those documents cite by name as the source of a figure. A document found after registration is added only as a dated deviation (§13).
+The inventory is built from three sets of documents:
+
+- the documents marked include = yes;
+- documents that those documents cite by name as the source of a figure;
+- Rajya Sabha Unstarred Question 3477 (1 April 2025, campaign activities; §3.1.2). It was obtained with the 2024 notification answers before registration, and it may contain national campaign figures. It is read at extraction like any other included document.
+
+A document found after registration is added only as a dated deviation (§13).
 
 **The provisional row** (a PIB release listed by CTD among campaign releases, PRID 2115334, whose page did not render) is resolved at extraction, before any figure is taken from it. It is included only if, on reading, it is an official PIB release dated within the search window that reports a figure of a quantity in §5.1. Otherwise it is excluded. Either way, the decision and its reason are recorded in the log. If the page still cannot be read, it is excluded with that reason.
 
@@ -549,7 +555,8 @@ If they then fail for the contrast that is primary, Q4 is reported descriptively
 
 - **Rajya Sabha Question 2511** (17 December 2024). Its window is the year to 19 November 2024, not January to October (§7.4).
 - **Rajya Sabha Question 1900** (16 December 2025). Its heading qualifies the counts as cases "under TB Mukt Bharat Abhiyan". If obtained, its 2025 column is compared with Question 1093 State by State, and any disagreement is a Q2 discrepancy. This cross-check does not change Q4.
-- **Rajya Sabha Questions 3001 and 3477** (§3.1.2). The first concerns drug-resistant TB and the second campaign activities. Neither is used.
+- **Rajya Sabha Question 3001** (§3.1.2), on drug-resistant TB, is not used.
+- **Rajya Sabha Question 3477** (§3.1.2), on campaign activities, is not used for Q4. It enters the Q1 figure inventory (§5.3).
 
 ### 9.6 Annual State notifications for the trend benchmark
 
