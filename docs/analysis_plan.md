@@ -785,3 +785,5 @@ No P values are reported.
 Deviations from this plan are logged here, each with its date. Anything exploratory is labelled as such in code and output, and logged here.
 
 **18 November 2026.** None.
+
+**18 November 2026 (after registration).** Rajya Sabha Unstarred Question 420 (3 February 2026; 2025 January–December notifications by State, Ni-kshay as on 21 January 2026) was obtained after registration. It is used only as an exploratory Q2 cross-check against Question 1216's 2025 column, State by State, and is labelled exploratory; it does not change Q4. Question 1900's 2024 (January–December) column is likewise compared with Question 1216's 2024 column as an exploratory check; its pre-specified 2025 cross-check (§9.5.5) is unchanged.

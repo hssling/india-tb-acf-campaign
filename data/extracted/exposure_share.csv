@@ -1,0 +1,36 @@
+unit,in_table,campaign_count,lgd_count,share,capped,flagged_e5,computable,reason
+Andaman and Nicobar Islands,no,0,3,0,no,no,yes,
+Andhra Pradesh,yes,1,,,,,no,LGD district count at 7 December 2024 not computable (analysis plan §9.3)
+Arunachal Pradesh,yes,1,,,,,no,LGD district count at 7 December 2024 not computable (analysis plan §9.3)
+Assam,yes,17,,,,,no,LGD district count at 7 December 2024 not computable (analysis plan §9.3)
+Bihar,yes,10,38,0.263158,no,no,yes,
+Chandigarh,yes,1,1,1,yes,no,yes,every district in the campaign: capped
+Chhattisgarh,yes,19,,,,,no,LGD district count at 7 December 2024 not computable (analysis plan §9.3)
+Dadra and Nagar Haveli and Daman and Diu,yes,1,3,0.333333,no,no,yes,
+Delhi,yes,11,,,,,no,LGD district count at 7 December 2024 not computable (analysis plan §9.3)
+Goa,yes,2,,,,,no,LGD district count at 7 December 2024 not computable (analysis plan §9.3)
+Gujarat,yes,16,,,,,no,LGD district count at 7 December 2024 not computable (analysis plan §9.3)
+Haryana,yes,14,,,,,no,LGD district count at 7 December 2024 not computable (analysis plan §9.3)
+Himachal Pradesh,yes,8,12,0.666667,no,no,yes,
+Jammu and Kashmir (incl. Ladakh),yes,3,,,,,no,LGD district count at 7 December 2024 not computable (analysis plan §9.3)
+Jharkhand,yes,4,24,0.166667,no,no,yes,
+Karnataka,yes,31,,,,,no,LGD district count at 7 December 2024 not computable (analysis plan §9.3)
+Kerala,yes,14,14,1,yes,no,yes,every district in the campaign: capped
+Lakshadweep,no,0,1,0,no,no,yes,
+Madhya Pradesh,yes,23,,,,,no,LGD district count at 7 December 2024 not computable (analysis plan §9.3)
+Maharashtra,yes,30,,,,,no,LGD district count at 7 December 2024 not computable (analysis plan §9.3)
+Manipur,yes,6,16,0.375,no,no,yes,
+Meghalaya,yes,5,12,0.416667,no,no,yes,
+Mizoram,yes,4,11,0.363636,no,no,yes,
+Nagaland,yes,3,,,,,no,LGD district count at 7 December 2024 not computable (analysis plan §9.3)
+Odisha,yes,19,,,,,no,LGD district count at 7 December 2024 not computable (analysis plan §9.3)
+Puducherry,yes,1,2,0.5,no,no,yes,
+Punjab,yes,18,,,,,no,LGD district count at 7 December 2024 not computable (analysis plan §9.3)
+Rajasthan,yes,5,,,,,no,LGD district count at 7 December 2024 not computable (analysis plan §9.3)
+Sikkim,yes,2,6,0.333333,no,no,yes,
+Tamil Nadu,yes,22,,,,,no,LGD district count at 7 December 2024 not computable (analysis plan §9.3)
+Telangana,yes,9,,,,,no,LGD district count at 7 December 2024 not computable (analysis plan §9.3)
+Tripura,yes,5,8,0.625,no,no,yes,
+Uttar Pradesh,yes,15,75,0.2,no,no,yes,
+Uttarakhand,yes,8,,,,,no,LGD district count at 7 December 2024 not computable (analysis plan §9.3)
+West Bengal,yes,19,23,0.826087,no,no,yes,
