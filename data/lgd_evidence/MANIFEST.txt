@@ -1,5 +1,6 @@
-# SHA-256 of the LGD evidence files (copied 19 November 2026 from the evidence search; public URLs and short quotes only)
-ffe5e42698a5cadf7563b562f2a8815ed50764f26f39239b8b4518efb4031465  changes.csv
-c401d7d26618f93be3996402ed2d2863d2410d3083c09f685eea427cb20be9de  rows.csv
-c5c5e3168f2de9a28c70c7f9bfed86d7f9d8310196b0db9ee8e2aa386f2bbd5e  states.csv
+# SHA-256 of the LGD evidence files (copied 19 November 2026 from the evidence search; public URLs and short quotes only).
+# Stored with LF line endings (repository rule); the CSV files were delivered with CRLF, content otherwise unchanged.
+8dd4008e232a72b3bcd2464caa59b6527d97d27392933e48b9c220baeced1cbc  changes.csv
+a5375cee9db571e4b499b9b379c85e4b4d2ba78c1aa4d69e06776b6cc8bcb7e4  rows.csv
+573f39d6ef9542bfd53f9431beb6d8cfc6438ca07c477c1999653a8977b424e1  states.csv
 e0fecfe50a555373a4dbd9d6d999ffb5fb322d4e8ed88cfe1bf179ed3d46804f  search_log.md
