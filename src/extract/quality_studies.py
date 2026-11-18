@@ -154,7 +154,7 @@ def parse_cell(cell: str) -> tuple[str, str]:
 
 def _value(printed: str) -> str:
     """The figure as a number (string); blank for '<0.1' and dashes (§5.2)."""
-    t = printed.strip().rstrip("%").strip()
+    t = printed.strip().rstrip("%").lstrip("≈~").strip()
     if not re.fullmatch(r"\d[\d ,]*(?:\.\d+)?(?: (?:million|lakh|crore))?", t):
         return ""
     mult = {"million": 10**6, "lakh": 10**5, "crore": 10**7}
@@ -398,18 +398,15 @@ def _gha_specs() -> list[dict]:
         if t["study"] != "GHA2023" or t["table_id"] != "Table 1":
             continue
         col, row = t["column_label"], t["row_label"]
-        if row == "INDIA":
-            q, unit = {"% Screened among population** (at least 10%)":
-                       ("other:pct_population_screened", "percent"),
-                       "% Tested among screened (at least 4.75%)":
-                       ("other:pct_tested_among_screened", "percent"),
-                       "% Diagnosed among tested (at least 5%)":
-                       ("other:pct_diagnosed_among_tested", "percent"),
-                       "NNS (max. 1538)": ("nns", "ratio")}[col]
-        elif col == "NNS (max. 1538)" and re.fullmatch(r"\d+", t["printed_cell"]):
-            q, unit = "nns", "ratio"
-        else:
-            continue
+        if not re.fullmatch(r"\d+(?:\.\d+)?", t["printed_cell"]):
+            continue                      # Puducherry: "No ACF Data Available"
+        q, unit = {"% Screened among population** (at least 10%)":
+                   ("other:pct_population_screened", "percent"),
+                   "% Tested among screened (at least 4.75%)":
+                   ("other:pct_tested_among_screened", "percent"),
+                   "% Diagnosed among tested (at least 5%)":
+                   ("other:pct_diagnosed_among_tested", "percent"),
+                   "NNS (max. 1538)": ("nns", "ratio")}[col]
         geo, gnote = _geo(row)
         S.append(dict(doc="GHA2023", loc="T1", row=row, col=col, quantity=q,
                       printed=t["printed_cell"], unit=unit, definition=col,
@@ -467,15 +464,12 @@ def _gha_specs() -> list[dict]:
         if not re.fullmatch(r"\d+", r[1] if len(r) > 1 else ""):
             continue
         geo, gnote = _geo(r[0])
-        india = r[0] == "INDIA"
         for i, (col, qn, unit) in enumerate((
                 ("Total population**", "other:population_in_districts_with_acf_data",
                  "persons"),
                 ("Number screened", "screened", "persons"),
                 ("Number tested among screened", "tested", "persons"),
                 ("Number diagnosed among tested", "tb_cases", "cases")), start=1):
-            if i == 1 and not india:
-                continue
             S.append(dict(doc="GHA2023SM", loc="S1", row=r[0], col=col, quantity=qn,
                           printed=r[i], unit=unit, definition=col,
                           context=_ctx_cell(S1_TITLE, col, r[0]), source_file=SUPP,
@@ -486,15 +480,12 @@ def _gha_specs() -> list[dict]:
         if not re.fullmatch(r"\d+", r[1] if len(r) > 1 else ""):
             continue
         geo, gnote = _geo(r[0])
-        india = r[0] == "INDIA"
         for i, (col, qn, unit) in enumerate((
                 ("Public notified TB (from 2022 India TB report)",
                  "other:public_sector_tb_notified", "cases"),
                 ("TB ACF cases diagnosed among tested (reported as ACF-detected)",
                  "tb_cases", "cases"),
                 ("%", "acf_share_notifications", "percent")), start=1):
-            if not india and i != 2:
-                continue
             S.append(dict(doc="GHA2023SM", loc="S2", row=r[0], col=col, quantity=qn,
                           printed=r[i], unit=unit, definition=col,
                           context=_ctx_cell(S2_TITLE, col, r[0]), source_file=SUPP,
@@ -576,7 +567,9 @@ def _pg_specs() -> list[dict]:
            ("other:pct_tested_among_presumptive", "66.3%", "percent",
             "presumptive TB tested"),
            ("other:pct_diagnosed_among_tested", "1.6%", "percent",
-            "tested diagnosed as TB")])
+            "tested diagnosed as TB"),
+           ("other:pct_diagnosed_put_on_treatment", "100%", "percent",
+            "diagnosed put on treatment")])
     prose("abs-nns", "Abstract",
           "The number needed to screen (target ≤1538 considering the algorithm) to detect "
           "one person with TB was 4971.",
@@ -588,6 +581,10 @@ def _pg_specs() -> list[dict]:
             "extent of using rapid molecular diagnostic tests")])
     # Results
     res = "Results, first paragraph of 'Scale and quality indicators'"
+    prose("res-population", res,
+          "The total population of 30 districts was 57 211 032.",
+          [("other:population_30_districts", "57 211 032", "persons",
+            "total population of 30 districts")])
     prose("res-mapped", res,
           "A total of 10 449 555 (18.3%) were mapped as high-risk, 75% of which "
           "(n = 7 837 170) were considered as denominator for further analysis.",
@@ -602,7 +599,17 @@ def _pg_specs() -> list[dict]:
           [("other:high_risk_population_denominator", "7 837 170", "persons",
             "high-risk population"),
            ("screened", "581 633", "persons", "were screened"),
-           ("other:pct_mapped_population_screened", "7.4%", "percent", "were screened")])
+           ("other:pct_mapped_population_screened", "7.4%", "percent", "were screened"),
+           ("other:screened_per_district_per_activity_day", "565", "persons",
+            "people screened per district per ACF activity day")])
+    prose("res-days", res, "There were a total of 1467 ACF activity days.",
+          [("other:acf_activity_days", "1467", "", "ACF activity days")])
+    prose("res-days-tool", res,
+          "ACF tool was used in the field in 1031 (70.3%) days.",
+          [("other:acf_activity_days_with_tool", "1031", "",
+            "ACF tool was used in the field"),
+           ("other:pct_acf_activity_days_with_tool", "70.3%", "percent",
+            "ACF tool was used in the field")])
     prose("res-presumptive", res,
           "Of these, 11 357 (1.95%, 95% CI: 1.92, 1.99) were identified as presumptive TB.",
           [("presumptive", "11 357", "persons", "were identified as presumptive TB"),
@@ -622,6 +629,60 @@ def _pg_specs() -> list[dict]:
            ("other:pct_diagnosed_among_tested", "1.6%", "percent",
             "were diagnosed with TB")])
     prose("res-nns", res, "The NNS was 4971.", [("nns", "4971", "ratio", "NNS")])
+    prose("res-xray", "Results, chest radiograph paragraph",
+          "Of the high-risk population screened, a total of 9321 (1.6%) underwent upfront "
+          "chest radiograph as a screening test and most of these people (n = 8854, 95%) "
+          "were from two districts of a state.",
+          [("screened", "9321", "persons",
+            "underwent upfront chest radiograph as a screening test"),
+           ("other:pct_screened_by_chest_radiograph", "1.6%", "percent",
+            "underwent upfront chest radiograph as a screening test"),
+           ("other:screened_by_chest_radiograph_two_districts", "8854", "persons",
+            "most of these people were from two districts of a state"),
+           ("other:pct_screened_by_chest_radiograph_two_districts", "95%", "percent",
+            "most of these people were from two districts of a state")])
+    prose("res-xray-abn", "Results, chest radiograph paragraph",
+          "Of these 9321, a total of 1087 (11.7%) had an abnormality in chest radiograph, "
+          "of whom 679 (62.5%) did not have any symptoms.",
+          [("other:chest_radiograph_abnormal", "1087", "persons",
+            "had an abnormality in chest radiograph"),
+           ("other:pct_chest_radiograph_abnormal", "11.7%", "percent",
+            "had an abnormality in chest radiograph"),
+           ("other:chest_radiograph_abnormal_asymptomatic", "679", "persons",
+            "did not have any symptoms"),
+           ("other:pct_chest_radiograph_abnormal_asymptomatic", "62.5%", "percent",
+            "did not have any symptoms")])
+    # Discussion: the study's own figures restated
+    disc = "Discussion"
+    prose("disc-summary", disc,
+          "During the ACF cycle, less than 10% of high-risk population was screened with "
+          "an NNS of ≈5000.",
+          [("other:pct_high_risk_population_screened", "10%", "percent",
+            "of high-risk population was screened"),
+           ("nns", "≈5000", "ratio", "NNS")])
+    prose("disc-seven", disc,
+          "Our estimates from this study, which are more reliable, suggest that only 7% of "
+          "mapped high-risk population were screened (cut-off 90%).",
+          [("other:pct_mapped_population_screened", "7%", "percent",
+            "of mapped high-risk population were screened")])
+    prose("disc-rapid", disc,
+          "The extent of use of rapid molecular diagnostic tests among ACF- and "
+          "PCF-detected presumptive TB was similar (26% versus 23%).",
+          [("other:pct_rapid_molecular_among_tested", "26%", "percent",
+            "extent of use of rapid molecular diagnostic tests among ACF- and PCF-detected "
+            "presumptive TB")])
+    prose("disc-days", disc,
+          "First, we captured the extent of use of ACF tool by ACF activity days (1031 of "
+          "1467 ACF activity days) and not based on what proportion of Ni-kshay reported "
+          "ACF care cascade data were captured by the ACF tool.",
+          [("other:acf_activity_days_with_tool", "1031", "",
+            "extent of use of ACF tool by ACF activity days"),
+           ("other:acf_activity_days", "1467", "", "ACF activity days")])
+    prose("disc-565", disc,
+          "There is scope to screen a larger number than the current average of 565 per "
+          "ACF activity day per district.",
+          [("other:screened_per_district_per_activity_day", "565", "persons",
+            "average of 565 per ACF activity day per district")])
     prose("res-rapid", "Results, rapid molecular diagnostic test",
           "Of 7527 presumptive tested, 1989 (26.4%, 95% CI: 25.4, 27.4) underwent rapid "
           "molecular diagnostic test.",
@@ -668,21 +729,34 @@ def scope_decisions() -> list[dict]:
         rows.append({"kind": "exclusion", "doc": doc, "source_file": f, "page": page,
                      "figures": figs, "where": where, "category": cat,
                      "decision": "not entered", "reason": SUBGROUP_REASON})
-    rows.append({"kind": "exclusion", "doc": "GHA2023", "source_file": GHA_URL, "page": "",
-                 "figures": "35 States x 3 columns",
-                 "where": "Table 1, State rows, percentage columns",
-                 "category": "other:pct_*",
-                 "decision": "not entered",
-                 "reason": "State percentages are indicators derived from the State counts "
-                           "of the supplement (S1), which are entered; the State NNS is "
-                           "entered; all remain in data/extracted/quality_studies.csv"})
-    rows.append({"kind": "exclusion", "doc": "PGPH2025", "source_file": PG_URL, "page": "",
-                 "figures": "57 211 032; 100%", "where": "Results; Abstract",
-                 "category": "other:",
-                 "decision": "not entered",
-                 "reason": "total population of the 30 districts and the treatment-initiation "
-                           "percentage are not a quantity of §5.1 and not an ACF cascade "
-                           "figure used by any check"})
+    for doc, f, figs, where, cat, why in (
+            ("PGPH2025", PG_URL, "70.3%, 28.7%, 8%, 2.7%, 9.2%; medians of 9, 5 days",
+             "Results, symptoms among presumptive TB", "clinical detail",
+             "prevalence of symptoms among presumptive TB: clinical description, not a "
+             "step of the cascade"),
+            ("PGPH2025", PG_URL, "34.1%, 20.6%, 9.5%, 8.6%, 6.9%, 2.9%, 2.7%, 75.3%; NNS "
+             "2495, 882, 1583, 1288", "Results, distribution of specific high-risk "
+             "populations; Table 3 text", "subgroup strata", SUBGROUP_REASON),
+            ("PGPH2025", PG_URL, "75%", "Methods, denominator; Figure 2 legend",
+             "analysis assumption",
+             "the 75% of the mapped high-risk population taken as the denominator is an "
+             "analysis parameter, not a figure of the cascade; its product, 7 837 170, is "
+             "entered"),
+            ("PGPH2025", PG_URL, "11%, 90%, 5%, 95%, 5%, 95%, 1538; 10%, 4.75%, 5%",
+             "PGPH Abstract and Methods; GHA Methods and Table 1 headings",
+             "benchmark targets",
+             "benchmark values of the national ACF guidance (norms), not figures of the "
+             "studies' own cascades; they stay in the column headings and "
+             "denominator_methods of data/extracted/quality_studies.csv. Open for a "
+             "ruling under Part A's rule 3, which admits targets stated as ACF targets"),
+            ("PGPH2025", PG_URL, "nearly nine percent; 1%; about 9%; 35",
+             "Introduction and Discussion, comparisons with 2021 and a systematic review",
+             "restated figures of other sources",
+             "the GHA 2021 figures are entered from the GHA sources with their own window; "
+             "the systematic review's NNS of 35 is not a figure of either study")):
+        rows.append({"kind": "exclusion", "doc": doc, "source_file": f, "page": "",
+                     "figures": figs, "where": where, "category": cat,
+                     "decision": "not entered", "reason": why})
     return rows
 
 

@@ -254,7 +254,7 @@ def test_pinned_prose_contexts():
     a = rows["PGPH2025.abs-scale.sentence.other_pct_mapped_population_screened"]
     assert a["context_verbatim"].startswith("The two scale indicators (target, observed)")
     assert rows["PGPH2025.abs-screened.sentence.screened"]["value"] == "581633"
-    assert {r["value"] for r in rows.values() if r["quantity"] == "other:pct_rapid_molecular_among_tested"} == {"26.4"}
+    assert {r["value"] for r in rows.values() if r["quantity"] == "other:pct_rapid_molecular_among_tested"} == {"26.4", "26"}
 
 
 def test_state_rows_enter_with_canonical_geography():
@@ -280,4 +280,43 @@ def test_subgroup_strata_not_in_inventory_and_decision_recorded():
               encoding="utf-8") as f:
         dec = [r for r in csv.DictReader(f) if r["source_file"] in q.OWN_FILES]
     cats = [r for r in dec if r["category"] == "subgroup strata"]
-    assert len(cats) == 3 and all(r["decision"] == "not entered" for r in cats)
+    assert len(cats) == 4 and all(r["decision"] == "not entered" for r in cats)
+
+
+def test_all_state_cells_enter():
+    rows = _mine()
+    st = [r for r in rows if r["geography"] not in ("India", "")]
+
+    def n(q, tid):
+        return len({r["geography"] for r in st if r["quantity"] == q
+                    and r["table_id"] == tid})
+    for q in ("other:pct_population_screened", "other:pct_tested_among_screened",
+              "other:pct_diagnosed_among_tested", "nns"):
+        assert n(q, "Table 1") == 35, q
+    assert sum(1 for r in st if r["table_id"] == "Table 1") == 35 * 4
+    assert n("other:population_in_districts_with_acf_data", "S1 Annex") == 35
+    assert n("other:public_sector_tb_notified", "S2 Annex") == 35
+    assert n("acf_share_notifications", "S2 Annex") == 35
+    assert n("tb_cases", "S2 Annex") == 35
+    assert all(r["unit"] == "percent" for r in st if r["quantity"].startswith("other:pct_"))
+    with open(ROOT / "data/extracted/inventory_scope_decisions.csv", newline="",
+              encoding="utf-8") as f:
+        dec = [r for r in csv.DictReader(f)]
+    assert not [r for r in dec if "percentage columns" in r["where"]]
+    assert not [r for r in dec if r["figures"].startswith("57 211 032")]
+
+
+def test_remaining_pgph_figures_enter():
+    rows = {r["fig_id"]: r for r in _prose()}
+    pop = rows["PGPH2025.res-population.sentence.other_population_30_districts"]
+    assert pop["value"] == "57211032" and pop["unit"] == "persons"
+    tx = rows["PGPH2025.abs-quality.sentence.other_pct_diagnosed_put_on_treatment"]
+    assert tx["value"] == "100" and tx["unit"] == "percent"
+    assert tx["context_verbatim"].startswith("The four quality indicators")
+    x = rows["PGPH2025.res-xray.sentence.screened"]
+    assert x["definition_class"] == "screened by chest X-ray" and x["value"] == "9321"
+
+
+def test_curly_apostrophe_in_methods_wording():
+    assert "district’s population" in q.GHA_M["pct_screened"]
+    assert "'" not in q.GHA_M["pct_screened"]
