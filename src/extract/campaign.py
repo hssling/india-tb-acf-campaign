@@ -1428,9 +1428,15 @@ def main() -> int:
                 "flagged_e5", "computable", "reason"], r.units)
 
     checks = table_checks()
-    _write(EXTRACTED / "table_total_checks.csv",
+    # rows of the other extractors (parliamentary answers, India TB Reports) are kept
+    tc_path = EXTRACTED / "table_total_checks.csv"
+    tc_kept = []
+    if tc_path.exists():
+        with open(tc_path, newline="", encoding="utf-8") as f:
+            tc_kept = [r for r in csv.DictReader(f) if r["source_file"] not in OWN_FILES]
+    _write(tc_path,
            ["table", "source_file", "page", "rows", "sum_of_rows", "printed_total",
-            "difference", "pass", "note"], checks)
+            "difference", "pass", "note"], checks + tc_kept)
 
     named = named_list_check(named_list_state_labels(ROOT / KERALA_FILE), rows)
     _write(EXTRACTED / "named_list_check.csv",

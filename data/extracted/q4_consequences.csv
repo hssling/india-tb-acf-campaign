@@ -1,0 +1,8 @@
+item,outcome,rule
+guard (§9.5.2),not triggered by extraction; the guard is applied to the extracted values before any Q4 computation,§9.5.2
+contrast: full-year 2025 vs 2024,computable; role primary,§9.6 extraction checks; §9.5; §10.7
+contrast: January-October 2025 vs 2024 (S8),computable; role sensitivity (S8),§9.6 extraction checks; §9.5; §10.7
+trend point 2019,ITR 2020: in use,§9.6 table and extraction checks
+trend point 2022,ITR 2023: in use,§9.6 table and extraction checks
+trend point 2023,RS Q1216: in use,§9.6 table and extraction checks
+trend point 2024,RS Q1216: in use,§9.6 table and extraction checks

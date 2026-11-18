@@ -42,6 +42,16 @@ STEP2: dict[str, tuple[str, str]] = {
     "the dadra and nagar haveli and daman and diu": (
         _DNHDD,
         "the words of the label are the canonical name preceded by the article 'The'"),
+    "dadra and nagar haveli and diu and daman": (
+        _DNHDD,
+        "the words of the label are those of Dadra and Nagar Haveli and Daman and Diu "
+        "with 'Diu' and 'Daman' printed in reverse order; they name exactly one State/UT "
+        "(RS Q. 1093 Annexure)"),
+    "lakshwadeep": (
+        "Lakshadweep",
+        "the label is the one word 'Lakshwadeep', the letters of Lakshadweep with 'adw' "
+        "printed as 'wad'; no other State/UT name is close (India TB Report 2019, "
+        "Annexure 1.7)"),
 }
 
 
