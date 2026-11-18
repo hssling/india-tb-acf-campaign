@@ -78,8 +78,36 @@ def test_inventory_geography_canonical():
 def test_inventory_rebuilds_identically_from_sources():
     from src.extract import campaign
     rows, provenance = campaign.build_inventory()
-    assert all(p["verified"] in ("text", "text (loose)", "page image")
+    assert all(p["method"] in ("text", "text (loose)", "page image")
                for p in provenance)
     built = [{k: str(v) for k, v in r.items()} for r in rows]
     on_disk = [r for r in _rows() if r["source_file"] in campaign.OWN_FILES]
     assert built == on_disk
+
+
+def _own_rows():
+    from src.extract import campaign
+    return [r for r in _rows() if r["source_file"] in campaign.OWN_FILES]
+
+
+def test_context_is_plan_literal():
+    """§13 (19 Nov 2026): prose has the figure's own sentence; a table cell has
+    table title | column heading | row label. Classes come from that context."""
+    from src import inventory_rules as R
+    for r in _own_rows():
+        ctx = r["context_verbatim"]
+        assert " … " not in ctx, r["fig_id"]
+        is_cell = "table cell" in r["note"]
+        if not is_cell:
+            R.find_figure(ctx, r["value_printed"])          # figure in its sentence
+        if r["quantity"] in ("screened", "tested", "tb_cases") and not is_cell:
+            assert r["definition_verbatim"] in ctx, r["fig_id"]
+        assert R.scope(ctx)[0] == r["scope"], r["fig_id"]
+
+
+def test_fig_id_is_stable_content_key():
+    import re
+    for r in _own_rows():
+        doc, page, *rest = r["fig_id"].split(".")
+        assert re.fullmatch(r"p\d{3}", page) and rest[-1 if not rest[-1].isdigit() else -2] \
+            == r["quantity"].replace(":", "_"), r["fig_id"]

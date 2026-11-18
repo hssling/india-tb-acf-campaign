@@ -4,8 +4,9 @@ Step 1: match the label to a canonical name or a listed alias (`src.states`),
 ignoring case and punctuation, collapsing spaces and reading "&" as "and".
 Step 2: resolve it from name evidence only, from the fixed table below; each
 resolution carries its evidence and is logged by the caller.
-Otherwise the label is unmapped and extraction halts (UnmappedLabel), so that a
-person decides; no mapping is invented.
+Otherwise the label is unmapped: `resolve` raises UnmappedLabel, and
+`resolve_or_list` applies step 3 (the row's State is not computable and is listed;
+its count still enters the printed-total checks). No mapping is invented.
 
 A pure string helper: it imports no PDF library.
 """
@@ -66,4 +67,24 @@ def resolve(label: str) -> Resolution:
     if key in STEP2:
         canon, evidence = STEP2[key]
         return Resolution(label, states.canonical(canon), 2, evidence)
+    # the words of the label, with spaces lost or inserted by line wrapping in the
+    # PDF ignored ("TamilNadu", "Chhattisgar h"), must name exactly one State/UT
+    squeezed = key.replace(" ", "")
+    hits = sorted({states.canonical(n) for n in states.ALL
+                   if states.normalize(n).replace(" ", "") == squeezed})
+    if len(hits) == 1 and squeezed:
+        return Resolution(label, hits[0], 2,
+                          f"the words of the label are the canonical name '{hits[0]}' "
+                          "once spaces lost or inserted by line wrapping are ignored")
     raise UnmappedLabel(f"label not mappable by the label rule: {label!r}")
+
+
+def resolve_or_list(label: str) -> Resolution:
+    """The label rule with its step 3 (§9.2): a label that fits no canonical name, or
+    more than one, gives step 3 with a blank canonical name; the caller lists the row
+    as not computable and keeps its count in printed-total checks."""
+    try:
+        return resolve(label)
+    except UnmappedLabel:
+        return Resolution(label, "", 3, "fits no canonical State/UT name, or more than "
+                          "one: State not computable (§9.2, step 3)")

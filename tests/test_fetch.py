@@ -133,7 +133,12 @@ def test_committed_manifest_is_wellformed():
         assert r["sha256"] == "" or len(r["sha256"]) == 64
         if r["url"].startswith("author-supplied:") and not r["sha256"]:
             assert "--pin" in r["note"]
-    assert any(r["file"].endswith("doc20241228477601.pdf") and not r["sha256"] for r in rows)
+    # item 17 (PIB year-end review) is pinned; where the file is present, it matches
+    item17 = [r for r in rows if r["file"].endswith("doc20241228477601.pdf")]
+    assert len(item17) == 1 and len(item17[0]["sha256"]) == 64
+    path = fetch_sources.ROOT / item17[0]["file"]
+    if path.exists():
+        fetch_sources.verify(path, item17[0]["sha256"])
 
 
 def test_html_body_refused_before_pinning(project, monkeypatch):

@@ -31,11 +31,19 @@ def test_label_step2_is_logged_with_evidence():
     assert r.canonical == DNHDD and r.step == 2 and r.evidence
 
 
-def test_label_unmappable_halts():
+def test_label_unmappable_raises_in_resolve_and_is_step3_in_resolve_or_list():
     with pytest.raises(labels.UnmappedLabel):
         labels.resolve("Atlantis")
-    with pytest.raises(labels.UnmappedLabel):
-        labels.resolve("TOTAL")
+    r = labels.resolve_or_list("Atlantis")
+    assert (r.canonical, r.step) == ("", 3) and r.evidence
+
+
+def test_label_step2_spacing_from_line_wrapping():
+    for lab, canon in (("TamilNadu", "Tamil Nadu"), ("Chhattisgar h", "Chhattisgarh"),
+                       ("CHANDIGA RH", "Chandigarh"),
+                       ("Dadraand Nagar Haveliand Damanand Diu", DNHDD)):
+        r = labels.resolve(lab)
+        assert (r.canonical, r.step) == (canon, 2) and r.evidence
 
 
 # ---------------------------------------------------------------- table parsing
@@ -60,9 +68,16 @@ def test_parse_without_total_reports_none():
     assert total is None and len(rows) == 2
 
 
-def test_e3_halts_on_unmappable_name():
-    with pytest.raises(labels.UnmappedLabel):
-        campaign.map_rows([("Karnataka", 2), ("Atlantis", 1)])
+def test_e3_unmappable_row_is_listed_and_still_counts_in_e1_e2():
+    rows = campaign.map_rows([("Atlantis", 10)]) + _table(n_rows=32, total=337)
+    assert rows[0] == ("Atlantis", "", 10)
+    res = campaign.check_exposure(rows, 347, _lgd(rows[1:]))
+    assert _check(res, "E1")["pass"] == "yes"
+    assert _check(res, "E2")["pass"] == "yes"          # its 10 still counted
+    assert _check(res, "E3")["pass"] == "no"
+    assert "Atlantis" in _check(res, "E3")["note"]
+    assert res.not_computable_rows == ["Atlantis"]
+    assert not res.rejected
 
 
 # ---------------------------------------------------------------- checks E1-E5
@@ -199,3 +214,55 @@ def test_ctd_table_printed_total():
     assert total == 347
     assert sum(c for _, c in rows) == total
     assert len(rows) == 33
+
+
+# ---------------------------------------------------------------- printed totals
+
+def test_total_check_tolerance_and_missing_total():
+    ok = campaign.total_check("t", "f", 1, [5, 5], 11)
+    assert ok["pass"] == "yes" and ok["difference"] == -1
+    bad = campaign.total_check("t", "f", 1, [5, 5], 12)
+    assert bad["pass"] == "no" and bad["difference"] == -2
+    none = campaign.total_check("t", "f", 1, [5, 5], None)
+    assert none["pass"] == "n/a" and "not applied" in none["note"]
+
+
+def test_village_table_parse():
+    lines = ["Annexure IV : High Risk Villages and Wards - State-wise",
+             "States and UT No. of High Risk Villages and Wards",
+             "Uttar Pradesh 26,722", "Goa 103", "Total 26,825", "=====",]
+    rows, total = campaign.parse_village_table(lines)
+    assert rows == [("Uttar Pradesh", "26,722"), ("Goa", "103")] and total == "26,825"
+
+
+@needs_ctd
+def test_real_table_totals():
+    checks = {c["table"]: c for c in campaign.table_checks()}
+    g = checks["Guidance Document, State | Total District"]
+    assert (g["pass"], g["sum_of_rows"], g["printed_total"], g["rows"]) == ("yes", 347, 347, 33)
+    v = checks["Campaign 2026 v6, Annexure IV High Risk Villages and Wards"]
+    assert (v["pass"], v["rows"], v["sum_of_rows"], v["printed_total"]) ==         ("no", 30, 158245, 158266)
+    c = checks["CTD 100 Days Campaign, State | Total District"]
+    assert c["pass"] == "yes" and c["sum_of_rows"] == 347
+
+
+# ---------------------------------------------------------------- named list (§9.2)
+
+def test_named_list_check_counts_and_flags():
+    ctd = [("Goa", "Goa", 2), ("Delhi", "Delhi", 1)]
+    lst = [(12, "Goa"), (12, "Goa"), (13, "Delhi"), (13, "Delhi"), (13, "Kerala")]
+    out = {r["state"]: r for r in campaign.named_list_check(lst, ctd)}
+    assert out["Goa"]["match"] == "yes"
+    assert out["Delhi"]["match"] == "no" and "Q2" in out["Delhi"]["note"]
+    assert out["Kerala"]["ctd_count"] == 0 and out["Kerala"]["match"] == "no"
+    assert (out["TOTAL"]["ctd_count"], out["TOTAL"]["named_list_rows"]) == (3, 5)
+
+
+KERALA = ROOT / "data_raw/official/TB_Elimination_Campaign.pdf"
+
+
+@pytest.mark.skipif(not KERALA.exists(), reason="data_raw absent")
+def test_named_list_reads_state_column_only():
+    labs = campaign.named_list_state_labels(KERALA)
+    assert all(labels.resolve_or_list(t).step < 3 for _, t in labs)
+    assert {p for p, _ in labs} <= set(range(12, 29))

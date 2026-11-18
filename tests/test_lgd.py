@@ -74,9 +74,13 @@ def test_row_with_date_but_no_type_is_not_reversible():
     assert "type" in out["Goa"]["reason"]
 
 
-def test_unmappable_state_halts():
-    with pytest.raises(KeyError):
-        lgd.reconstruct(_cur(("Atlantis", "1", "X")), [])
+def test_unmappable_state_is_listed_not_counted():
+    lost: list = []
+    out, log = lgd.reconstruct(_cur(("Atlantis", "1", "X"), ("Goa", "2", "G")),
+                               [_mod(9, "5", "Atlantis")], unmapped=lost)
+    assert set(out) == {"Goa"}
+    assert [x["list"] for x in lost] == ["current", "modifications"]
+    assert log[0]["action"].startswith("not computable")
 
 
 def test_spreadsheetml_and_xlsx_readers(tmp_path):

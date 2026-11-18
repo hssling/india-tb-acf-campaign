@@ -195,8 +195,10 @@ _KINDS = {
 
 
 def _canon(label: str, resolutions: dict) -> str:
-    r = labels.resolve(label)
-    if r.step == 2:
+    """Canonical name by the label rule; "" for a label that stays unmapped (§9.2,
+    step 3: its rows are listed and not counted)."""
+    r = labels.resolve_or_list(label)
+    if r.step >= 2:
         resolutions[label] = r
     return r.canonical
 
@@ -204,11 +206,21 @@ def _canon(label: str, resolutions: dict) -> str:
 # ------------------------------------------------------------------ reconstruction
 
 def reconstruct(current: list[dict], mods: list[dict], reference: date = REFERENCE,
-                resolutions: dict | None = None) -> tuple[dict, list[dict]]:
+                resolutions: dict | None = None,
+                unmapped: list | None = None) -> tuple[dict, list[dict]]:
     """Per canonical State: current_count, count at the end of `reference` (None if
-    not reconstructable), reconstructable, reason, modification_rows; and the log."""
+    not reconstructable), reconstructable, reason, modification_rows; and the log.
+    Rows whose State label stays unmapped are listed in `unmapped`, not counted."""
     res = resolutions if resolutions is not None else {}
-    counts = Counter(_canon(c["state_label"], res) for c in current)
+    lost = unmapped if unmapped is not None else []
+    counts: Counter = Counter()
+    for c in current:
+        s = _canon(c["state_label"], res)
+        if s:
+            counts[s] += 1
+        else:
+            lost.append({"list": "current", "state_label": c["state_label"],
+                         "district_code": c["district_code"]})
     out = {s: {"current_count": n, "count": n, "reconstructable": "yes", "reason": "",
                "modification_rows": 0} for s, n in counts.items()}
     log: list[dict] = []
@@ -225,6 +237,15 @@ def reconstruct(current: list[dict], mods: list[dict], reference: date = REFEREN
 
     for m in mods:
         state = _canon(m["state_label"], res)
+        if not state:
+            lost.append({"list": "modifications", "state_label": m["state_label"],
+                         "district_code": m["district_code"]})
+            log.append({"row": m["row"], "district_code": m["district_code"],
+                        "district_name": m["district_name"], "state": "",
+                        "date_field": "", "date": "", "type": m["type"],
+                        "action": "not computable: State label unmapped (§9.2, step 3)",
+                        "effect": ""})
+            continue
         _state(state)["modification_rows"] += 1
         entry = {"row": m["row"], "district_code": m["district_code"],
                  "district_name": m["district_name"], "state": state,
@@ -277,6 +298,11 @@ def reconstruct(current: list[dict], mods: list[dict], reference: date = REFEREN
             entry["action"], entry["effect"] = "reversed: rename (count unchanged)", "0"
         else:
             prev = _canon(m["previous_state_label"], res)
+            if not prev:
+                _fail(state, f"report row {m['row']}: previous State label unmapped")
+                entry["action"] = "not reversible: previous State label unmapped"
+                log.append(entry)
+                continue
             st["count"] -= 1
             _state(prev)["count"] += 1
             entry["action"] = "reversed: district moved back"
@@ -312,7 +338,10 @@ def run() -> tuple[dict, list[dict], list[str], dict]:
     current = parse_current(read_xlsx_rows(ROOT / CURRENT))
     fields, mods = parse_modifications(read_spreadsheetml_rows(ROOT / MODS))
     resolutions: dict = {}
-    out, log = reconstruct(current, mods, resolutions=resolutions)
+    unmapped: list = []
+    out, log = reconstruct(current, mods, resolutions=resolutions, unmapped=unmapped)
+    if unmapped:
+        print(f"State labels unmapped (rows listed, not counted): {unmapped}")
     return out, log, fields, resolutions
 
 
@@ -328,7 +357,7 @@ def main() -> int:
     out, log, fields, resolutions = run()
     labels_by_state: dict[str, str] = {}
     for c in parse_current(read_xlsx_rows(ROOT / CURRENT)):
-        labels_by_state.setdefault(labels.resolve(c["state_label"]).canonical,
+        labels_by_state.setdefault(labels.resolve_or_list(c["state_label"]).canonical,
                                    c["state_label"])
     rows = []
     for s in sorted(out):

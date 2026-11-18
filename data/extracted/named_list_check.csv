@@ -1,0 +1,35 @@
+state,ctd_count,named_list_rows,match,named_list_labels,label_rule_step,note
+Andhra Pradesh,1,1,yes,Andhra Pradesh,1,
+Arunachal Pradesh,1,1,yes,Arunachal Pradesh,1,
+Assam,17,17,yes,Assam,1,
+Bihar,10,10,yes,Bihar,1,
+Chandigarh,1,1,yes,CHANDIGA RH,2,
+Chhattisgarh,19,19,yes,Chhattisgar h,2,
+Dadra and Nagar Haveli and Daman and Diu,1,1,yes,Dadraand Nagar Haveliand Damanand Diu,2,
+Delhi,11,26,no,Delhi,1,Q2 discrepancy candidate (§9.2 named list)
+Goa,2,2,yes,Goa,1,
+Gujarat,16,16,yes,Gujarat,1,
+Haryana,14,14,yes,Haryana,1,
+Himachal Pradesh,8,8,yes,Himachal Pradesh,1,
+Jammu and Kashmir,3,3,yes,Jammu& Kashmir,1,
+Jharkhand,4,4,yes,Jharkhand,1,
+Karnataka,31,31,yes,Karnataka,1,
+Kerala,14,14,yes,Kerala,1,
+Madhya Pradesh,23,23,yes,Madhya Pradesh,1,
+Maharashtra,30,52,no,Maharashtr a,2,Q2 discrepancy candidate (§9.2 named list)
+Manipur,6,6,yes,Manipur,1,
+Meghalaya,5,5,yes,Meghalaya,1,
+Mizoram,4,4,yes,Mizoram,1,
+Nagaland,3,3,yes,Nagaland,1,
+Odisha,19,19,yes,Odisha,1,
+Puducherry,1,1,yes,Puducherry,1,
+Punjab,18,18,yes,Punjab,1,
+Rajasthan,5,5,yes,Rajasthan,1,
+Sikkim,2,2,yes,Sikkim,1,
+Tamil Nadu,22,26,no,TamilNadu,2,Q2 discrepancy candidate (§9.2 named list)
+Telangana,9,9,yes,Telangana,1,
+Tripura,5,5,yes,Tripura,1,
+Uttar Pradesh,15,15,yes,Uttar Pradesh,1,
+Uttarakhand,8,8,yes,Uttarakhan d,2,
+West Bengal,19,28,no,West Bengal,1,Q2 discrepancy candidate (§9.2 named list)
+TOTAL,347,397,no,,,CTD: sum of State rows; named list: all rows

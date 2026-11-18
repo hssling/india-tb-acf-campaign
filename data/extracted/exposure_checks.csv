@@ -1,9 +1,9 @@
 check,inputs,expected,observed,pass,note
 E1,TOTAL row,347,347,yes,
-E2,sum of State/UT rows; TOTAL row,347,347,yes,
-E3,State/UT rows mapped by the label rule,"33 rows, each mapped","33 rows, 33 mapped",yes,an unmappable label halts extraction; step-2 resolutions are logged
-E4,units in the table with a computable LGD count,at least 5 with campaign count below LGD count,12 of 14,yes,counting also the units absent from the table (campaign count 0): 14; units whose LGD count is not computable are not evaluated: 19
-E5,units with a computable LGD count,at most 3 flagged,0 flagged,yes,none flagged
+E2,sum of State/UT rows (mapped or not); TOTAL row,347,347,yes,
+E3,State/UT rows mapped by the label rule,"33 rows, each mapped","33 rows, 33 mapped",yes,step-2 resolutions are logged in exposure_campaign.csv
+E4,units in the table with a computable LGD count,at least 5 with campaign count below LGD count,12 of 14,yes,"counted over the units in the table only (the column is what E4 tests); counting also the units absent from the table (campaign count 0): 14, which also passes; units not evaluated because their LGD count is not computable: 19"
+E5,units with a computable LGD count,at most 3 flagged,0 flagged,yes,none flagged; units not evaluated because their LGD count is not computable (§9.3): 19
 E6,criteria table (PDF page 6) and the text with it,347,347,yes,"report only; per-criterion counts are entered in the inventory, not tested"
 E7,sentence with the table,347 districts; 33 States/UTs,347 districts; 33 States/UTs,yes,report only
 decision,"E1, E2, E4, E5",table not rejected,not rejected,yes,

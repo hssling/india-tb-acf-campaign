@@ -1,0 +1,6 @@
+table,source_file,page,rows,sum_of_rows,printed_total,difference,pass,note
+"CTD 100 Days Campaign, State | Total District",data_raw/official/100-days-campaign-Report-1-Complete-on-5-12-2024-New.pdf,7,33,347,347,0,yes,values kept exactly as printed
+"Guidance Document, State | Total District",data_raw/official/Guidance-Document-on-TB-Mukt-Bharat-Abhiyan_0.pdf,8,33,347,347,0,yes,values kept exactly as printed
+"Campaign 2026 v6, Annexure IV High Risk Villages and Wards",data_raw/official/TB-Mukt-Bharat-Abhiyan-Campaign-2026-v6.pdf,59,30,158245,158266,-21,no,values kept exactly as printed
+"CTD 100 Days Campaign, criteria table",data_raw/official/100-days-campaign-Report-1-Complete-on-5-12-2024-New.pdf,6,4,,,,n/a,no total printed: sum check not applied; the per-criterion counts are not summed (criteria may overlap; §9.2 E6)
+"Guidance Document, criteria table",data_raw/official/Guidance-Document-on-TB-Mukt-Bharat-Abhiyan_0.pdf,8,4,,,,n/a,no total printed: sum check not applied; the per-criterion counts are not summed (criteria may overlap; §9.2 E6)
