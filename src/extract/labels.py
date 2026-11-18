@@ -34,6 +34,11 @@ STEP2: dict[str, tuple[str, str]] = {
         "Jammu and Kashmir",
         "the page prints 'G' between the words; the words Jammu and "
         "Kashmir name exactly one State/UT"),
+    "dadra nagar haveli diu daman": (
+        _DNHDD,
+        "the words of the label name Dadra and Nagar Haveli and Daman and Diu (the "
+        "printed 'Dadra Nagar Haveli' and 'Diu Daman' joined by a slash), and the combined "
+        "unit names exactly one State/UT"),
     "the dadra and nagar haveli and daman and diu": (
         _DNHDD,
         "the words of the label are the canonical name preceded by the article 'The'"),

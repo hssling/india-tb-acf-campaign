@@ -209,3 +209,75 @@ def test_quality_csv_rebuilds_identically():
     rows, inv = q.build()
     assert _qs() == [{k: str(v) for k, v in r.items()} for r in rows]
     assert {r["fig_id"]: r for r in inv} == {r["fig_id"]: r for r in _mine()}
+
+
+def test_dnhdd_label_resolves_at_step_2():
+    from src.extract import labels
+    for lab in ("Dadra Nagar Haveli /Diu Daman", "Dadra Nagar Haveli/Diu Daman"):
+        r = labels.resolve(lab)
+        assert r.canonical == "Dadra and Nagar Haveli and Daman and Diu" and r.step == 2
+        assert "exactly one State/UT" in r.evidence
+
+
+def _prose():
+    return [r for r in _mine() if not r["table_id"]]
+
+
+def test_prose_contexts_are_full_sentences():
+    rows = _prose()
+    assert len(rows) > 30
+    for r in rows:
+        c = r["context_verbatim"]
+        assert c.rstrip().endswith((".", "?", "!", ".)")), r["fig_id"]
+        assert c[0].isupper() or c[0].isdigit(), r["fig_id"]
+        assert "verbatim from the PMC BioC JSON" in r["note"], r["fig_id"]
+        assert "not machine-verified" not in r["note"], r["fig_id"]
+
+
+def test_pinned_prose_contexts():
+    rows = {r["fig_id"]: r for r in _prose()}
+    gha = rows["GHA2023.abs.sentence.other_pct_population_screened"]
+    assert "first ACF cycle" in gha["context_verbatim"]
+    assert gha["context_verbatim"].startswith("At the national level, for the first ACF")
+    assert (gha["scope"], gha["window_label"]) == ("programme-wide", "first acf cycle")
+    assert rows["GHA2023.res.sentence.nns"]["context_verbatim"] == "The NNS was 2824."
+    assert rows["GHA2023.res.sentence.other_pct_population_screened"][
+        "context_verbatim"].startswith("At the national level, 9.3%")
+    t = rows["PGPH2025.res-tested.sentence.tested"]
+    assert t["context_verbatim"].startswith("Of 11 357")
+    s = rows["PGPH2025.res-screened.sentence.screened"]
+    assert s["context_verbatim"].startswith("During the 1031 ACF activity days")
+    assert "of the 7 837 170 high-risk population" in s["context_verbatim"]
+    assert s["scope"] == "programme-wide"
+    assert rows["PGPH2025.res-screened.sentence.other_high_risk_population_denominator"][
+        "value"] == "7837170"
+    a = rows["PGPH2025.abs-scale.sentence.other_pct_mapped_population_screened"]
+    assert a["context_verbatim"].startswith("The two scale indicators (target, observed)")
+    assert rows["PGPH2025.abs-screened.sentence.screened"]["value"] == "581633"
+    assert {r["value"] for r in rows.values() if r["quantity"] == "other:pct_rapid_molecular_among_tested"} == {"26.4"}
+
+
+def test_state_rows_enter_with_canonical_geography():
+    from src import states
+    rows = _mine()
+    st = [r for r in rows if r["geography"] not in ("India", "")]
+    for q in ("screened", "tested", "tb_cases", "nns"):
+        assert len({r["geography"] for r in st if r["quantity"] == q}) >= 34, q
+    for r in st:
+        assert states.canonical(r["geography"]) == r["geography"]
+    dn = [r for r in st if r["geography"] == "Dadra and Nagar Haveli and Daman and Diu"]
+    assert dn and all("label rule step 2" in r["note"] for r in dn)
+    assert not [r for r in rows if r["geography"] == ""]
+
+
+def test_subgroup_strata_not_in_inventory_and_decision_recorded():
+    assert not [r for r in _mine() if "Elderly" in r["context_verbatim"]
+                and r["table_id"] in ("Table 2", "Table 3")]
+    for r in _mine():
+        if r["table_id"] in ("Table 2", "Table 3"):
+            assert r["context_verbatim"].endswith("| Total"), r["fig_id"]
+    with open(ROOT / "data/extracted/inventory_scope_decisions.csv", newline="",
+              encoding="utf-8") as f:
+        dec = [r for r in csv.DictReader(f) if r["source_file"] in q.OWN_FILES]
+    cats = [r for r in dec if r["category"] == "subgroup strata"]
+    assert len(cats) == 3 and all(r["decision"] == "not entered" for r in cats)
