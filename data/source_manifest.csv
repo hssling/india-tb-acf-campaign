@@ -24,6 +24,6 @@ data_raw/lgd/alldistrictbyDate2026_11_18_21_20_13_069.xls,author-supplied: lgdir
 data_raw/gha2023/ZGHA_A_2256129_SM2351.docx,https://pmc.ncbi.nlm.nih.gov/articles/instance/10515680/bin/ZGHA_A_2256129_SM2351.docx,,,,download list item 15; digest pinned on first download
 data_raw/pq/AU1900_PxKD5V.pdf,author-supplied: sansad.in Rajya Sabha question archive,139419,f0d10f4b499704af1b337d1b27c72fc4278ad1bb236e515f5c92fc278b9407e2,2026-11-18,"RS Session 269 Unstarred Q. 1900, answered 16 Dec 2025; name resolved and pinned with --pin"
 data_raw/pq/AU420_ulGhhr.pdf,author-supplied: sansad.in Rajya Sabha question archive,569837,563cb33b5617f13c8accf1b8d64d6d4eae489148cd820f5fbdad03c58931cc18,2026-11-18,"RS Session 270 Unstarred Q. 420, answered 3 Feb 2026; name resolved and pinned with --pin"
-data_raw/studies/dataset_v2.xlsx,author-supplied: figshare 10.6084/m9.figshare.23723748,,,,download list item 16; pinned with --pin
-data_raw/studies/Codebook.xlsx,author-supplied: figshare 25106084,,,,download list item 23; pinned with --pin
-data_raw/studies/annexs3.pgm,author-supplied: figshare 25106096,,,,download list item 24; pinned with --pin
+data_raw/studies/Phase 1 dataset_v2.xlsx,author-supplied: figshare 10.6084/m9.figshare.23723748,91669,cbae6cc92d7e27431a3e57dcf6f5527e42b21851247f224f19d8f1c4e5eae36c,2026-11-18,download list item 16; pinned with --pin
+data_raw/studies/Codebook.xlsx,author-supplied: figshare 25106084,18158,d0f26b4e1d5622d209ba20255b543c246f48cd0342c20ce9e5b8246a1ad7f23a,2026-11-18,download list item 23; pinned with --pin
+data_raw/studies/annexs3.pgm,author-supplied: figshare 25106096,7688,f892de00eb94b987a62098e47d4f54e2e64b043335ba3eb87a97ca153abedb3f,2026-11-18,download list item 24; pinned with --pin
