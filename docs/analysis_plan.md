@@ -23,13 +23,17 @@ The study uses published, aggregate, official data only. The unit of analysis fo
 
 These refinements were made before any figure was extracted. Each is stated where it applies.
 
-1. **Comparability condition (a) of design §9.2** is fixed as "same quantity in the same words from the same source" (§9.5). Neither answer that forms the primary pair states its public and private coverage; this becomes a stated limitation.
-2. **The January–October 2024 table** for Q4 is Lok Sabha Starred Question 261, not Rajya Sabha Unstarred Question 2511 named in the source-search note, because the answer text of Question 2511 shows a different window (§9.5).
-3. **The 2024 trend point** of design §9.3 is fixed to a named source, or, if no full-year 2024 State table can be obtained, the primary trend uses three points (§9.6).
+1. **The primary Q4 contrast** is the full year 2025 against the full year 2024, both from one parliamentary answer with one source and one as-on date (Rajya Sabha Question 1216). It replaces the January–October contrast of design §2 and §6.4. The author decided this on 18 November 2026, before registration (§9.5.1).
+   - For this contrast, condition (c) of design §9.2 becomes "one as-on date for both years, within 60 days after the end of the later window".
+   - A pre-specified guard tests whether its counts are total notifications. If the guard fails, the January–October contrast becomes primary (§9.5.2).
+2. **The January–October contrast** becomes sensitivity analysis S8 (§9.5.3, §10.5).
+   - Its 2024 table is Lok Sabha Starred Question 261, not Rajya Sabha Unstarred Question 2511 named in the source-search note, because the answer text of Question 2511 shows a different window.
+   - Its comparability condition (a) of design §9.2 is fixed as "same quantity in the same words from the same source". Neither of its answers states its public and private coverage, and this is a stated limitation.
+3. **The trend sources** of design §9.3 are fixed (§9.6). The points for 2019 and 2022 come from the India TB Report, and those for 2023 and 2024 from Rajya Sabha Question 1216, which shares the outcome's cut-off. The fallback sources are named.
 4. **The exposure table** must pass pre-specified extraction checks. A State with more campaign districts than LGD districts is flagged and capped rather than rejected (§9.2, E5). The district denominator is reconstructed from the Local Government Directory (LGD) by a fixed rule (§9.2, §9.3).
-5. **Sensitivity analyses are added** for reporting lag (§10.5, S8) and for the capped States: S6a excludes the States flagged under E5, and S6b excludes every State whose exposure share is 1 (§10.5).
+5. **Sensitivity analyses are added:** the January–October contrast with its reporting-lag analyses (§10.5, S8), and two for the capped States: S6a excludes the States flagged under E5, and S6b excludes every State whose exposure share is 1 (§10.5).
 6. **The population-share sensitivity analysis** of design §6.4 can be run only if a named list of campaign districts is obtained (§10.5, S7).
-7. **The placebo's expected change** uses only the trend points before the placebo window (§10.6).
+7. **The placebo** is 2023 (from the 2023 trend source) against 2022 (India TB Report). Its expected change uses only the trend points before the placebo window (§10.6).
 8. **The rules for comparing figures in Q2** (comparison groups, keyword rules for definition classes, qualifiers such as "more than", and the reporting unit) are fixed in advance (§5, §7).
 
 ## 2. Questions
@@ -37,7 +41,7 @@ These refinements were made before any figure was extracted. Each is stated wher
 - **Q1. Consistency.** Do the published ACF and campaign figures agree across sources, documents and dates, and does each source's internal arithmetic hold? The checks are fixed in §6.
 - **Q2. Definitions.** Where figures disagree, is the disagreement explained by an arithmetic error, a difference in definition, or a difference in window or cut-off date? The decision order is fixed in §7. Q2 includes the reconciliation of the ACF quality indicators of two published studies (Global Health Action 2023, doi 10.1080/16549716.2023.2256129; PLOS Global Public Health 2025, doi 10.1371/journal.pgph.0005103).
 - **Q3. Yield.** Where a published table gives the numerator and denominator by State, what are the State-level ACF yields? The indicators are TB diagnosed per 100,000 people screened, the number needed to screen, and the ACF share of notifications (§8).
-- **Q4. Dose-response.** Did TB notifications rise more, relative to each State's own trend, in States with a larger share of their districts in phase 1 of the campaign? The contrast is January–October 2025 against January–October 2024 (§9, §10). Q4 is an ecological association, not an estimate of the campaign's causal effect.
+- **Q4. Dose-response.** Did TB notifications rise more, relative to each State's own trend, in States with a larger share of their districts in phase 1 of the campaign? The primary contrast is the full year 2025 against the full year 2024; the January–October contrast is a sensitivity analysis (§9, §10). Q4 is an ecological association, not an estimate of the campaign's causal effect.
 
 ## 3. Data sources
 
@@ -63,11 +67,15 @@ The following files were downloaded on 18 November 2026 into `data_raw/`, which 
 
 | File | Answer | Bytes | SHA-256 | Use |
 |---|---|---|---|---|
-| `AS261_lP7nYE.pdf` | Lok Sabha, Starred Question 261, "Eradication of TB by 2025", answered 13 December 2024. https://eparlib.sansad.in/bitstream/123456789/2985936/1/AS261_lP7nYE.pdf | 214,238 | `245a778539f40e7682aa69ff0e7e1d8c087d89243a6206931caddcf33f5c9fa4` | Q4: January–October 2024 (§9.5); 2023 column (§9.6; §10.5, S8) |
-| `AU1093_dH065I.pdf` | Rajya Sabha, Unstarred Question 1093, answered 9 December 2025 (Rajya Sabha question archive, sansad.in) | 117,980 | `349b4b48b1ce40247db84ea24cd989b35bd45d949487c87d08e81f797b531438` | Q4: January–October 2025 (§9.5) |
-| `AU2511_t81pFf.pdf` | Rajya Sabha, Unstarred Question 2511, answered 17 December 2024 (Rajya Sabha question archive, sansad.in) | 130,804 | `7c600909db309d072e28016f0232a6e4dd3ce07a31da7291cd5987443bae8d24` | Q1–Q2 only; **not used for Q4** (§9.5) |
+| `AS261_lP7nYE.pdf` | Lok Sabha, Starred Question 261, "Eradication of TB by 2025", answered 13 December 2024. https://eparlib.sansad.in/bitstream/123456789/2985936/1/AS261_lP7nYE.pdf | 214,238 | `245a778539f40e7682aa69ff0e7e1d8c087d89243a6206931caddcf33f5c9fa4` | S8: January–October 2024 (§9.5.3); 2023 column for S8(b) (§10.5) |
+| `AU1093_dH065I.pdf` | Rajya Sabha, Unstarred Question 1093, answered 9 December 2025 (Rajya Sabha question archive, sansad.in) | 117,980 | `349b4b48b1ce40247db84ea24cd989b35bd45d949487c87d08e81f797b531438` | S8: January–October 2025 (§9.5.3) |
+| `AU2511_t81pFf.pdf` | Rajya Sabha, Unstarred Question 2511, answered 17 December 2024 (Rajya Sabha question archive, sansad.in) | 130,804 | `7c600909db309d072e28016f0232a6e4dd3ce07a31da7291cd5987443bae8d24` | Q1–Q2 only; **not used for Q4** (§9.5.5) |
+| `AU1216_WFw8li.pdf` | Rajya Sabha, Unstarred Question 1216, answered 10 February 2026 (Rajya Sabha question archive, sansad.in) | 218,634 | `099d2f12e0ba26740dd37cede0baeef6c7edfde62ed28afcaf67529beb419780` | Q4 primary: full-year 2024 and 2025 (§9.5.1); trend points 2023 and 2024 (§9.6); placebo (§10.6) |
+| `AU3467_mVGJLD.pdf` | Rajya Sabha, Unstarred Question 3467, answered 1 April 2025 (Rajya Sabha question archive, sansad.in) | 161,654 | `1c33f53107151fcc705b0a69c82c91e1a3bd06c44bf935d539e8ec0c3f53a925` | Guard (§9.5.2); fallback trend point 2024 (§9.6) |
+| `AU3001_ZXEQ3g.pdf` | Rajya Sabha, Unstarred Question 3001 (drug-resistant TB) | 134,970 | `9f5dbd8be0fdb8914bc2adef8655c78471c2b4674895b85b184b161dd8ba332a` | Not used |
+| `AU3477_SSspdQ.pdf` | Rajya Sabha, Unstarred Question 3477 (campaign activities) | 99,336 | `628c03cbb3951f20c97bb422849e70a34962b303f7c1977d4e81e1eb4cc1613a` | Not used |
 
-The download URLs of the two Rajya Sabha answers are recorded in the source manifest when the fetch script is written.
+The download URLs of the Rajya Sabha answers are recorded in the source manifest when the fetch script is written.
 
 #### 3.1.3 Local Government Directory (`data_raw/lgd/`)
 
@@ -86,7 +94,7 @@ The author's earlier study (https://github.com/hssling/india-state-tb-score) hol
 |---|---|---|---|
 | 2020 (2019) | `63b9408015dae510858e0eef2711e809d398bfe3149dd21c94390b258c007e7e` | https://tbcindia.mohfw.gov.in/wp-content/uploads/2023/05/India-TB-Report-2020.pdf | Trend point 2019; placebo |
 | 2023 (2022) | `0817ac3a1e7a03273438073d4e685f88aa93507ad115ec5c6588edfddc8f0b7b` | https://tbcindia.mohfw.gov.in/wp-content/uploads/2023/05/5646719104TB_AR_2023_04-04-2023_LRP_final.pdf | Trend point 2022; placebo |
-| 2024 (2023) | `e37f9f406153b5e9a19726538c3f4d09dc4c470281c34fe511adaa56a0e22765` | https://tbcindia.mohfw.gov.in/wp-content/uploads/2024/10/TB-Report_for-Web_08_10-2024-1.pdf | Trend point 2023; placebo; S8(b) |
+| 2024 (2023) | `e37f9f406153b5e9a19726538c3f4d09dc4c470281c34fe511adaa56a0e22765` | https://tbcindia.mohfw.gov.in/wp-content/uploads/2024/10/TB-Report_for-Web_08_10-2024-1.pdf | Fallback trend point 2023 and placebo (§9.6, §10.6); S8(b); Q2 cross-check of Question 1216 (§7.4) |
 
 The 2021 edition (calendar-2020 data) is a scan with no text layer and is not used; 2020 is in any case excluded from the trend (§9.6). No edition giving calendar-2024 State notifications was found on CTD's website on 18 November 2026.
 
@@ -94,10 +102,7 @@ The 2021 edition (calendar-2020 data) is a scan with no text layer and is not us
 
 Each needs the author's permission before download (file, source and size). The role of each is fixed in this plan. A source that cannot be obtained is reported as unavailable, and the analysis that needs it is reported as not run.
 
-- **Parliamentary answer documents.** Three Rajya Sabha Unstarred Questions; their roles are fixed in §9.5 and §9.6:
-  - Question 3467 (1 April 2025): State/UT-wise TB patients notified and treated successfully, 2023 and 2024 (being obtained; see §9.6);
-  - Question 1216 (10 February 2026): State/UT-wise TB cases notified, 2023 to 2025 (being obtained; see §9.6);
-  - Question 1900 (16 December 2025): State/UT-wise TB cases "under TB Mukt Bharat Abhiyan", 2024 and 2025.
+- **Parliamentary answer document:** Rajya Sabha Unstarred Question 1900 (16 December 2025), State/UT-wise TB cases "under TB Mukt Bharat Abhiyan", 2024 and 2025. Its role is fixed in §9.5.5.
 - **Open Government Data (OGD) mirrors** of parliamentary tables, listed in `data/search_log.csv`.
 - **Quality studies:** the Global Health Action 2023 supplement and its Figshare dataset (doi 10.6084/m9.figshare.23723748); the PLOS Global Public Health 2025 supporting files and Figshare collection (doi 10.6084/m9.figshare.c.7048385.v1).
 - **The remaining documents** marked include = yes in `data/search_log.csv`. HTML pages (PIB releases, the two studies' full texts) are read online and cited with their URL and access date.
@@ -114,7 +119,9 @@ Before this plan was written, the following had been seen. Nothing else had been
 2. **The CTD exposure table.** During the search, the *100 Days Campaign* document was displayed once in an online document viewer. The heading of the selection-criteria table (PDF page 6) and the heading and State/UT row labels of the per-State table (PDF page 7) were read, and the rows were counted from the State names.
    - No State-level campaign-district count was recorded, transcribed or used. The per-State table was displayed once, during the source search, and its values may have been visible.
    - Both tables will be read afresh from the downloaded, hashed copy (§9.2).
-3. **The parliamentary answers.** The wording of Lok Sabha Starred Question 261 and Rajya Sabha Unstarred Questions 1093 and 2511 (headings, column labels, footnotes, source lines, and the dates in the answer text) was read with all counts masked.
+3. **The parliamentary answers.** The wording of seven answers was read with all counts masked: headings, column labels, footnotes, source lines, and the dates in the answer text.
+   - Lok Sabha Starred Question 261, and Rajya Sabha Unstarred Questions 1093 and 2511.
+   - Rajya Sabha Unstarred Questions 1216, 3467, 3001 and 3477, read for wording only. In Question 1216, the day of the as-on date was masked as well.
 4. **The LGD files.** Only their headers (sheet name and report heading) were read. No district was counted.
 5. **National figures quoted in the design.** The design (§1) quotes, from public summaries:
    - national campaign totals (for example 9.02 crore screened and 3.01 lakh cases);
@@ -125,14 +132,14 @@ Before this plan was written, the following had been seen. Nothing else had been
    These national figures motivated Q1 and Q2. They enter the inventory only from their source documents.
 6. **The author's earlier study.** That study extracted State-level totals of TB patients notified in 2022 and 2023 from the 2023 and 2024 editions of the India TB Report (annexure 1.2 in each edition), and those values are public in its repository.
    - They were not consulted in preparing this plan.
-   - They are, however, inputs to trend points 2022 and 2023 and to the placebo outcome (§9.6, §10.6).
+   - The 2022 values are, however, an input to trend point 2022 and to the placebo (§9.6, §10.6). The 2023 values enter only as the fallback trend point and placebo value, the S8(b) proxy and a Q2 cross-check.
    - The annexure page locations given in §9.6 for the 2023 and 2024 editions were taken from that study's source-choice record, without its State values. The rows read for this purpose also show that study's comparison of two national notification-target figures; no State value and no notification count was read.
    - The exposure was not recorded, and nothing involving it was computed. No quantity that involves the exposure (the Q4 slope or the placebo slope) could therefore have been computed or anticipated.
 
 In summary:
 
 - No State-level campaign-district count was recorded, transcribed or used. The per-State table was displayed once, during the source search, and its values may have been visible (item 2).
-- No State-level January–October notification count and no State-level ACF figure has been seen.
+- No State-level count from any parliamentary answer (full-year or January–October), and no State-level ACF figure, has been seen.
 
 ## 5. Figure inventory
 
@@ -206,7 +213,7 @@ Before any Q1–Q4 computation, every source choice is recorded in `data/source_
 - the exposure table's location, the result of each check in §9.2, and every label resolved under its label rule;
 - the LGD date field used and the reconstruction log (§9.3);
 - the unit coarsening (§9.4);
-- the outcome pair and the comparability judgement at extraction (§9.5);
+- the outcome tables, the comparability judgement at extraction, and the result of the guard (the State ratios, their medians and the decision) (§9.5);
 - the source of each trend point, including any fallback used (§9.6);
 - whether a named list of campaign districts was found (§9.2);
 - whether Rajya Sabha Question 1900 was obtained (§9.5);
@@ -332,6 +339,8 @@ These are entered and classified under §7.3 like any other:
 - **Rajya Sabha Question 2511.** The answer's table is headed "State/UT wise TB cases Notification and Death^ reported in 2024*", with the footnote "*As on 19th Nov 2024". Its window is therefore the year to date. Its OGD mirror labels the field "January to October".
 - **Rajya Sabha Question 1900,** if obtained (§9.5): its January–October 2025 column against Question 1093, State by State.
 - **The 2023 State counts** of Lok Sabha Question 261 against the India TB Report 2024, State by State.
+- **Question 1216 against Question 3467**, for 2023 and 2024: every State whose ratio lies outside 0.95 to 1.05 (§9.5.2).
+- **The 2023 State counts** of Question 1216 against the India TB Report 2024, State by State.
 
 ### 7.5 Reconciliation of the two quality studies
 
@@ -466,7 +475,42 @@ The union territories, for sensitivity analysis S5, are those that were union te
 
 ### 9.5 Outcome tables and their comparability
 
-**Primary pair.**
+#### 9.5.1 Primary contrast: full-year 2025 against full-year 2024
+
+The primary contrast is the full calendar year 2025 against the full calendar year 2024, both taken from one document. The author decided this on 18 November 2026, before registration. It replaces the January–October contrast of design §2 and §6.4, which becomes sensitivity analysis S8 (§9.5.3, §10.5).
+
+- **Source.** Rajya Sabha Unstarred Question 1216, answered 10 February 2026.
+  - The annexure is headed "State/UT wise Number of TB Case notified and Number of patients who have received the monthly nutritional assistance reported under TB Mukt Bharat Abhiyan, in Year 2023, 2024 and 2025".
+  - Its columns are "2023 (Jan-Dec)", "2024 (Jan-Dec)" and "2025 (Jan-Dec)", each split into "No. of TB cases notified" and "Beneficiaries paid at least once".
+  - The note reads "Data Source: Ni-kshay (As on [day] February 2026)". The day was masked in the reading of the wording, and the note is to be quoted in full at extraction.
+- **Counts used.** The "No. of TB cases notified" columns for 2024 and 2025. The "Beneficiaries paid at least once" columns are not used.
+
+**Comparability (design §9.2, applied to full years).**
+
+- **(a) Same quantity.** Met trivially: both counts are in one table, with one column heading, one source and one as-on date.
+- **(b) Same window.** Met trivially: both are full calendar years (1 January to 31 December).
+- **(c) Cut-off.** The cut-off is the same February 2026 date for both years. It falls within 60 days after the end of the later window: any day in February 2026 is at most 59 days after 31 December 2025.
+
+  Design §9.2 (c) asked for each year's cut-off to fall within 60 days of that year's window. That holds for 2025 but not for 2024, whose count was drawn about 13 months after its year ended. For this contrast, condition (c) is therefore replaced by a different rule: one as-on date for both years, within 60 days after the end of the later window. The difference in completeness that this leaves is a stated limitation (§10.9). The January–October sensitivity analysis, where both cut-offs are within 0–43 days of the window end, addresses it in part.
+
+#### 9.5.2 Guard: does Question 1216 report total notifications?
+
+Question 1216 reports cases notified in a table about the TB Mukt Bharat Abhiyan, so it must be confirmed that its counts are the State's total notifications. Rajya Sabha Unstarred Question 3467 (answered 1 April 2025) serves as the reference.
+
+- **Reference table.** Its Annexure-I is headed "State-wise TB patients notified and treated successfully in 2023 and 2024". Its columns include "notified", with the footnote "*Treatment outcome will be due in 2025". It states no as-on date.
+- **Comparison.** At extraction, and before any Q4 computation, each State's 2023 and 2024 counts in Question 1216 are divided by its "notified" counts in Question 3467, after unit coarsening (§9.4). States lacking either value are left out of the comparison and listed.
+- **Rule.**
+  - If, for either year, the median of these State ratios lies outside 0.95 to 1.05, Question 1216 is judged not to report total notifications.
+  - In that case the primary Q4 analysis is the January–October contrast (§9.5.3), with the fallback trend sources of §9.6. The full-year contrast is then reported descriptively only (§10.7). This consequence is pre-specified and is not a deviation.
+  - Whatever the medians, any State whose ratio lies outside 0.95 to 1.05 in either year is recorded as a Q2 discrepancy (§7.4).
+- **If the guard cannot be applied.** This is the case if Question 3467 fails its extraction checks or fewer than 10 States have both values. The full-year contrast then remains primary, and the paper states that the guard could not be run.
+- **Recording.** The ratios, the medians and the decision are recorded in `data/source_choices.csv` before the freeze (§5.4).
+
+The same consequence follows if Question 1216 fails its own extraction checks: its State rows do not sum to its printed total within ±1, or a column cannot be read.
+
+#### 9.5.3 Sensitivity contrast: January–October 2025 against January–October 2024
+
+This pair is sensitivity analysis S8 (§10.5). It becomes the primary contrast if the guard of §9.5.2 fails.
 
 - **January–October 2024:** Lok Sabha Starred Question 261, answered 13 December 2024.
   - Annexure-I, headed "State/UT wise TB cases reported since 2022 to 2024*", column "2024 (Jan- Oct)".
@@ -478,7 +522,7 @@ The union territories, for sensitivity analysis S5, are those that were union te
   - Data source: Ni-kshay portal.
   - No "as on" date is stated.
 
-**Comparability (design §9.2, as refined here).** The pair qualifies for the Q4 regression only if all three conditions hold:
+**Comparability (design §9.2, as refined here).** The pair qualifies for the regression only if all three conditions hold:
 
 - **(a) Same quantity.** Both tables describe the same quantity in the same words ("TB cases reported") from the same source (Ni-kshay). This is met on the answers' wording.
 
@@ -490,51 +534,51 @@ The union territories, for sensitivity analysis S5, are those that were union te
 
   The condition is met under either reading.
 
-**Re-check at extraction.** Any note printed with the values, such as a footnote on a row or on the table, is read at extraction:
+**Completeness lag.** Ni-kshay counts grow as records are updated. The two tables may have been drawn at different lags after 31 October: 0 to 43 days for 2024, and 0 to 39 days for 2025. S8(a) and S8(b) address this (§10.5).
 
-- if a note changes the window, cut-off or source for one State, that State is excluded and listed;
-- if a note changes it for the whole table, conditions (a)–(c) are judged again.
+#### 9.5.4 Re-check at extraction
 
-If (a)–(c) then fail, Q4 is reported descriptively only (§10.7).
+For every outcome table, any note printed with the values, such as a footnote on a row or on the table, is read at extraction:
 
-**Completeness lag.** Ni-kshay counts grow as records are updated. The two tables may have been drawn at different lags after 31 October: 0 to 43 days for 2024, and 0 to 39 days for 2025. A pre-specified sensitivity analysis addresses this (§10.5, S8).
+- if a note changes the window, cut-off or source for one State, that State is excluded from that contrast and listed;
+- if a note changes it for the whole table, the comparability conditions for that contrast are judged again.
 
-**Sources not used for Q4.**
+If they then fail for the contrast that is primary, Q4 is reported descriptively only (§10.7).
+
+#### 9.5.5 Sources not used for Q4
 
 - **Rajya Sabha Question 2511** (17 December 2024). Its window is the year to 19 November 2024, not January to October (§7.4).
 - **Rajya Sabha Question 1900** (16 December 2025). Its heading qualifies the counts as cases "under TB Mukt Bharat Abhiyan". If obtained, its 2025 column is compared with Question 1093 State by State, and any disagreement is a Q2 discrepancy. This cross-check does not change Q4.
+- **Rajya Sabha Questions 3001 and 3477** (§3.1.2). The first concerns drug-resistant TB and the second campaign activities. Neither is used.
 
 ### 9.6 Annual State notifications for the trend benchmark
 
-**Trend points.** Calendar years 2019, 2022, 2023 and 2024.
+**Trend points.** Calendar years 2019, 2022, 2023 and 2024; the primary trend uses all four.
 
 - 2020 and 2021 are excluded (COVID-19 disruption).
-- The 2024 point is used only as a full calendar year. January–October 2024 is never used as an annual point.
+- Every point is a full calendar year. January–October counts are never used as annual points.
 
 **Source of each year.** The values are re-extracted by this project's code from the hashed files.
 
-| Year | Primary source | Fallback |
+| Year | Primary source | Fallback trend source (used if the guard of §9.5.2 fails, or Question 1216 fails extraction) |
 |---|---|---|
-| 2019 | India TB Report 2020: the State-wise annexure of total TB patients notified in 2019, located from its list of annexures | None. A State with no 2019 value uses the later points only |
-| 2022 | India TB Report 2023, annexure 1.2, "TB patients notified … Total" (PDF pages 213–214) | None |
-| 2023 | India TB Report 2024, annexure 1.2, "TB patients notified … Total" (PDF pages 187–188) | Lok Sabha Question 261, column "2023" |
-| 2024 | **[PLACEHOLDER: TO BE FIXED BEFORE REGISTRATION.]** The parliamentary answer document that supplies full-year 2024 State counts of TB patients notified. Candidates being obtained: Rajya Sabha Question 3467 (1 April 2025) and Rajya Sabha Question 1216 (10 February 2026). | **[PLACEHOLDER: TO BE FIXED BEFORE REGISTRATION.]** |
+| 2019 | India TB Report 2020: the State-wise annexure of total TB patients notified in 2019, located from its list of annexures | Same |
+| 2022 | India TB Report 2023, annexure 1.2, "TB patients notified … Total" (PDF pages 213–214) | Same |
+| 2023 | Rajya Sabha Question 1216, column "2023 (Jan-Dec)", "No. of TB cases notified" | India TB Report 2024, annexure 1.2, "TB patients notified … Total" (PDF pages 187–188) |
+| 2024 | Rajya Sabha Question 1216, column "2024 (Jan-Dec)", "No. of TB cases notified" | Rajya Sabha Question 3467, Annexure-I, the 2024 "notified" column |
 
-> **[PLACEHOLDER: TO BE FIXED BEFORE REGISTRATION.]** The 2024 row above, and the primary trend, will be fixed in this plan before the public push:
->
-> - if a full-year 2024 State table is obtained, the primary trend uses four points (2019, 2022, 2023, 2024), with the 2024 point taken from the named answer document, and the three-point trend is sensitivity analysis S4;
-> - if neither candidate can be obtained, the primary trend uses three points (2019, 2022, 2023), and S4 is not run separately.
->
-> This placeholder is removed when the choice is fixed.
-
-- **Fallbacks.** A primary source is replaced by its fallback only if it fails an extraction check: its State rows do not sum to its printed total within ±1, or it has no State-wise table of total notifications. The replacement is recorded in `data/source_choices.csv`. If the 2024 point has no usable source after extraction, the primary trend uses 2019, 2022 and 2023. This consequence is pre-specified, is recorded in `data/source_choices.csv`, and is not a deviation.
-- **Cross-check.** The State-level 2022 and 2023 values are also compared with the earlier study's public extraction, and any difference is reported.
+- **Why Question 1216 for 2023 and 2024.** It has the same cut-off as the outcome, so the latest trend points and the outcome are counted to the same date.
+- **Fallback.** The fallback column replaces the primary sources for 2023 and 2024 together, never one year alone. The replacement is recorded in `data/source_choices.csv`. If the India TB Report 2020 or 2023 fails an extraction check (its State rows do not sum to its printed total within ±1), that year is missing for every State, and the trend uses the remaining points.
+- **Cross-checks.**
+  - The State-level 2022 values are compared with the earlier study's public extraction, and any difference is reported.
+  - The 2023 State counts of Question 1216 are compared with the India TB Report 2024, State by State, and any difference is a Q2 discrepancy (§7.4).
 
 **Fit.** For State s, the trend slope β_s is the ordinary least-squares slope of ln(N_s,t) on calendar year t over the State's available trend points. β_s is the State's fitted annual log growth.
 
 - **Fallback for 2019.** A State with no 2019 value uses the points from 2022 onward.
 - **Minimum.** At least two points are needed. A State with fewer is not computable and is listed.
 - **A zero count** in any trend point makes the State not computable.
+- **The 2024 point and the outcome.** In the primary analysis, the 2024 trend point and the outcome's 2024 count are the same number, from Question 1216.
 
 ## 10. Q4: analysis
 
@@ -542,19 +586,21 @@ If (a)–(c) then fail, Q4 is reported descriptively only (§10.7).
 
 For State s:
 
-- a_s and b_s are the January–October 2024 and 2025 counts (§9.5);
-- y_s = ln(b_s / a_s) is the observed change;
+- a_s and b_s are the counts for the two windows of the contrast:
+  - **primary:** full-year 2024 and full-year 2025, from Question 1216 (§9.5.1);
+  - **S8:** January–October 2024 and January–October 2025, from Lok Sabha Question 261 and Rajya Sabha Question 1093 (§9.5.3);
+- y_s = ln(b_s / a_s) is the observed change. For the primary contrast this is ln(N_s,2025 / N_s,2024);
 - β_s is the fitted annual log growth of §9.6, used as the expected change;
 - the **excess change** is x_s = y_s − β_s.
 
-The expected change assumes that the State's growth over January–October equals its annual growth, which requires unchanged seasonality between the two years. This is stated as a limitation.
+For the primary contrast, the outcome and the trend are both counted over full calendar years. For S8, the expected change assumes that the State's growth over January–October equals its annual growth, which requires unchanged seasonality between the two years. This is stated as a limitation.
 
 ### 10.2 Model
 
 - **Fit.** Weighted least squares of x_s on exposure E_s: x_s = γ0 + γ1 E_s + ε_s.
-- **Weights.** w_s = 1/(1/a_s + 1/b_s), the inverse of the Poisson variance of y_s.
+- **Weights.** w_s = 1/(1/a_s + 1/b_s), the inverse of the Poisson variance of y_s. For the primary contrast, w_s = 1/(1/N_s,2024 + 1/N_s,2025).
 - **Primary estimand: γ1.** This is the difference in excess log change between a State with every district in the campaign and a State with none. It is also reported as exp(γ1), and per 10 percentage points of exposure as exp(0.1 γ1).
-- **The intercept γ0** is reported, with the caveat that any difference in completeness lag common to all States moves it (§10.5, S8).
+- **The intercept γ0** is reported, with a caveat: any difference in completeness between the two counts that is common to all States moves it (§10.9).
 - **Model interval.** The weights set only the relative weighting; the residual variance is estimated:
   - s² = Σ w_s r_s² / (n − 2), where r_s are the residuals of the weighted fit;
   - SE(γ1) = √(s² / Σ w_s (E_s − Ē_w)²), with Ē_w the weighted mean exposure;
@@ -579,7 +625,7 @@ The expected change assumes that the State's growth over January–October equal
 
 A State is not computable if:
 
-- it is missing from either outcome table;
+- it is missing from either outcome column;
 - either window count is zero;
 - its exposure is not computable (§9.3);
 - it has fewer than two trend points (§9.6).
@@ -588,12 +634,12 @@ Such States are listed with the reason. No value is imputed, and no count is set
 
 ### 10.5 Sensitivity analyses
 
-Each sensitivity analysis uses the model of §10.2 and reports both intervals, unless stated otherwise.
+Each sensitivity analysis uses the model of §10.2 with the primary contrast and reports both intervals, unless stated otherwise. If the guard of §9.5.2 fails, S8 becomes the primary analysis, and S1–S7 are run on the January–October contrast instead.
 
 - **S1. Unweighted.** w_s = 1 for every State.
 - **S2. Leave one State out.** The model is refitted n times. γ1 is reported for each omission, with the minimum, the maximum, and the State whose omission moves γ1 most. There is no bootstrap.
-- **S3. Recent trend only.** Trend points from 2022 onward: 2022, 2023 and, where the primary trend includes it, 2024.
-- **S4. Three-point trend.** Trend points 2019, 2022 and 2023 only. This excludes the 2024 annual point, which includes December 2024, after the campaign began. If the primary trend already uses these three points (§9.6), S4 is the primary analysis and is not repeated.
+- **S3. Recent trend only.** Trend points 2022, 2023 and 2024.
+- **S4. Three-point trend.** Trend points 2019, 2022 and 2023 only. This excludes the 2024 annual point, which includes December 2024, after the campaign began.
 - **S5. States only.** Union territories (§9.4) are excluded.
 - **S6a. Flagged States excluded.** The States flagged under E5 (campaign count above LGD count; §9.2) are excluded. If no State is flagged, S6a is reported as empty.
 - **S6b. Partial exposure only.** Every capped State, whose exposure share is 1 (§9.3), is excluded. This includes the flagged States and the States with every district in the campaign.
@@ -601,34 +647,44 @@ Each sensitivity analysis uses the model of §10.2 and reports both intervals, u
   - The share is the Census 2011 population (Primary Census Abstract, Office of the Registrar General) of the State's campaign districts, over the State's Census 2011 population.
   - A State with a campaign district created after 2011 is not computable for S7, and is listed.
   - If no named list is obtained, S7 is not run, and the paper says so.
-- **S8. Reporting lag.**
-  - **(a) Uniform lag.** The 2025 counts are multiplied by 0.98 and by 0.95, representing a 2025 table 2% or 5% more complete than the 2024 table.
+- **S8. January–October contrast.** The model of §10.2 is fitted to the January–October 2025 against January–October 2024 contrast (§9.5.3), with weights from the January–October counts and the trend of §9.6.
+  - It is run only if the pair meets conditions (a)–(c) of §9.5.3. Otherwise it is reported descriptively (§10.7).
+  - Its cut-offs are 0–43 days after the window end in both years, against about six weeks and about 13 months in the primary contrast. It therefore addresses in part the difference in completeness of the primary counts (§10.9).
+  - Two further analyses address the difference in reporting lag between its two tables:
+  - **S8(a). Uniform lag.** The January–October 2025 counts are multiplied by 0.98 and by 0.95, representing a 2025 table 2% or 5% more complete than the 2024 table.
     - The weights w_s are held fixed at their values from the unscaled counts.
     - A uniform factor shifts every y_s by the same amount, so it changes γ0 but not γ1. The intercept is reported under each factor, and the invariance of γ1 is confirmed in code.
-  - **(b) State-specific lag.** A State's tendency to late updating is measured by ln r_s. Here r_s is the ratio of the State's 2023 count in Lok Sabha Question 261 (drawn in December 2024) to its 2023 count in the India TB Report 2024.
-    - **Model.** ln r_s is added to the model of §10.2 as a second covariate: x_s = γ0 + γ1 E_s + γ2 ln r_s + ε_s, with the same weights. γ1 is reported with and without the covariate.
+  - **S8(b). State-specific lag.** A State's tendency to late updating is measured by ln r_s. Here r_s is the ratio of the State's 2023 count in Lok Sabha Question 261 (drawn in December 2024) to its 2023 count in the India TB Report 2024.
+    - **Model.** ln r_s is added to the S8 model as a second covariate: x_s = γ0 + γ1 E_s + γ2 ln r_s + ε_s, with the same weights. γ1 is reported with and without the covariate.
     - **Interval.** With X the design matrix (a column of ones, E and ln r) and W = diag(w), the covariance of the coefficients is s² (XᵀWX)⁻¹, with s² = Σ w_s r_s² / (n − 3) from the residuals of this fit. The 95% interval for γ1 uses Student's t with n − 3 degrees of freedom.
     - **Bootstrap.** As in §10.3. A draw is degenerate, counted and excluded if its matrix XᵀWX is singular: its determinant is at most 10⁻¹² times the product of its diagonal entries. This includes draws in which all resampled exposures, or all resampled ln r values, are equal.
     - **Exclusions.** States lacking either 2023 count are excluded from S8(b) and listed.
-    - **Not computable.** If the 2023 trend point falls back to Lok Sabha Question 261 (§9.6), then r_s = 1 in every State. The covariate is then constant and collinear with the intercept, so S8(b) is not computable, and it is reported as such. The same applies if r_s is equal in every State for any other reason.
+    - **Not computable.** If r_s is equal in every State, the covariate is collinear with the intercept, so S8(b) is not computable, and it is reported as such.
 
 ### 10.6 Placebo
 
 No State-wise January–October 2023 table of TB notifications was found (source-search note, §4). The placebo therefore uses annual counts.
 
-- **Observed:** y^P_s = ln(N_s,2023 / N_s,2022), from the India TB Reports 2024 and 2023.
-- **Expected:** β^P_s = ln(N_s,2022 / N_s,2019) / 3. This is the State's annual log growth between its two trend points before the placebo window, 2020 and 2021 being excluded. A State with no 2019 value is not computable for the placebo.
+- **Observed:** y^P_s = ln(N_s,2023 / N_s,2022).
+  - N_s,2023 comes from Question 1216, the 2023 trend source.
+  - N_s,2022 comes from the India TB Report 2023.
+  - If the trend falls back (§9.6), N_s,2023 comes from the India TB Report 2024 instead.
+- **Expected:** β^P_s = ln(N_s,2022 / N_s,2019) / 3, from the India TB Reports 2023 and 2020. This is the State's annual log growth between its two trend points before the placebo window, 2020 and 2021 being excluded. A State with no 2019 value is not computable for the placebo.
 - **Excess:** x^P_s = y^P_s − β^P_s.
 - **Fit.** WLS of x^P_s on the same exposure E_s, with w_s = 1/(1/N_s,2022 + 1/N_s,2023), and the intervals of §10.2 and §10.3.
 - **Expected result.** A campaign that began in December 2024 cannot affect 2022–2023, so the placebo slope should be close to 0.
 - **Precision.** The placebo's expected change is a two-point slope across the COVID-19 gap (2019 to 2022). It is therefore noisier than the primary analysis's fitted trend, and the placebo interval is expected to be wider.
+- **Source change.** In the primary case, the placebo's observed change crosses from the India TB Report (2022) to Question 1216 (2023). A level difference between the two sources that is common to all States moves only γ0. A difference that varies by State adds noise, and any part of it that varies with exposure would bias the placebo slope.
 
 ### 10.7 Descriptive fallback
 
-If comparability fails (§9.5), or the minimum of §10.2 is not met, Q4 is reported descriptively only, with the reason.
+Q4 is reported descriptively only, with the reason, in any of these cases:
 
-- The report is a State table of a_s, b_s, y_s (with its Poisson 95% interval y_s ± z √(1/a_s + 1/b_s), where z = `statistics.NormalDist().inv_cdf(0.975)`), β_s, x_s and E_s.
-- There is no regression and no slope.
+- comparability fails for the contrast that is primary (§9.5);
+- the minimum of §10.2 is not met;
+- the full-year contrast after the guard of §9.5.2 has failed. It is then reported descriptively beside the January–October primary.
+
+The report is a State table of a_s, b_s, y_s (with its Poisson 95% interval y_s ± z √(1/a_s + 1/b_s), where z = `statistics.NormalDist().inv_cdf(0.975)`), β_s, x_s and E_s. There is no regression and no slope.
 
 If the exposure table is rejected (§9.2) and no named list replaces it, Q4 is not run.
 
@@ -651,15 +707,22 @@ No P values are reported.
 - **Exposure measure.**
   - Exposure is measured as district membership, not as activity performed.
   - In every State, the numerator counts NTEP programme districts and the denominator counts LGD revenue districts. These are different units (§9.2, E5).
-- **Trend sources.** The 2019, 2022 and 2023 trend points come from the India TB Report. The 2024 point, where used, comes from a parliamentary answer. The 2024 point may therefore differ from the others in definition and cut-off as well as in year (§9.6; S4 omits it).
+- **Completeness of the primary counts.** Both counts were drawn on the same February 2026 date. The 2025 count was therefore taken about six weeks after its year ended, and late updates to it may be incomplete. The 2024 count, at about 13 months, is more complete.
+  - This asymmetry understates 2025 relative to 2024. It biases the observed change y_s, and so the excess change, downward.
+  - If the shortfall is the same proportion in every State, it moves only γ0. If it varies with exposure, it biases γ1.
+  - The January–October sensitivity analysis (S8), whose two cut-offs are both 0–43 days after the window end, addresses this in part.
+- **Trend sources.** The primary trend mixes two sources: the India TB Report for 2019 and 2022, and Question 1216 for 2023 and 2024.
+  - A level difference between the sources, or a difference in completeness (the Question 1216 counts were drawn later after their years ended), alters β_s. If the later points are relatively more complete, β_s is overstated and the excess change understated.
+  - S3 and S4 vary the trend points, and the cross-check of Question 1216 against the India TB Report 2024 for 2023 (§9.6) measures the level difference.
+- **Total notifications.** Question 1216 reports cases notified in a table on the TB Mukt Bharat Abhiyan. The guard of §9.5.2 tests whether these are total notifications; it does so at the median, not State by State.
 - **Lag proxy (S8(b)).**
-  - ln r_s shares the India TB Report 2023 value with the trend slope β_s, so the two are not independent.
-  - The proxy measures late updating about a year after the data year, not the 0–43-day lag of the outcome tables.
+  - The proxy measures late updating about a year after the data year, not the 0–43-day lag of the January–October tables.
+  - Where the trend falls back to the India TB Report 2024 for 2023 (§9.6), ln r_s shares that value with β_s, so the two are not independent.
 - **Timing.**
-  - The 2025 window includes the later expansion of the campaign, which dilutes the phase-1 contrast.
-  - The 2024 window ends before the campaign began, but the 2024 annual trend point includes December 2024 (§10.5, S4).
-- **Coverage and lag.** Neither outcome table states its public and private coverage (§9.5), and the completeness lags of the two tables may differ (§10.5, S8).
-- **Seasonality.** The expected change assumes unchanged seasonality (§10.1).
+  - The 2025 window includes the rest of the 100-day campaign (to March 2025) and its later expansion. The expansion dilutes the phase-1 contrast.
+  - The full-year 2024 count includes December 2024, after the campaign began on 7 December. Any early campaign effect therefore raises the 2024 baseline, which biases the contrast toward no effect. The same month is in the 2024 trend point (S4 omits that point).
+- **Coverage (S8).** Neither January–October table states its public and private coverage (§9.5.3), and their completeness lags may differ (S8(a), S8(b)).
+- **Seasonality (S8).** The January–October contrast assumes unchanged seasonality (§10.1).
 
 ## 11. Software and reproducibility
 
@@ -670,7 +733,7 @@ No P values are reported.
 - **Provenance.**
   - Every extracted value carries its source file, its PDF page or paragraph, and its table.
   - Every count carries its window start, window end and cut-off date, with the basis of the cut-off (§5.2).
-  - In Q4, only counts with the same window and a cut-off within 60 days after the window end are compared.
+  - In Q4, only counts with the same window are compared. Their cut-off rule is that of §9.5: one shared as-on date within 60 days after the end of the later window (primary), or each cut-off within 60 days after its own window end (S8).
 - **State names.** These come from one canonical mapping. In every table, labels are mapped by the label rule of §9.2 (E3), and each resolution is logged. A label that stays unmapped or ambiguous makes its row not computable, and the row is listed.
 - **Code reuse.** Code reused from the author's earlier study (State names, extraction primitives, the fetch script and the verification suite) is copied into this repository with attribution, not imported.
 - **Numbers.** Every number in the manuscript is derived by code, and checked against the outputs by an automated check.
