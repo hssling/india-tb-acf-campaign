@@ -780,7 +780,7 @@ No P values are reported.
 
 ## 13. Deviations
 
-**Registration point.** To be recorded here after the public push of this plan.
+**Registration point.** This plan was registered by its first public push to https://github.com/hssling/india-tb-acf-campaign at commit 2a422a2 (pushed 2026-11-18T17:59:29Z, from the GitHub API). No figure value had been extracted before that push. The text above this section is frozen at that commit; later changes are logged below as dated deviations. The event is recorded in docs/registration_event.json.
 
 Deviations from this plan are logged here, each with its date. Anything exploratory is labelled as such in code and output, and logged here.
 
