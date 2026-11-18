@@ -42,6 +42,11 @@ OUT = ROOT / "data/extracted/lgd_districts_2024-12-07.csv"
 LOG = ROOT / "data/extracted/lgd_reconstruction_log.csv"
 REFERENCE = date(2024, 12, 7)
 
+# Deviation of §13 (19 November 2026): reconstruction from official notices.
+EVIDENCE = ROOT / "data/lgd_evidence"
+OUT_R = ROOT / "data/extracted/lgd_districts_2024-12-07_reconstructed.csv"
+LOG_R = ROOT / "data/extracted/lgd_reconstruction_log_reconstructed.csv"
+
 _X = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
 _SS = "{urn:schemas-microsoft-com:office:spreadsheet}"
 
@@ -353,6 +358,186 @@ def _summary(state: str, log: list[dict]) -> str:
             f"report gives (report rows {rows}): " + "; ".join(whys))
 
 
+# ================================================================== §13 deviation
+# District denominator reconstructed from official notices (§13, 19 November 2026).
+# The evidence (data/lgd_evidence/) is applied mechanically; the rulings below settle
+# the judgement points that the evidence search left open.
+
+RULING_LGD_FEED = (
+    "ruling 1: the LGD public district feed record for a district code counts as 'the "
+    "LGD public page for that district'; its effective date is the date used, and it "
+    "suffices to show that a district existed before 8 December 2024")
+RULINGS: dict[str, dict] = {
+    "AR-01": {"note": "ruling 2: Bichom is undone on the LGD effective date of 10 January "
+                      "2025 (the only dated official source), so Arunachal Pradesh = 26; "
+                      "it would be 27 if the commencement of the State Act (Act 2 of 2024) "
+                      "predated 8 December 2024"},
+    "DL-04": {"note": "ruling 3: Shahdara is abolished by the notification of 25 December "
+                      "2025, which fixes the complete list of districts in force 'in "
+                      "supersession of all previous notifications'"},
+    "GJ-01": {"date": "2025-09-24",
+              "note": "ruling 4: the LGD effective date (24 September 2025) is used, not "
+                      "the district website's 2 October 2025; both are after the "
+                      "reference date"},
+}
+for _i in range(1, 10):
+    RULINGS[f"RJ-{_i:02d}"] = {
+        "note": "ruling 5: restored; both candidate dates (Gazette 29 December 2024, "
+                "listing 30 December 2024) fall after the cut-off"}
+
+# effect on the count at the reference date of undoing a change of each type
+_UNDO = {"created": -1, "split": -1, "abolished": +1, "merged": +1,
+         "renamed": 0, "other": 0}
+
+
+def read_evidence(folder: Path = EVIDENCE) -> tuple[list[dict], list[dict]]:
+    """(changes, row accounting) from the evidence folder."""
+    with open(folder / "changes.csv", newline="", encoding="utf-8") as f:
+        changes = list(csv.DictReader(f))
+    with open(folder / "rows.csv", newline="", encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    return changes, rows
+
+
+def _blank_state() -> dict:
+    return {"current_count": 0, "count": 0, "computable": "yes", "reason": "",
+            "modification_rows": 0, "rows_accounted": 0, "undone_created": 0,
+            "restored": 0, "moves_reversed": 0}
+
+
+def reconstruct_from_evidence(current: list[dict], mods: list[dict], changes: list[dict],
+                              accounting: list[dict], reference: date = REFERENCE,
+                              rulings: dict | None = None) -> tuple[dict, list[dict]]:
+    """Per canonical State: current count, reconstructed count (None if not
+    computable), and the reversal log.
+
+    count = current - created + abolished/merged-away, with moves reversed, using only
+    changes dated after `reference` (a change dated on the reference date is kept).
+    Every modification row of the State must be accounted for in `accounting` (by a
+    change id of that State, or by 'existed-before' with a source); otherwise the
+    State is not computable."""
+    rulings = RULINGS if rulings is None else rulings
+    res: dict = {}
+    out: dict[str, dict] = {}
+    for c in current:
+        s = _canon(c["state_label"], res)
+        if s:
+            x = out.setdefault(s, _blank_state())
+            x["current_count"] += 1
+            x["count"] += 1
+
+    def fail(s: str, why: str) -> None:
+        x = out.setdefault(s, _blank_state())
+        x["computable"] = "no"
+        x["reason"] = (x["reason"] + "; " if x["reason"] else "") + why
+
+    log: list[dict] = []
+    state_of: dict[str, str] = {}
+    for ch in changes:
+        s = _canon(ch["state"], res)
+        cid = ch["change_id"]
+        state_of[cid] = s
+        rule = rulings.get(cid, {})
+        d = parse_date(rule.get("date", ch["date"]))
+        notes = [rule["note"]] if "note" in rule else []
+        if "lgdirectory.gov.in" in ch["source_url"]:
+            notes.append(RULING_LGD_FEED)
+        entry = {"change_id": cid, "state": s, "district_code": ch["district_code"],
+                 "district_name": ch["district_name"], "change_type": ch["change_type"],
+                 "date": d.isoformat() if d else "",
+                 "date_kind": "effective (LGD record; ruling 4)" if "date" in rule
+                 else ch["date_kind"],
+                 "action": "", "effect": "", "source_url": ch["source_url"],
+                 "ruling": "; ".join(notes)}
+        kind = ch["change_type"].strip().lower()
+        x = out.setdefault(s, _blank_state())
+        if d is None:
+            entry["action"] = "not applied: no date"
+            fail(s, f"change {cid} has no date")
+        elif d <= reference:
+            entry["action"] = "kept: in force on the reference date"
+        elif kind == "moved":
+            entry["action"] = "not applied: the evidence gives no previous State"
+            fail(s, f"change {cid}: move without previous State")
+        elif kind not in _UNDO:
+            entry["action"] = f"not applied: change type {kind!r} cannot be undone"
+            fail(s, f"change {cid}: type {kind!r}")
+        else:
+            delta = _UNDO[kind]
+            x["count"] += delta
+            if delta < 0:
+                x["undone_created"] += 1
+                entry["action"], entry["effect"] = "undone: district removed", f"{s} -1"
+            elif delta > 0:
+                x["restored"] += 1
+                entry["action"], entry["effect"] = "undone: district restored", f"{s} +1"
+            else:
+                entry["action"], entry["effect"] = "undone: count unchanged", "0"
+        log.append(entry)
+
+    acc = {(str(r["row"]), r["district_code"]): r for r in accounting}
+    for m in mods:
+        s = _canon(m["state_label"], res)
+        if not s:
+            continue
+        x = out.setdefault(s, _blank_state())
+        x["modification_rows"] += 1
+        a = acc.get((str(m["row"]), m["district_code"]))
+        tokens = [t.strip() for t in a["accounted_by"].split(";") if t.strip()] if a else []
+        ok = bool(tokens)
+        for t in tokens:
+            if t == "existed-before":
+                ok = ok and bool(a["source_url"].strip())
+            else:
+                ok = ok and state_of.get(t) == s
+        if ok:
+            x["rows_accounted"] += 1
+        else:
+            fail(s, f"report row {m['row']} (code {m['district_code']}) not accounted for")
+    for x in out.values():
+        if x["computable"] == "no":
+            x["count"] = None
+    return out, log
+
+
+def run_reconstructed() -> tuple[dict, list[dict]]:
+    _verify_inputs()
+    current = parse_current(read_xlsx_rows(ROOT / CURRENT))
+    _, mods = parse_modifications(read_spreadsheetml_rows(ROOT / MODS))
+    changes, accounting = read_evidence()
+    return reconstruct_from_evidence(current, mods, changes, accounting)
+
+
+def write_reconstructed() -> dict:
+    out, log = run_reconstructed()
+    with open(EVIDENCE / "states.csv", newline="", encoding="utf-8") as f:
+        ev = {r["state"]: r for r in csv.DictReader(f)}
+    rows = []
+    for s in sorted(out):
+        x = out[s]
+        e = ev.get(s)
+        cnt = "" if x["count"] is None else x["count"]
+        rows.append({
+            "state": s, "coarse_unit": states.coarsen(s),
+            "current_count": x["current_count"],
+            "modification_rows": x["modification_rows"],
+            "rows_accounted": x["rows_accounted"],
+            "created_undone": x["undone_created"], "abolished_restored": x["restored"],
+            "moves_reversed": x["moves_reversed"], "computable": x["computable"],
+            "count_2024_12_07": cnt,
+            "evidence_count": e["reconstructed_count"] if e else "",
+            "matches_evidence": "" if not e else
+            ("yes" if str(cnt) == e["reconstructed_count"] else "no"),
+            "reason": x["reason"],
+            "basis": ("§13 deviation (19 November 2026): reconstruction from official "
+                      "notices" if x["modification_rows"] else
+                      "no modification row: current count, as under §9.3")})
+    _write(OUT_R, list(rows[0]), rows)
+    _write(LOG_R, ["change_id", "state", "district_code", "district_name", "change_type",
+                   "date", "date_kind", "action", "effect", "source_url", "ruling"], log)
+    return out
+
+
 def main() -> int:
     out, log, fields, resolutions = run()
     labels_by_state: dict[str, str] = {}
@@ -382,6 +567,9 @@ def main() -> int:
     n_no = sum(1 for r in rows if r["reconstructable"] == "no")
     print(f"{len(rows)} States/UTs; {len(log)} modification rows; "
           f"{n_no} not reconstructable; fields given: {fields}")
+    rec = write_reconstructed()
+    n_no = sum(1 for x in rec.values() if x["computable"] == "no")
+    print(f"reconstructed (§13 deviation): {n_no} States not computable")
     return 0
 
 

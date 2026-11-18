@@ -1,4 +1,5 @@
 """Exposure table (analysis plan §9.2, checks E1-E7) and the label rule (E3)."""
+import csv
 from pathlib import Path
 
 import pytest
@@ -266,3 +267,30 @@ def test_named_list_reads_state_column_only():
     labs = campaign.named_list_state_labels(KERALA)
     assert all(labels.resolve_or_list(t).step < 3 for _, t in labs)
     assert {p for p, _ in labs} <= set(range(12, 29))
+    assert len(labs) == 397
+    from collections import Counter
+    n = Counter(labels.resolve_or_list(t).canonical for _, t in labs)
+    # rows cut by a page break are joined: p.12/13 Bihar, p.19/20 Maharashtra,
+    # p.26/27 West Bengal
+    assert (n["Bihar"], n["Maharashtra"], n["West Bengal"]) == (10, 52, 28)
+
+
+def test_scope_decisions_merge_keeps_other_extractors(tmp_path):
+    path = tmp_path / "decisions.csv"
+    cols = campaign.SCOPE_COLUMNS
+    other = {c: "" for c in cols} | {"kind": "exclusion", "doc": "PGPH2025",
+                                     "source_file": "https://pmc.example/PMC1/",
+                                     "reason": "quality study"}
+    mine_old = {c: "" for c in cols} | {"kind": "exclusion", "doc": "CTD100",
+                                        "source_file": campaign.CTD_FILE,
+                                        "reason": "old"}
+    rule_old = {c: "" for c in cols} | {"kind": "rule", "reason": campaign.SCOPE_RULE}
+    rule_new = {c: "" for c in cols} | {"kind": "rule", "source_file": campaign.OFF,
+                                        "reason": campaign.SCOPE_RULE}
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=cols)
+        w.writeheader()
+        w.writerows([rule_old, mine_old, other])
+    mine_new = mine_old | {"reason": "new"}
+    merged = campaign._merge_scope([rule_new, mine_new], path)
+    assert merged == [rule_new, mine_new, other]

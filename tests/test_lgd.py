@@ -142,3 +142,88 @@ def test_real_lgd_files_parse():
     assert len(cur) > 700
     fields, mods = lgd.parse_modifications(lgd.read_spreadsheetml_rows(MODS))
     assert mods and all(m["district_code"] for m in mods)
+
+
+# ------------------------------------------------ §13 deviation: official notices
+
+def _chg(cid, state, code, kind, d, url="https://example.gov.in/notice"):
+    return {"change_id": cid, "state": state, "district_code": code,
+            "district_name": f"D{code}", "change_type": kind, "date": d,
+            "date_kind": "effective", "source_url": url}
+
+
+def _acc(row, code, by, url="https://example.gov.in/notice"):
+    return {"row": str(row), "district_code": code, "accounted_by": by, "source_url": url}
+
+
+def test_evidence_created_and_abolished_are_undone():
+    # Goa now: 1, 2, 3; district 3 created 2025-01-10, district X abolished 2025-02-01
+    mods = [_mod(10, "3", "Goa"), _mod(11, "2", "Goa")]
+    changes = [_chg("GA-1", "Goa", "3", "created", "2025-01-10"),
+               _chg("GA-2", "Goa", "", "abolished", "2025-02-01")]
+    acc = [_acc(10, "3", "GA-1"), _acc(11, "2", "GA-2;existed-before")]
+    out, log = lgd.reconstruct_from_evidence(CURRENT_LIST, mods, changes, acc, rulings={})
+    assert out["Goa"]["count"] == 3            # 3 - 1 + 1
+    assert out["Goa"]["computable"] == "yes"
+    assert [e["effect"] for e in log] == ["Goa -1", "Goa +1"]
+    assert all(e["source_url"] for e in log)
+    assert out["Kerala"]["count"] == 2           # no modification row: current count
+
+
+def test_evidence_unaccounted_row_makes_state_not_computable():
+    mods = [_mod(10, "3", "Goa"), _mod(11, "1", "Goa")]
+    changes = [_chg("GA-1", "Goa", "3", "created", "2025-01-10")]
+    for acc in ([_acc(10, "3", "GA-1")],                         # row 11 missing
+                [_acc(10, "3", "GA-1"), _acc(11, "1", "")],       # row 11 blank
+                [_acc(10, "3", "GA-1"), _acc(11, "1", "KL-9")],   # unknown change id
+                [_acc(10, "3", "GA-1"), _acc(11, "1", "existed-before", url="")]):
+        out, _ = lgd.reconstruct_from_evidence(CURRENT_LIST, mods, changes, acc,
+                                               rulings={})
+        assert out["Goa"]["computable"] == "no" and out["Goa"]["count"] is None
+        assert "row 11" in out["Goa"]["reason"]
+
+
+def test_evidence_change_on_reference_date_kept_and_next_day_undone():
+    mods = [_mod(10, "3", "Goa"), _mod(11, "2", "Goa")]
+    acc = [_acc(10, "3", "GA-1"), _acc(11, "2", "GA-2")]
+    changes = [_chg("GA-1", "Goa", "3", "created", "2024-12-07"),
+               _chg("GA-2", "Goa", "2", "created", "2024-12-08")]
+    out, log = lgd.reconstruct_from_evidence(CURRENT_LIST, mods, changes, acc, rulings={})
+    assert out["Goa"]["count"] == 2
+    assert log[0]["action"].startswith("kept") and log[1]["effect"] == "Goa -1"
+
+
+def test_evidence_ruling_overrides_date_and_is_logged():
+    mods = [_mod(10, "3", "Goa")]
+    changes = [_chg("GA-1", "Goa", "3", "created", "2025-01-10")]
+    rul = {"GA-1": {"date": "2024-12-01", "note": "ruling x"}}
+    out, log = lgd.reconstruct_from_evidence(CURRENT_LIST, mods, changes,
+                                             [_acc(10, "3", "GA-1")], rulings=rul)
+    assert out["Goa"]["count"] == 3 and log[0]["ruling"] == "ruling x"
+
+
+EVID = ROOT / "data/lgd_evidence"
+
+
+@needs_lgd
+def test_real_reconstruction_pinned_counts():
+    out, log = lgd.run_reconstructed()
+    got = {s: x["count"] for s, x in out.items()}
+    assert got["Rajasthan"] == 50
+    assert got["Delhi"] == 11
+    assert got["Andhra Pradesh"] == 26
+    assert got["Ladakh"] == 2 and got["Jammu and Kashmir"] + got["Ladakh"] == 22
+    assert got["Goa"] == 2
+    assert got["Arunachal Pradesh"] == 26 and got["Gujarat"] == 33
+    assert all(x["computable"] == "yes" for x in out.values())
+    assert all(e["source_url"] for e in log)
+
+
+def test_evidence_manifest_matches_files():
+    import hashlib
+    lines = (EVID / "MANIFEST.txt").read_text(encoding="utf-8").split("\n")
+    pins = dict(reversed(ln.split("  ", 1)) for ln in lines
+                if ln and not ln.startswith("#"))
+    assert set(pins) == {"changes.csv", "rows.csv", "states.csv", "search_log.md"}
+    for name, digest in pins.items():
+        assert hashlib.sha256((EVID / name).read_bytes()).hexdigest() == digest, name

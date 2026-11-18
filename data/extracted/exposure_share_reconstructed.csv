@@ -1,0 +1,36 @@
+unit,in_table,campaign_count,lgd_count,share,capped,flagged_e5,computable,reason
+Andaman and Nicobar Islands,no,0,3,0,no,no,yes,
+Andhra Pradesh,yes,1,26,0.038462,no,no,yes,
+Arunachal Pradesh,yes,1,26,0.038462,no,no,yes,
+Assam,yes,17,35,0.485714,no,no,yes,
+Bihar,yes,10,38,0.263158,no,no,yes,
+Chandigarh,yes,1,1,1,yes,no,yes,every district in the campaign: capped
+Chhattisgarh,yes,19,33,0.575758,no,no,yes,
+Dadra and Nagar Haveli and Daman and Diu,yes,1,3,0.333333,no,no,yes,
+Delhi,yes,11,11,1,yes,no,yes,every district in the campaign: capped
+Goa,yes,2,2,1,yes,no,yes,every district in the campaign: capped
+Gujarat,yes,16,33,0.484848,no,no,yes,
+Haryana,yes,14,22,0.636364,no,no,yes,
+Himachal Pradesh,yes,8,12,0.666667,no,no,yes,
+Jammu and Kashmir (incl. Ladakh),yes,3,22,0.136364,no,no,yes,
+Jharkhand,yes,4,24,0.166667,no,no,yes,
+Karnataka,yes,31,31,1,yes,no,yes,every district in the campaign: capped
+Kerala,yes,14,14,1,yes,no,yes,every district in the campaign: capped
+Lakshadweep,no,0,1,0,no,no,yes,
+Madhya Pradesh,yes,23,55,0.418182,no,no,yes,
+Maharashtra,yes,30,36,0.833333,no,no,yes,
+Manipur,yes,6,16,0.375,no,no,yes,
+Meghalaya,yes,5,12,0.416667,no,no,yes,
+Mizoram,yes,4,11,0.363636,no,no,yes,
+Nagaland,yes,3,17,0.176471,no,no,yes,
+Odisha,yes,19,30,0.633333,no,no,yes,
+Puducherry,yes,1,2,0.5,no,no,yes,
+Punjab,yes,18,23,0.782609,no,no,yes,
+Rajasthan,yes,5,50,0.1,no,no,yes,
+Sikkim,yes,2,6,0.333333,no,no,yes,
+Tamil Nadu,yes,22,38,0.578947,no,no,yes,
+Telangana,yes,9,33,0.272727,no,no,yes,
+Tripura,yes,5,8,0.625,no,no,yes,
+Uttar Pradesh,yes,15,75,0.2,no,no,yes,
+Uttarakhand,yes,8,13,0.615385,no,no,yes,
+West Bengal,yes,19,23,0.826087,no,no,yes,

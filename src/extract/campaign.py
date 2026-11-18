@@ -132,6 +132,18 @@ def _yn(ok: bool) -> str:
     return "yes" if ok else "no"
 
 
+def coarse_lgd(counts: dict[str, int | None]) -> dict[str, int | None]:
+    """LGD count per coarsened unit (§9.4): the sum over its members, None if any
+    member is not computable."""
+    out: dict[str, int | None] = {}
+    for s, n in counts.items():
+        u = states.coarsen(s)
+        if u in out and out[u] is None:
+            continue
+        out[u] = None if n is None else out.get(u, 0) + n
+    return out
+
+
 def check_exposure(rows: list[tuple[str, str, int]], total: int | None,
                    lgd: dict[str, int | None], e6_number: int | None = None,
                    e7: tuple[int | None, int | None] = (None, None)) -> ExposureResult:
@@ -902,10 +914,10 @@ def _fixed_specs() -> list[Spec]:
     ]
 
     # ---------------- Ministry letter with attachments (Kerala Medical Council copy) ----
-    k1 = ("2. This campaign will cover 347 selected high priority districts across 33 "
+    k1 = ("This campaign will cover 347 selected high priority districts across 33 "
           "state/UTs (copy enclosed) and the campaign plan along with guidelines are also "
           "enclosed.")
-    k2 = ("2. This 100 days' intensified campaign will cover 347 selected high priority "
+    k2 = ("This 100 days' intensified campaign will cover 347 selected high priority "
           "districts across 33 States/UTs (Annexure-I) and will involve a comprehensive "
           "strategy to mobilize resources, raise awareness and intensify actions against "
           "TB across all prioritized States/Districts.")
@@ -926,10 +938,10 @@ def _fixed_specs() -> list[Spec]:
         _states_spec("KERALA", 2, k2, para="MoHFW D.O. letter Z-28015/191/2024-TB, para 2",
                      image=True, pub_date="2024-11-21"),
     ]
-    kc = ("Geographical Focus: The campaign targets 347 districts across 33 states/UTs, "
+    kc = ("The campaign targets 347 districts across 33 states/UTs, "
           "including high-burden of TB disease and mortality due to TB, tribal, mining, "
           "and aspirational districts.")
-    cn = "Concept Note: 100 Days Campaign, section 4"
+    cn = "Concept Note: 100 Days Campaign, section 4 'Geographical Focus'"
     S += [Spec("KERALA", 5, "districts_selected", "347", "districts", "districts", kc,
                para=cn),
           _states_spec("KERALA", 5, kc, para=cn)]
@@ -1291,8 +1303,9 @@ def ctd_page_checks(rows: list[dict]) -> list[dict]:
 
 
 def scope_decisions(rows: list[dict], specs: list[Spec]) -> list[dict]:
-    out = [{"kind": "rule", "doc": "", "source_file": "", "page": "", "figures": "",
-            "where": "", "category": "", "decision": "", "reason": SCOPE_RULE}]
+    out = [{"kind": "rule", "doc": "campaign and press documents", "source_file": OFF,
+            "page": "", "figures": "", "where": "", "category": "", "decision": "",
+            "reason": SCOPE_RULE}]
     for s in specs:
         if s.basis:
             out.append({"kind": "included by rule 3", "doc": s.doc,
@@ -1326,6 +1339,28 @@ def _merge_inventory(own: list[dict]) -> list[dict]:
     return own + kept
 
 
+SCOPE_DECISIONS = EXTRACTED / "inventory_scope_decisions.csv"
+SCOPE_COLUMNS = ["kind", "doc", "source_file", "page", "figures", "where", "category",
+                 "decision", "reason"]
+
+
+def _own_scope_row(r: dict) -> bool:
+    """A row written by this extractor: one of its documents, its rule row (source
+    'data_raw/official/'), or its rule row as first written (blank source)."""
+    return (r["source_file"] in OWN_FILES or r["source_file"] == OFF
+            or (r["source_file"] == "" and r["reason"].startswith(SCOPE_RULE[:60])))
+
+
+def _merge_scope(own: list[dict], path: Path = SCOPE_DECISIONS) -> list[dict]:
+    """Rows of other extractors are kept as they are; this extractor's rows replace
+    its own earlier rows (merged on source_file)."""
+    kept = []
+    if path.exists():
+        with open(path, newline="", encoding="utf-8") as f:
+            kept = [r for r in csv.DictReader(f) if not _own_scope_row(r)]
+    return own + kept
+
+
 def _e7_numbers(lines: list[str]) -> tuple[int | None, int | None]:
     m = re.search(r"(\d+) districts have been selected across (\d+) State/UTs",
                   " ".join(lines))
@@ -1349,23 +1384,19 @@ def main() -> int:
     verify_inputs()
     from src.extract import lgd as lgd_mod
     lgd_out, _, _, _ = lgd_mod.run()
-
-    # LGD count per coarse unit (None if any member is not reconstructable)
-    lgd_units: dict[str, int | None] = {}
-    for s, st in lgd_out.items():
-        u = states.coarsen(s)
-        if u in lgd_units and lgd_units[u] is None:
-            continue
-        lgd_units[u] = None if st["count"] is None else lgd_units.get(u, 0) + st["count"]
+    lgd_units = coarse_lgd({s: st["count"] for s, st in lgd_out.items()})
+    rec_out, _ = lgd_mod.run_reconstructed()
+    lgd_units_rec = coarse_lgd({s: st["count"] for s, st in rec_out.items()})
 
     ctd = ROOT / CTD_FILE
     lines = page_lines(ctd, CTD_PAGE)
     raw_rows, total = parse_exposure_lines(lines)
     resolutions = [labels.resolve_or_list(lab) for lab, _ in raw_rows]
     rows = [(lab, r.canonical, n) for (lab, n), r in zip(raw_rows, resolutions)]
-    res = check_exposure(rows, total, lgd_units,
-                         e6_number=_e6_number(page_lines(ctd, CRITERIA_PAGE), lines),
-                         e7=_e7_numbers(lines))
+    e6 = _e6_number(page_lines(ctd, CRITERIA_PAGE), lines)
+    e7 = _e7_numbers(lines)
+    res = check_exposure(rows, total, lgd_units, e6_number=e6, e7=e7)
+    res_rec = check_exposure(rows, total, lgd_units_rec, e6_number=e6, e7=e7)
 
     n_left = (len(raw_rows) + 1) // 2
     _write(EXTRACTED / "exposure_campaign.csv",
@@ -1380,16 +1411,21 @@ def main() -> int:
              "source_file": CTD_FILE, "pdf_page": CTD_PAGE, "printed_page": 5,
              "table_id": "State | Total District (Geographical prioritization)"}
             for i, ((lab, n), r) in enumerate(zip(raw_rows, resolutions))])
-    _write(EXTRACTED / "exposure_checks.csv",
-           ["check", "inputs", "expected", "observed", "pass", "note"],
-           res.checks + [{"check": "decision", "inputs": "E1, E2, E4, E5",
-                          "expected": "table not rejected",
-                          "observed": "rejected" if res.rejected else "not rejected",
-                          "pass": "no" if res.rejected else "yes",
-                          "note": "; ".join(res.reject_reasons)}])
-    _write(EXTRACTED / "exposure_share.csv",
-           ["unit", "in_table", "campaign_count", "lgd_count", "share", "capped",
-            "flagged_e5", "computable", "reason"], res.units)
+    for r, suffix in ((res, ""), (res_rec, "_reconstructed")):
+        _write(EXTRACTED / f"exposure_checks{suffix}.csv",
+               ["check", "inputs", "expected", "observed", "pass", "note"],
+               r.checks + [{"check": "decision", "inputs": "E1, E2, E4, E5",
+                            "expected": "table not rejected",
+                            "observed": "rejected" if r.rejected else "not rejected",
+                            "pass": "no" if r.rejected else "yes",
+                            "note": "; ".join(r.reject_reasons) + (
+                                "" if not suffix else
+                                ("; " if r.reject_reasons else "") +
+                                "denominator: LGD count reconstructed from official "
+                                "notices (§13 deviation, 19 November 2026)")}])
+        _write(EXTRACTED / f"exposure_share{suffix}.csv",
+               ["unit", "in_table", "campaign_count", "lgd_count", "share", "capped",
+                "flagged_e5", "computable", "reason"], r.units)
 
     checks = table_checks()
     _write(EXTRACTED / "table_total_checks.csv",
@@ -1407,21 +1443,21 @@ def main() -> int:
     _write(EXTRACTED / "campaign_inventory_provenance.csv",
            ["kind", "fig_id", "source_file", "page", "method", "figures_found"],
            prov + ctd_page_checks(inv))
-    _write(EXTRACTED / "inventory_scope_decisions.csv",
-           ["kind", "doc", "source_file", "page", "figures", "where", "category",
-            "decision", "reason"], scope_decisions(inv, specs))
+    _write(SCOPE_DECISIONS, SCOPE_COLUMNS, _merge_scope(scope_decisions(inv, specs)))
 
-    for c in res.checks:
-        print(c["check"], c["pass"], "|", c["observed"])
-    print("exposure table", "REJECTED: " + "; ".join(res.reject_reasons)
-          if res.rejected else "not rejected")
+    for label, r in (("registered §9.3", res), ("reconstructed (§13)", res_rec)):
+        print(f"-- exposure checks, denominator {label}")
+        for c in r.checks:
+            print(c["check"], c["pass"], "|", c["observed"])
+        print("exposure table", "REJECTED: " + "; ".join(r.reject_reasons)
+              if r.rejected else "not rejected")
     for c in checks:
         print("total check:", c["table"], c["pass"], c["sum_of_rows"], c["printed_total"])
     mism = [r["state"] for r in named if r["match"] == "no" and r["state"] != "TOTAL"]
     print(f"named list: {named[-1]['named_list_rows']} rows; States not matching the CTD "
           f"table: {len(mism)}")
     print(f"inventory rows from campaign documents: {len(inv)}")
-    return 1 if res.rejected else 0
+    return 1 if res.rejected or res_rec.rejected else 0
 
 
 if __name__ == "__main__":

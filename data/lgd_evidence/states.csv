@@ -1,0 +1,20 @@
+state,current_count,created,abolished,moves,reconstructed_count,computable,reason,official_count_check
+Andhra Pradesh,28,2,0,0,26,yes,In-window changes undone; all rows accounted.,none found
+Arunachal Pradesh,27,1,0,0,26,yes,Bichom creation dated 2025-01-10 by LGD (only dated official source) undone; JUDGEMENT OPEN: Act of 23 Feb 2024 names Bichom but its commencement notification was not found; 27 if Bichom is held to pre-date 8 Dec 2024. Keyi Panyor (2024-11-25) kept.,none found
+Assam,35,0,0,0,35,yes,"No creation/abolition in window found; Sribhumi rename 21 Nov 2024 (before reference) count-neutral. 2022 merger/2023 re-creation of Bajali, Biswanath, Hojai, Tamulpur lie before window (news/RBI only).",none found
+Chhattisgarh,33,0,0,0,33,yes,No creation/abolition/move dated 8 Dec 2024-18 Nov 2026 found; all rows existed before 8 Dec 2024.,none found
+Delhi,13,3,1,0,11,yes,"Gazette 25 Dec 2025 creates 13 Areas: Old Delhi, Central North, Outer North new; Shahdara absent (abolition inferred, judgement flagged).",none found
+Goa,3,1,0,0,2,yes,In-window changes undone; all rows accounted.,none found
+Gujarat,34,1,0,0,33,yes,Vav-Tharad (2 Oct 2025) undone; source is district website (no notification cited) plus LGD record - judgement flagged.,none found
+Haryana,23,1,0,0,22,yes,In-window changes undone; all rows accounted.,none found
+Karnataka,31,0,0,0,31,yes,Ramanagara renamed Bengaluru South (count-neutral).,none found
+Ladakh,8,6,0,0,2,yes,Five districts 27 Apr 2026 and Sankoo 16 Oct 2026 undone; coarsened unit J&K+Ladakh = 20 + 2 = 22.,none found
+Madhya Pradesh,55,0,0,0,55,yes,No creation/abolition/move dated 8 Dec 2024-18 Nov 2026 found; all rows existed before 8 Dec 2024.,none found
+Maharashtra,36,0,0,0,36,yes,No creation/abolition/move dated 8 Dec 2024-18 Nov 2026 found; all rows existed before 8 Dec 2024.,none found
+Nagaland,17,0,0,0,17,yes,Meluri created 2024-11-02 per LGD (before reference date) kept.,none found
+Odisha,30,0,0,0,30,yes,11 LGD renames (eff 2026-06-22) and 1 spelling change; count-neutral.,none found
+Punjab,23,0,0,0,23,yes,No creation/abolition/move dated 8 Dec 2024-18 Nov 2026 found; all rows existed before 8 Dec 2024.,none found
+Rajasthan,41,0,9,0,50,yes,Nine districts abolished by Revenue Dept notifications listed 30-12-2024; restored.,none found
+Tamil Nadu,38,0,0,0,38,yes,No creation/abolition/move dated 8 Dec 2024-18 Nov 2026 found; all rows existed before 8 Dec 2024.,none found
+Telangana,33,0,0,0,33,yes,No creation/abolition/move dated 8 Dec 2024-18 Nov 2026 found; all rows existed before 8 Dec 2024.,none found
+Uttarakhand,13,0,0,0,13,yes,No creation/abolition/move dated 8 Dec 2024-18 Nov 2026 found; all rows existed before 8 Dec 2024.,none found
