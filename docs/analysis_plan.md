@@ -26,7 +26,7 @@ These refinements were made before any figure was extracted. Each is stated wher
 1. **Comparability condition (a) of design §9.2** is fixed as "same quantity in the same words from the same source" (§9.5). Neither answer that forms the primary pair states its public and private coverage; this becomes a stated limitation.
 2. **The January–October 2024 table** for Q4 is Lok Sabha Starred Question 261, not Rajya Sabha Unstarred Question 2511 named in the source-search note, because the answer text of Question 2511 shows a different window (§9.5).
 3. **The 2024 trend point** of design §9.3 is fixed to named sources, and a three-point trend is pre-specified for when no full-year 2024 table is available (§9.6).
-4. **The exposure table** must pass pre-specified extraction checks, and the district denominator is reconstructed from the Local Government Directory (LGD) by a fixed rule (§9.2, §9.3).
+4. **The exposure table** must pass pre-specified extraction checks. A State with more campaign districts than LGD districts is flagged and capped rather than rejected (§9.2, E5). The district denominator is reconstructed from the Local Government Directory (LGD) by a fixed rule (§9.2, §9.3).
 5. **Two sensitivity analyses are added:** one for reporting lag (§10.5, S8), and one excluding States with every district in the campaign (§10.5, S6).
 6. **The population-share sensitivity analysis** of design §6.4 can be run only if a named list of campaign districts is obtained (§10.5, S7).
 7. **The placebo's expected change** uses only the trend points before the placebo window (§10.6).
@@ -316,11 +316,21 @@ The source search found an official per-State count of phase-1 campaign district
   - **E2.** The 33 State/UT rows sum exactly to the TOTAL row.
   - **E3.** There are 33 State/UT rows, each mapping to a canonical name. "DNH & DND" maps to Dadra and Nagar Haveli and Daman and Diu.
   - **E4.** The column is not a count of all districts: at least 5 States have a campaign count below their LGD count at the reference date (§9.3).
-  - **E5.** In every State, after unit coarsening (§9.4), the campaign count is at most the LGD count.
+  - **E5.** In each State, after unit coarsening (§9.4), the campaign count is compared with the LGD count. A State whose campaign count exceeds its LGD count is **flagged**: its share is capped at 1 (§9.3), it is listed, and it is excluded in sensitivity analysis S6 (§10.5).
+    - The reason is that NTEP programme districts can outnumber revenue districts in a few States (for example Delhi).
+    - A small number of exceedances is therefore expected. It is handled by the cap and the sensitivity analysis, not by discarding the exposure.
+    - More than 3 flagged States would suggest that the column is not a campaign count, and rejects the table (below).
   - **E6.** The selection-criteria table on PDF page 6 ("Sr. No. | Criteria | Number of districts") is read. If it, or the text with it, prints a number of districts selected, that number equals 347. The per-criterion counts are entered in the inventory but not otherwise tested, because the criteria may overlap.
   - **E7.** The sentence that accompanies the table states how many districts were selected across how many States/UTs. It must give 347 districts, and a number of States/UTs equal to the row count.
-- **If any check fails,** the table is not used, and there is no repair by hand. The gate rule of design §9.1 is then applied again:
-  - the exposure falls back to a named list of campaign districts (below), if one passes E1–E7 applied to its per-State counts;
+- **Rejection.** The table is rejected only if one of these holds:
+  - E1 fails (TOTAL is not 347);
+  - E2 fails (the rows do not sum to TOTAL);
+  - E4 fails (fewer than 5 States have a campaign count below their LGD count, so the column may be a count of all districts);
+  - more than 3 States are flagged under E5.
+
+  A failure of E3, E6 or E7 does not reject the table. It is reported, and a failure of E6 or E7 is entered as a Q2 discrepancy. A row of the table that cannot be mapped to a canonical name (E3) stops extraction until the mapping is resolved (§11).
+- **If the table is rejected,** it is not used, and there is no repair by hand. The gate rule of design §9.1 is then applied again:
+  - the exposure falls back to a named list of campaign districts (below), if its per-State counts pass the same rejection rules;
   - otherwise Q4 is not run, and the paper reports Q1–Q3.
 
   This consequence is pre-specified and is not a deviation.
@@ -342,8 +352,7 @@ The source search found an official per-State count of phase-1 campaign district
 - **Logging.** Every reversal is logged with its row in the report.
 - **A State that cannot be reconstructed** is one where a modification cannot be reversed from the fields the report gives. The State is listed, and its exposure is not computable. There is no discretion beyond this rule.
 - **Exposure share.** For State s, E_s = min(1, c_s / L_s). Here c_s is the campaign count and L_s the reconstructed LGD count, both after unit coarsening.
-  - Under check E5 no share can exceed 1. The cap is kept in code as a guard.
-  - States whose share equals 1 (every district in the campaign) are the capped States. They are reported, and are excluded in sensitivity analysis S6 (§10.5).
+  - The capped States are those whose share is 1. They are either States flagged under E5 (campaign count above LGD count) or States with every district in the campaign. They are listed, the flagged ones marked as such, and are excluded in sensitivity analysis S6 (§10.5).
 
 ### 9.4 Units
 
@@ -492,7 +501,7 @@ Each sensitivity analysis uses the model of §10.2 and reports both intervals, u
 - **S3. Recent trend only.** Trend points from 2022 onward: 2022, 2023 and, where the primary trend includes it, 2024.
 - **S4. Three-point trend.** Trend points 2019, 2022 and 2023 only. This excludes the 2024 annual point, which includes December 2024, after the campaign began. If the primary trend already uses these three points (§9.6), S4 is the primary analysis and is not repeated.
 - **S5. States only.** Union territories (§9.4) are excluded.
-- **S6. Partial exposure only.** The capped States, whose exposure share is 1 (§9.3), are excluded.
+- **S6. Partial exposure only.** The capped States, whose exposure share is 1 (§9.3), are excluded. These include every State flagged under E5 (§9.2).
 - **S7. Population share as the exposure.** This is run only if a named list of campaign districts is obtained (§9.2).
   - The share is the Census 2011 population (Primary Census Abstract, Office of the Registrar General) of the State's campaign districts, over the State's Census 2011 population.
   - A State with a campaign district created after 2011 is not computable for S7, and is listed.
@@ -518,7 +527,7 @@ If comparability fails (§9.5), or the minimum of §10.2 is not met, Q4 is repor
 - The report is a State table of a_s, b_s, y_s (with its Poisson 95% interval y_s ± 1.96 √(1/a_s + 1/b_s)), β_s, x_s and E_s.
 - There is no regression and no slope.
 
-If the exposure table fails (§9.2) and no named list replaces it, Q4 is not run.
+If the exposure table is rejected (§9.2) and no named list replaces it, Q4 is not run.
 
 ### 10.8 Interpretation, fixed in advance
 
