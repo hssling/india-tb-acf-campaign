@@ -40,7 +40,7 @@ Committed with the plan:
 - the implementation plan:
   [`docs/superpowers/plans/2026-11-18-acf-campaign.md`](docs/superpowers/plans/2026-11-18-acf-campaign.md);
 - the source-search note, which records document titles, headings, windows and
-  cut-off dates but no figure values: [`docs/gate_task0.md`](docs/gate_task0.md);
+  cut-off dates but no figure values: [`docs/source_search.md`](docs/source_search.md);
 - the search log: [`data/search_log.csv`](data/search_log.csv).
 
 ## Data
@@ -68,6 +68,10 @@ PDF extraction only.
 
 - Code: MIT ([`LICENSE`](LICENSE)).
 - Derived data and outputs: CC BY 4.0 ([`LICENSE-DATA`](LICENSE-DATA)).
+
+`CITATION.cff` lists MIT only. The Citation File Format reads several listed
+licences as alternatives, so the CC BY 4.0 licence of the derived data is
+stated here and in `LICENSE-DATA` instead.
 
 ## Citation
 

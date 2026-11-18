@@ -73,7 +73,7 @@
 
 **Files:**
 - Create: `data/search_log.csv` with columns `site, query, date_searched, title, url, doc_date, doc_type, relevance, include, reason`.
-- Create: `docs/gate_task0.md`.
+- Create: `docs/source_search.md`.
 
 **Rules:**
 - Read and search only. Do not download. Do not record any figure value.
@@ -85,14 +85,14 @@
   - the India TB Report 2019 and 2022 pages;
   - CTD's "Active Case Finding" page;
   - the full text of the Global Health Action (GHA) 2023 quality study.
-- `docs/gate_task0.md` records:
+- `docs/source_search.md` records:
   - the Q4 gate outcome (GO with a list, GO with counts, or NO-GO), with sources;
   - the placebo choice (spec §9.5);
   - whether the January–October tables satisfy spec §9.2 (a)–(c), judged from document metadata and stated headings only, never from values;
   - the download list (file, URL, size from a HEAD request) for the controller to put to the author.
 
 - [ ] **Step 1:** Search and fill `data/search_log.csv`.
-- [ ] **Step 2:** Write `docs/gate_task0.md`.
+- [ ] **Step 2:** Write `docs/source_search.md`.
 - [ ] **Step 3:** Commit locally (`git init` happens in Task 1; until then the files stay unstaged). Report the gate outcome and the download list.
 
 ### Task 1: Repository, analysis plan and registration
@@ -123,9 +123,9 @@
   - the descriptive fallback if spec §9.2 (a)–(c) fail.
 - §13 Deviations, empty and dated.
 
-**Data seen before the plan:** document titles and metadata only, as recorded in `docs/gate_task0.md`.
+**Data seen before the plan:** document titles and metadata only, as recorded in `docs/source_search.md`.
 
-- [ ] **Step 1:** `git init -b main`. Write the files. Commit "docs: pre-registered analysis plan, before any figure was extracted", together with the design, this plan, `search_log.csv` and `gate_task0.md`.
+- [ ] **Step 1:** `git init -b main`. Write the files. Commit "docs: pre-registered analysis plan, before any figure was extracted", together with the design, this plan, `search_log.csv` and `source_search.md`.
 - [ ] **Step 2 (controller):** run `gh repo create hssling/india-tb-acf-campaign --public --source . --push`. Record the push time from the GitHub API (`pushed_at`). Save the registration event to `docs/registration_event.json`, and record the registration point in §13.
 
 ### Task 2: Fetch, manifest and copied primitives
@@ -239,7 +239,7 @@
 - Create: `src/q4_dose_response.py`, `outputs/q4_states.csv`, `outputs/q4_summary.csv` and tests.
 
 **Interfaces:**
-- Consumes: `compare.jan_oct_pairs`, the extracted annual notifications, and the exposure from `gate_task0` sources.
+- Consumes: `compare.jan_oct_pairs`, the extracted annual notifications, and the exposure from the `source_search.md` sources.
 - Produces: `excess(state) -> float | None`, `wls(x, y, w) -> (slope, se, n)`, and `bootstrap_ci(...)`.
 
 **Rules:** state the spread of exposure (SD and range) and n. If spec §9.2 fails, write only the descriptive table and the reason.
