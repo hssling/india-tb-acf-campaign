@@ -1,0 +1,579 @@
+# Pre-registered analysis plan: India's active case-finding figures and the 100-day TB Mukt Bharat Abhiyaan
+
+**Date of this plan:** 18 November 2026
+**Author:** Siddalingaiah H S, MD, Professor, Department of Community Medicine, Shridevi Institute of Medical Sciences and Research Hospital, Tumkur, Karnataka, India. ORCID 0000-0002-4771-8285. Single author.
+**Repository:** https://github.com/hssling/india-tb-acf-campaign
+**Status:** registered before any figure was extracted from a source document and before any computation. The registration point (commit SHA and UTC time of the public push) is recorded in §13.
+**Design:** `docs/superpowers/specs/2026-11-18-acf-campaign-design.md` (18 November 2026). Where this plan and the design differ, this plan governs; the differences are listed in §1.3.
+**Source search:** `docs/gate_task0.md` (the source-search note) and `data/search_log.csv`, both committed with this plan.
+
+---
+
+## 1. Background and scope
+
+### 1.1 Background
+
+Active case finding (ACF) is a pillar of India's National TB Elimination Programme (NTEP). The Central TB Division (CTD) of the Ministry of Health and Family Welfare ran a 100-day intensified campaign, the TB Mukt Bharat Abhiyaan, from 7 December 2024 in 347 districts (phase 1), and later extended it. Official statements give national totals of people screened and of TB cases found that differ between documents, and published estimates of ACF quality differ between studies. No peer-reviewed evaluation of the campaign was found by a novelty check on 18 November 2026.
+
+### 1.2 Scope
+
+The study uses published, aggregate, official data only. The unit of analysis for the state-level questions (Q3, Q4) is the State or Union Territory (UT), after the unit coarsening of §9.4. District-level analysis, cost-effectiveness, and causal claims beyond an ecological, state-level association are out of scope. The study concerns measurement and evidence. It does not judge whether screening is worthwhile, and it does not imply that any figure was falsified.
+
+### 1.3 Refinements of the design fixed by this plan
+
+These refinements were made before any figure was extracted. Each is stated where it applies.
+
+1. **Comparability condition (a) of design §9.2** is fixed as "same quantity in the same words from the same source" (§9.5). Neither answer that forms the primary pair states its public and private coverage; this becomes a stated limitation.
+2. **The January–October 2024 table** for Q4 is Lok Sabha Starred Question 261, not Rajya Sabha Unstarred Question 2511 named in the source-search note, because the answer text of Question 2511 shows a different window (§9.5).
+3. **The 2024 trend point** of design §9.3 is fixed to named sources, and a three-point trend is pre-specified for when no full-year 2024 table is available (§9.6).
+4. **The exposure table** must pass pre-specified extraction checks, and the district denominator is reconstructed from the Local Government Directory (LGD) by a fixed rule (§9.2, §9.3).
+5. **Two sensitivity analyses are added:** one for reporting lag (§10.5, S8), and one excluding States with every district in the campaign (§10.5, S6).
+6. **The population-share sensitivity analysis** of design §6.4 can be run only if a named list of campaign districts is obtained (§10.5, S7).
+7. **The placebo's expected change** uses only the trend points before the placebo window (§10.6).
+
+## 2. Questions
+
+- **Q1. Consistency.** Do the published ACF and campaign figures agree across sources, documents and dates, and does each source's internal arithmetic hold? The checks are fixed in §6.
+- **Q2. Definitions.** Where figures disagree, is the disagreement explained by an arithmetic error, a difference in definition, or a difference in window or cut-off date? The decision order is fixed in §7. Q2 includes the reconciliation of the ACF quality indicators of two published studies (Global Health Action 2023, doi 10.1080/16549716.2023.2256129; PLOS Global Public Health 2025, doi 10.1371/journal.pgph.0005103).
+- **Q3. Yield.** Where a published table gives the numerator and denominator by State, what are the State-level ACF yields? The indicators are TB diagnosed per 100,000 people screened, the number needed to screen, and the ACF share of notifications (§8).
+- **Q4. Dose-response.** Did TB notifications rise more, relative to each State's own trend, in States with a larger share of their districts in phase 1 of the campaign? The contrast is January–October 2025 against January–October 2024 (§9, §10). Q4 is an ecological association, not an estimate of the campaign's causal effect.
+
+## 3. Data sources
+
+### 3.1 Files downloaded before this plan
+
+The following files were downloaded on 18 November 2026 into `data_raw/`, which is excluded from the repository. They are not redistributed. A fetch script will download them from their official locations and verify each digest. Files the author downloaded personally through a CAPTCHA (the LGD reports, §3.1.3) are verified against the digests below but are not re-downloaded by the script.
+
+#### 3.1.1 Programme, campaign and press documents (`data_raw/official/`)
+
+| File | Content | Bytes | SHA-256 | URL |
+|---|---|---|---|---|
+| `100-days-campaign-Report-1-Complete-on-5-12-2024-New.pdf` | CTD, *100 Days Campaign* (48 pages; file name dated 5 December 2024). Exposure table (§9.2) | 15,715,802 | `e353293ae24c376200cf6fb8921f68b0acdabdae557b2c0bad36cf3e207e5bbb` | https://tbcindia.mohfw.gov.in/wp-content/uploads/2025/01/100-days-campaign-Report-1-Complete-on-5-12-2024-New.pdf |
+| `TB-Mukt-Bharat-Abhiyan-Campaign-2026-v6.pdf` | CTD, TB Mukt Bharat Abhiyaan campaign document, version 6 (2026) | 1,036,945 | `2d107b1f8175ba3fdadd4e73f8860355cdb7496a26f727c87ffdd46d4a99f819` | https://tbcindia.mohfw.gov.in/wp-content/uploads/2026/03/TB-Mukt-Bharat-Abhiyan-Campaign-2026-v6.pdf |
+| `Guidance-Document-on-TB-Mukt-Bharat-Abhiyan_0.pdf` | CTD, Guidance Document on TB Mukt Bharat Abhiyan (2025) | 3,584,607 | `f331a783dbfa792a078c45601d5e2ad92a9c6d34c8a0a9bd72f02b5856fb8838` | https://tbcindia.mohfw.gov.in/wp-content/uploads/2025/09/Guidance-Document-on-TB-Mukt-Bharat-Abhiyan_0.pdf |
+| `doc2024127466601.pdf` | Press Information Bureau (PIB), *Synopsis of 100-Day Campaign* (7 December 2024) | 1,727,083 | `8de4fa8a3ee50973a4090c1e18c9ea28461e18e7b213825a698b0416726548ee` | https://static.pib.gov.in/WriteReadData/specificdocs/documents/2024/dec/doc2024127466601.pdf |
+| `doc2024126465901.pdf` | PIB backgrounder, *India's 100-Day TB Elimination Campaign* (6 December 2024) | 806,043 | `bdc5b490f6296ec2b15eab05cfa9caa71254ec14f0aa566c0781a40ef1099537` | https://static.pib.gov.in/WriteReadData/specificdocs/documents/2024/dec/doc2024126465901.pdf |
+| `doc2026324833001.pdf` | PIB press note, *India Speeding Towards TB Elimination* (24 March 2026) | 624,028 | `48f8d2ba95cba962e237c2fc2b9736fcc253573f3319fa48c917cf750e153efe` | https://static.pib.gov.in/WriteReadData/specificdocs/documents/2026/mar/doc2026324833001.pdf |
+| `India-TB-Report-2019.pdf` | India TB Report 2019 (calendar-2018 data); ACF inventory only | 16,920,376 | `87e546751372ba157cb9eba1620173d54aad0fb99abc1b99f4302e9a2005c03b` | https://tbcindia.mohfw.gov.in/wp-content/uploads/2023/05/India-TB-Report-2019.pdf |
+| `TBAnnaulReport2022.pdf` | India TB Report 2022 (calendar-2021 data); ACF inventory only | 50,821,996 | `dc9ff4a88a28eb87232770d0956fe92b2b266b15e5794f879a7335b7c083418b` | https://tbcindia.mohfw.gov.in/wp-content/uploads/2023/05/TBAnnaulReport2022.pdf |
+| `TB_Elimination_Campaign.pdf` | Ministry of Health letter L-11012/2/2019-DCC with attachments (Kerala Medical Council copy) | 2,692,311 | `786ed1a5e4fde7cb79245df5a2f2f75ef8f8658b112896a755c627adb9133a6f` | https://medicalcouncil.kerala.gov.in/wp-content/uploads/2025/01/TB_Elimination_Campaign.pdf |
+
+#### 3.1.2 Parliamentary answers (`data_raw/pq/`)
+
+| File | Answer | Bytes | SHA-256 | Use |
+|---|---|---|---|---|
+| `AS261_lP7nYE.pdf` | Lok Sabha, Starred Question 261, "Eradication of TB by 2025", answered 13 December 2024. https://eparlib.sansad.in/bitstream/123456789/2985936/1/AS261_lP7nYE.pdf | 214,238 | `245a778539f40e7682aa69ff0e7e1d8c087d89243a6206931caddcf33f5c9fa4` | Q4: January–October 2024 (§9.5); 2023 column (§9.6; §10.5, S8) |
+| `AU1093_dH065I.pdf` | Rajya Sabha, Unstarred Question 1093, answered 9 December 2025 (Rajya Sabha question archive, sansad.in) | 117,980 | `349b4b48b1ce40247db84ea24cd989b35bd45d949487c87d08e81f797b531438` | Q4: January–October 2025 (§9.5) |
+| `AU2511_t81pFf.pdf` | Rajya Sabha, Unstarred Question 2511, answered 17 December 2024 (Rajya Sabha question archive, sansad.in) | 130,804 | `7c600909db309d072e28016f0232a6e4dd3ce07a31da7291cd5987443bae8d24` | Q1–Q2 only; **not used for Q4** (§9.5) |
+
+The download URLs of the two Rajya Sabha answers are recorded in the source manifest when the fetch script is written.
+
+#### 3.1.3 Local Government Directory (`data_raw/lgd/`)
+
+Downloaded by the author on 18 November 2026 from https://lgdirectory.gov.in/downloadDirectory.do, which requires a CAPTCHA.
+
+| File | Content | Bytes | SHA-256 |
+|---|---|---|---|
+| `All_Districtof_India_2026-11-18_21-18-59.xlsx` | "All Districts of India", the current list on 18 November 2026 | 35,051 | `19b0ac791a0cf763a4dd6d414be64c2ae3bacb8ba36fc12d9d7d8fca6b0b3ab6` |
+| `alldistrictbyDate2026_11_18_21_20_13_069.xls` | District modifications, headed "Modification done between (From 07/12/2024 - TO 18/11/2026)" (SpreadsheetML) | 91,018 | `e00d438ca2d29cc183afcdd846164a443901cc27528f5e45e125686a3f8fdfe1` |
+
+### 3.2 India TB Report editions used for annual State notifications
+
+The author's earlier study (https://github.com/hssling/india-state-tb-score) holds these editions. This project re-fetches them from the same official URLs and verifies them against the same digests. The digests of the copies held were recomputed on 18 November 2026 and match.
+
+| Edition (data year) | SHA-256 | URL | Use |
+|---|---|---|---|
+| 2020 (2019) | `63b9408015dae510858e0eef2711e809d398bfe3149dd21c94390b258c007e7e` | https://tbcindia.mohfw.gov.in/wp-content/uploads/2023/05/India-TB-Report-2020.pdf | Trend point 2019; placebo |
+| 2023 (2022) | `0817ac3a1e7a03273438073d4e685f88aa93507ad115ec5c6588edfddc8f0b7b` | https://tbcindia.mohfw.gov.in/wp-content/uploads/2023/05/5646719104TB_AR_2023_04-04-2023_LRP_final.pdf | Trend point 2022; placebo |
+| 2024 (2023) | `e37f9f406153b5e9a19726538c3f4d09dc4c470281c34fe511adaa56a0e22765` | https://tbcindia.mohfw.gov.in/wp-content/uploads/2024/10/TB-Report_for-Web_08_10-2024-1.pdf | Trend point 2023; placebo; S8(b) |
+
+The 2021 edition (calendar-2020 data) is a scan with no text layer and is not used; 2020 is in any case excluded from the trend (§9.6). No edition giving calendar-2024 State notifications was found on CTD's website on 18 November 2026.
+
+### 3.3 Sources still to be obtained
+
+Each needs the author's permission before download (file, source and size). Each is used only if obtained before the source-choice freeze of §5.4; a source obtained later is used only as a dated deviation (§13).
+
+- **Parliamentary answer documents.** Three Rajya Sabha Unstarred Questions; their roles are fixed in §9.5 and §9.6:
+  - Question 3467 (1 April 2025): State/UT-wise TB patients notified and treated successfully, 2023 and 2024;
+  - Question 1216 (10 February 2026): State/UT-wise TB cases notified, 2023 to 2025;
+  - Question 1900 (16 December 2025): State/UT-wise TB cases "under TB Mukt Bharat Abhiyan", 2024 and 2025.
+- **Open Government Data (OGD) mirrors** of parliamentary tables, listed in `data/search_log.csv`.
+- **Quality studies:** the Global Health Action 2023 supplement and its Figshare dataset (doi 10.6084/m9.figshare.23723748); the PLOS Global Public Health 2025 supporting files and Figshare collection (doi 10.6084/m9.figshare.c.7048385.v1).
+- **The remaining documents** marked include = yes in `data/search_log.csv`. HTML pages (PIB releases, the two studies' full texts) are read online and cited with their URL and access date.
+
+### 3.4 Rule for parliamentary tables
+
+A parliamentary table enters Q3 or Q4 only from the answer document itself. OGD mirrors are used to locate answers and as cross-checks, because one mirror is already known to label a window differently from its answer (§7.4). A difference between an answer and its mirror is recorded in the inventory and classified under Q2.
+
+## 4. Data seen before this plan
+
+Before this plan was written, the following had been seen. Nothing else had been read for numeric content, and nothing has been computed.
+
+1. **The source search.** Titles, URLs, dates, document types, table headings, stated windows and cut-off dates of the documents listed in `data/search_log.csv`, as recorded in the source-search note. No figure value was recorded.
+2. **The CTD exposure table.** During the search, the *100 Days Campaign* document was displayed in an online document viewer. The heading of the selection-criteria table (PDF page 6) and the heading and State/UT row labels of the per-State table (PDF page 7) were read; the rows were counted from the State names. The values in either table were not recorded. Both tables will be read afresh from the downloaded, hashed copy (§9.2).
+3. **The parliamentary answers.** The wording of Lok Sabha Starred Question 261 and Rajya Sabha Unstarred Questions 1093 and 2511 (headings, column labels, footnotes, source lines, and the dates in the answer text) was read with all counts masked.
+4. **The LGD files.** Only their headers (sheet name and report heading) were read. No district was counted.
+5. **National figures quoted in the design.** The design (§1) quotes, from public summaries:
+   - national campaign totals (for example 9.02 crore screened and 3.01 lakh cases);
+   - national ACF shares of notifications (2.5% for 2022; 1.6% for 2023);
+   - the headline indicators of the two quality studies;
+   - the phase-1 count of 347 districts and the count of 33 States/UTs.
+
+   These national figures motivated Q1 and Q2. They enter the inventory only from their source documents.
+6. **The author's earlier study.** That study extracted State-level totals of TB patients notified in 2022 and 2023 from the 2023 and 2024 editions of the India TB Report (annexure 1.2 in each edition), and those values are public in its repository.
+   - They were not consulted in preparing this plan.
+   - They are, however, inputs to trend points 2022 and 2023 and to the placebo outcome (§9.6, §10.6).
+   - No campaign-district count has been seen, so no quantity that involves the exposure (the Q4 slope or the placebo slope) could have been computed or anticipated.
+
+No State-level campaign-district count, State-level January–October notification count, or State-level ACF figure has been seen.
+
+## 5. Figure inventory
+
+### 5.1 Scope of the inventory
+
+The inventory, `data/figures_inventory.csv`, holds one row for each published figure of the quantities below that appears in a document marked include = yes in `data/search_log.csv`.
+
+- Every occurrence is entered, including figures repeated across documents.
+- A figure printed more than once in the same document is entered once for each distinct table or paragraph.
+- Figures are entered whether or not they agree with others; no figure is left out because it looks wrong.
+
+Quantities (column `quantity`) come from a fixed vocabulary:
+
+- `districts_selected`: campaign districts, national or by State;
+- `population_targeted`: people identified as the campaign's target or vulnerable population;
+- `screened`: people screened or reached, with the definition as stated;
+- `presumptive`: people identified with presumptive TB;
+- `tested_persons` and `tests_done`: people tested, and tests performed (including chest X-ray and molecular tests, with the modality stated in the definition);
+- `diagnosed`: people diagnosed with TB;
+- `notified`: TB patients notified or TB cases reported;
+- `acf_share_notifications`: the ACF share of notifications;
+- `nns`: the number needed to screen;
+- `yield`: TB diagnosed per stated number screened;
+- `other:<name>`: any other ACF or campaign figure, entered for completeness but not used by the checks of §6.
+
+Press releases enter only where they are official (PIB or a Ministry). News coverage is used only to locate official sources and never as a source.
+
+### 5.2 Schema
+
+| Column | Content |
+|---|---|
+| `fig_id` | Stable identifier |
+| `quantity` | From the vocabulary of §5.1 |
+| `value` | As a number. Indian magnitude words are converted (1 lakh = 100,000; 1 crore = 10,000,000) |
+| `value_printed` | The figure exactly as printed, for example "9.02 crore" |
+| `unit` | persons, tests, cases, districts, percent, or ratio |
+| `definition_verbatim` | The source's own words for the quantity, quoted |
+| `definition_class` | From the vocabulary of §7.2. "unspecified" where the source does not state it; never inferred |
+| `scope` | phase 1 (347 districts), expanded campaign, programme-wide (not the campaign), or unspecified |
+| `series_type` | cumulative (counted from a stated start date) or period |
+| `window_start`, `window_end` | As stated; blank if not stated |
+| `as_on` | The stated "as on" date; blank if not stated |
+| `as_on_basis` | stated; bounded (no date stated, so the answer or publication date is the latest possible); or window_end (the stated end of the data is taken as the cut-off) |
+| `geography` | India, or a canonical State/UT name |
+| `source_file`, `source_url` | The document |
+| `page_or_para` | PDF page and table, or paragraph |
+| `table_id` | The table heading or number, if any |
+| `pub_date` | The document's date |
+
+Blanks stay blank. No field is filled by inference from another document.
+
+### 5.3 Stopping rule
+
+The search of design §9.6 was run on 18 November 2026 and is closed:
+
+- sites: tbcindia.mohfw.gov.in, pib.gov.in, eparlib.sansad.in, rsdebate.nic.in, data.gov.in and ntep.in;
+- terms: "active case finding", "ACF" and "TB Mukt Bharat Abhiyaan" (with the variant "Abhiyan");
+- date window: 1 December 2022 to 18 November 2026;
+- record: `data/search_log.csv`, 149 rows (56 include = yes, 1 provisional, 92 include = no, each with a reason).
+
+The inventory is built from the documents marked include = yes, plus documents those documents cite by name as the source of a figure. The provisional row is resolved at extraction, and the decision is recorded in the log. A document found after registration is added only as a dated deviation (§13).
+
+### 5.4 Source-choice freeze
+
+Before any Q1–Q4 computation, every source choice is recorded in `data/source_choices.csv` and committed. This includes:
+
+- the exposure table's location and the result of each check in §9.2;
+- the LGD date field used and the reconstruction log (§9.3);
+- the unit coarsening (§9.4);
+- the outcome pair and the comparability judgement at extraction (§9.5);
+- the source of each trend point, and whether the primary trend uses three or four points (§9.6);
+- whether a named list of campaign districts was found (§9.2);
+- whether Rajya Sabha Question 1900 was obtained (§9.5);
+- each table used for Q3.
+
+Any change to a recorded choice after that commit is a dated deviation (§13).
+
+## 6. Q1: consistency checks
+
+Every check is applied to every source in which its inputs appear. Its result is written to `outputs/q1_checks.csv`, with the columns check, inputs, expected, observed, pass and note. A failed check is reported with its source and is never corrected silently.
+
+### 6.1 Rounding
+
+A figure printed as an integer count is exact. A figure printed with rounding (a percentage, or a value in lakh or crore) carries a half-unit in its last printed digit: "9.02 crore" lies in [9.015, 9.025] crore, and "3.7%" in [3.65%, 3.75%].
+
+### 6.2 The checks
+
+1. **The cascade does not grow.** Within one source, for figures with the same window, cut-off, geography and scope: screened ≥ presumptive ≥ tested ≥ diagnosed ≥ notified.
+   - The check is applied to every pair of steps present, adjacent or not.
+   - "Tested" means `tested_persons`. `tests_done` is not used, because one person may have several tests.
+   - For rounded figures, the check fails only if the upper bound of the earlier step is below the lower bound of the later step.
+2. **Percentages recompute.** A stated percentage p with numerator n and denominator d, all from the same source, passes if the interval [p − h_p, p + h_p] overlaps the interval [100 (n − h_n)/(d + h_d), 100 (n + h_n)/(d − h_d)].
+   - Each h is half a unit in the last printed digit, and 0 for an exact count.
+   - Example: 37 of 1,000 stated as 3.7% passes; stated as 4.0% it fails.
+3. **Totals equal the sum of their parts.** For exact counts, |sum of parts − printed total| ≤ 1. For rounded figures, the tolerance is the sum of the parts' half-units plus the total's half-unit.
+4. **A cumulative series never decreases.** Figures of the same quantity, definition class, scope and geography, counted from the same start date, are ordered by cut-off date across all documents.
+   - Each later value must be at least the earlier one. A decrease beyond the rounding tolerance of rule 3 fails.
+   - A failure across documents is also a discrepancy for Q2.
+
+## 7. Q2: discrepancies and definitions
+
+### 7.1 What counts as a discrepancy
+
+Two inventory figures form a discrepancy if they have the same quantity, geography and stated window (start and end), and their values differ by more than their combined rounding tolerance (§6.1).
+
+- Figures with the same start but different window ends fall under check 4 of §6.2 instead.
+- A difference between a parliamentary answer and its OGD mirror (§3.4), in a value, window or label, is also a discrepancy.
+
+### 7.2 Definition classes
+
+Classes are assigned from the stated definition only:
+
+- **screened:** population reached, people symptom-screened, people screened by chest X-ray, or unspecified;
+- **tested:** people tested, or tests done;
+- **cases:** diagnosed, or notified;
+- **scope:** phase 1, expanded campaign, programme-wide, or unspecified.
+
+### 7.3 Decision order
+
+Each discrepancy is given the first class that applies, and the evidence for it is recorded in `outputs/q2_discrepancies.csv`:
+
+1. **Arithmetic error within a source.** One of the figures fails a check of §6.2 that involves it. The failing check is cited.
+2. **Definitional difference.** Both definitions are stated and fall in different classes of §7.2. Both definitions are quoted.
+3. **Window or cut-off difference.** Both sources state their window or cut-off, and these differ. For a cumulative quantity, the difference must also run in the expected direction: the later cut-off or the longer window gives the larger value. Otherwise this class does not apply.
+4. **Unexplained.** None of the above applies, including where a date or definition needed for classes 2 and 3 is unstated.
+
+"Unexplained" is a valid result. It records that the published documents do not explain a difference; it is not a finding of error or misconduct. Where more than one class applies, the first is assigned and the others are noted.
+
+### 7.4 Pre-identified discrepancies
+
+These are entered and classified under §7.3 like any other:
+
+- **Rajya Sabha Question 2511.** The answer's table is headed "State/UT wise TB cases Notification and Death^ reported in 2024*", with the footnote "*As on 19th Nov 2024". Its window is therefore the year to date. Its OGD mirror labels the field "January to October".
+- **Rajya Sabha Question 1900,** if obtained (§9.5): its January–October 2025 column against Question 1093, State by State.
+- **The 2023 State counts** of Lok Sabha Question 261 against the India TB Report 2024, State by State.
+
+### 7.5 Reconciliation of the two quality studies
+
+- **Studies.** Shewade HD et al., *Global Health Action* 2023 (national aggregates; PMC10515680), and Shewade HD et al., *PLOS Global Public Health* 2025 (field cohort; PMC12574901).
+- **Common indicators.** Each is computed only where a study's published tables give its numerator and denominator:
+  - C1, diagnosed among people tested;
+  - C2, tested among people screened;
+  - C3, tested among people with presumptive TB;
+  - C4, the number needed to screen (people screened per person diagnosed).
+- **Data.** The published tables are used first. The Figshare data are used only where a table gives a percentage without its counts, and only with the author's permission to download.
+- **Output.** For each indicator and study:
+  - the value as published;
+  - the value recomputed on the common definition, with its Wilson interval (§8.2);
+  - the stated denominator.
+
+  Indicators that a study's tables cannot give are listed as not recomputable. What remains different after recomputation is reported as a difference in setting and denominator, not as an error by either study.
+
+## 8. Q3: yield
+
+### 8.1 Indicators
+
+Each indicator is computed by State and year only where a published table gives both its numerator and its denominator:
+
+- **Yield:** 100,000 × diagnosed ÷ screened. Where the table gives notified rather than diagnosed, the indicator is named accordingly.
+- **Number needed to screen (NNS):** screened ÷ diagnosed.
+- **ACF share of notifications:** TB patients found through ACF (diagnosed or notified, as the table states) ÷ all TB patients notified, for the same State and period.
+
+### 8.2 Intervals
+
+- **Proportions** use the Wilson score interval, with z = `statistics.NormalDist().inv_cdf(0.975)`. For x of n, with p̂ = x/n:
+  - the centre is (p̂ + z²/2n) / (1 + z²/n);
+  - the half-width is z √(p̂(1 − p̂)/n + z²/4n²) / (1 + z²/n).
+- **Yield.** The interval is the Wilson interval of diagnosed ÷ screened, multiplied by 100,000.
+- **NNS.** The interval is the reciprocal of the Wilson bounds of diagnosed ÷ screened: (1/upper, 1/lower).
+- **Zero diagnosed.** The yield is 0, with its Wilson interval. The NNS is not computable, and its upper bound is reported as unbounded.
+
+### 8.3 Missing data
+
+There is no imputation. States and years without a published numerator and denominator are listed in `outputs/q3_yield.csv` as not available, with the reason.
+
+## 9. Q4: data
+
+### 9.1 Gate outcome
+
+The source search found an official per-State count of phase-1 campaign districts, but no named list (source-search note, §1). The outcome is **GO with counts**: the exposure is each State's count of campaign districts over its district count, subject to the checks of §9.2. Phase 1 (347 districts) is the exposure; the later expansion is not used.
+
+### 9.2 Exposure table and its checks
+
+- **Source.** CTD, *100 Days Campaign*, PDF page 7 (printed page 5), under "Geographical prioritization". The table is headed "State | Total District". It is set in two column blocks, with 33 State/UT rows and a TOTAL row.
+- **Reading.** The table is read from the downloaded copy whose SHA-256 is given in §3.1.1, not from any online viewer.
+- **Checks.** All are applied at extraction:
+  - **E1.** The TOTAL row equals 347.
+  - **E2.** The 33 State/UT rows sum exactly to the TOTAL row.
+  - **E3.** There are 33 State/UT rows, each mapping to a canonical name. "DNH & DND" maps to Dadra and Nagar Haveli and Daman and Diu.
+  - **E4.** The column is not a count of all districts: at least 5 States have a campaign count below their LGD count at the reference date (§9.3).
+  - **E5.** In every State, after unit coarsening (§9.4), the campaign count is at most the LGD count.
+  - **E6.** The selection-criteria table on PDF page 6 ("Sr. No. | Criteria | Number of districts") is read. If it, or the text with it, prints a number of districts selected, that number equals 347. The per-criterion counts are entered in the inventory but not otherwise tested, because the criteria may overlap.
+  - **E7.** The sentence that accompanies the table states how many districts were selected across how many States/UTs. It must give 347 districts, and a number of States/UTs equal to the row count.
+- **If any check fails,** the table is not used, and there is no repair by hand. The gate rule of design §9.1 is then applied again:
+  - the exposure falls back to a named list of campaign districts (below), if one passes E1–E7 applied to its per-State counts;
+  - otherwise Q4 is not run, and the paper reports Q1–Q3.
+
+  This consequence is pre-specified and is not a deviation.
+- **Named list.** The Kerala copy of the Ministry letter (§3.1.1) is searched for a named list of phase-1 districts. If it holds one whose per-State counts equal the CTD table in every State:
+  - the CTD counts remain the exposure;
+  - the list serves as a cross-check, and makes the population-share sensitivity analysis possible (§10.5, S7).
+
+  If its counts differ from the CTD table in any State, the difference is a Q2 discrepancy, and the CTD table remains the exposure.
+- **States absent from the table.** A State/UT absent from the table has a campaign count of 0, provided E1 and E2 pass. These States are listed.
+
+### 9.3 District denominator: LGD reconstruction at 7 December 2024
+
+- **Reference date.** 7 December 2024, the campaign's start date. The district list in force at the end of that day is the denominator.
+- **Rule.**
+  - Start from the current list, "All Districts of India", downloaded on 18 November 2026.
+  - Reverse every modification in the modification report dated on or after 8 December 2024, working backwards from the latest. Modifications dated 7 December 2024 were in force on the reference date and are kept.
+  - Use the effective date if the report gives one, and otherwise the date of the modification. The field used is recorded in `data/source_choices.csv`.
+- **Reversals.** A district created is removed; a district abolished is restored; a district renamed keeps its count; a district moved between States is moved back; a split or merger is undone.
+- **Logging.** Every reversal is logged with its row in the report.
+- **A State that cannot be reconstructed** is one where a modification cannot be reversed from the fields the report gives. The State is listed, and its exposure is not computable. There is no discretion beyond this rule.
+- **Exposure share.** For State s, E_s = min(1, c_s / L_s). Here c_s is the campaign count and L_s the reconstructed LGD count, both after unit coarsening.
+  - Under check E5 no share can exceed 1. The cap is kept in code as a guard.
+  - States whose share equals 1 (every district in the campaign) are the capped States. They are reported, and are excluded in sensitivity analysis S6 (§10.5).
+
+### 9.4 Units
+
+Units are combined to the coarser unit in every source and every year, before any join:
+
+- Jammu and Kashmir with Ladakh;
+- Dadra and Nagar Haveli with Daman and Diu;
+- any other pair that one source reports separately and another combines, as found at extraction and recorded in `data/source_choices.csv`.
+
+For a combined unit, the exposure is Σc ÷ ΣL over its members, and the counts are summed.
+
+The union territories, for sensitivity analysis S5, are those that were union territories on 7 December 2024:
+
+- Andaman and Nicobar Islands;
+- Chandigarh;
+- Dadra and Nagar Haveli and Daman and Diu;
+- Delhi;
+- Jammu and Kashmir (with Ladakh);
+- Lakshadweep;
+- Puducherry.
+
+### 9.5 Outcome tables and their comparability
+
+**Primary pair.**
+
+- **January–October 2024:** Lok Sabha Starred Question 261, answered 13 December 2024.
+  - Annexure-I, headed "State/UT wise TB cases reported since 2022 to 2024*", column "2024 (Jan- Oct)".
+  - The answer text refers to the "current year (till 31.10.2024)".
+  - Data source: Ni-kshay.
+- **January–October 2025:** Rajya Sabha Unstarred Question 1093, answered 9 December 2025.
+  - The table is headed "State/UT wise TB cases reported for 2025 (Jan–Oct, 2025)".
+  - Data source: Ni-kshay portal.
+  - No "as on" date is stated.
+
+**Comparability (design §9.2, as refined here).** The pair qualifies for the Q4 regression only if all three conditions hold:
+
+- **(a) Same quantity.** Both tables describe the same quantity in the same words ("TB cases reported") from the same source (Ni-kshay). This is met on the answers' wording.
+
+  Neither answer states whether its counts cover both the public and private sectors. Coverage is assumed to be the same in both years, and this is stated as a limitation. Requiring the word "total", which neither source uses, would test the wording rather than the quantity.
+- **(b) Same window.** Both cover 1 January to 31 October. This is met.
+- **(c) Cut-off within 60 days after 31 October.**
+  - **2024.** The answer states that the data run to 31 October 2024. Read as the cut-off date, the lag is 0 days. Read as the end of the window only, the cut-off is bounded by the answer date, 43 days after 31 October.
+  - **2025.** No date is stated. The cut-off cannot be later than the answer date, 9 December 2025, which is 39 days after 31 October.
+
+  The condition is met under either reading.
+
+**Re-check at extraction.** Any note printed with the values, such as a footnote on a row or on the table, is read at extraction:
+
+- if a note changes the window, cut-off or source for one State, that State is excluded and listed;
+- if a note changes it for the whole table, conditions (a)–(c) are judged again.
+
+If (a)–(c) then fail, Q4 is reported descriptively only (§10.7).
+
+**Completeness lag.** Ni-kshay counts grow as records are updated. The two tables may have been drawn at different lags after 31 October: 0 to 43 days for 2024, and 0 to 39 days for 2025. A pre-specified sensitivity analysis addresses this (§10.5, S8).
+
+**Sources not used for Q4.**
+
+- **Rajya Sabha Question 2511** (17 December 2024). Its window is the year to 19 November 2024, not January to October (§7.4).
+- **Rajya Sabha Question 1900** (16 December 2025). Its heading qualifies the counts as cases "under TB Mukt Bharat Abhiyan". If obtained, its 2025 column is compared with Question 1093 State by State, and any disagreement is a Q2 discrepancy. This cross-check does not change Q4.
+
+### 9.6 Annual State notifications for the trend benchmark
+
+**Trend points.** Calendar years 2019, 2022, 2023 and 2024.
+
+- 2020 and 2021 are excluded (COVID-19 disruption).
+- The 2024 point is used only as a full calendar year. January–October 2024 is never used as an annual point.
+
+**Source of each year.** The values are re-extracted by this project's code from the hashed files.
+
+| Year | Primary source | Fallback |
+|---|---|---|
+| 2019 | India TB Report 2020: the State-wise annexure of total TB patients notified in 2019, located from its list of annexures | None. A State with no 2019 value uses the later points only |
+| 2022 | India TB Report 2023, annexure 1.2, "TB patients notified … Total" (PDF pages 213–214) | None |
+| 2023 | India TB Report 2024, annexure 1.2, "TB patients notified … Total" (PDF pages 187–188) | Lok Sabha Question 261, column "2023" |
+| 2024 | Rajya Sabha Question 3467 (1 April 2025): the 2024 column of TB patients notified, from the answer document | Rajya Sabha Question 1216 (10 February 2026): the 2024 column of TB cases notified, from the answer document |
+
+- **Fallbacks.** A primary source is replaced by its fallback only if it fails an extraction check: its State rows do not sum to its printed total within ±1, or it has no State-wise table of total notifications. The replacement is recorded in `data/source_choices.csv`.
+- **Cross-check.** The State-level 2022 and 2023 values are also compared with the earlier study's public extraction, and any difference is reported.
+- **Primary trend when 2024 is unavailable.** The primary trend uses 2019, 2022 and 2023 if either of these holds:
+  - neither 2024 source is obtained as an answer document before the freeze (§5.4);
+  - both 2024 sources fail extraction.
+
+  Sensitivity analysis S4 is then the primary analysis, and is not repeated.
+
+**Fit.** For State s, the trend slope β_s is the ordinary least-squares slope of ln(N_s,t) on calendar year t over the State's available trend points. β_s is the State's fitted annual log growth.
+
+- **Fallback for 2019.** A State with no 2019 value uses the points from 2022 onward.
+- **Minimum.** At least two points are needed. A State with fewer is not computable and is listed.
+- **A zero count** in any trend point makes the State not computable.
+
+## 10. Q4: analysis
+
+### 10.1 Outcome and expected change
+
+For State s:
+
+- a_s and b_s are the January–October 2024 and 2025 counts (§9.5);
+- y_s = ln(b_s / a_s) is the observed change;
+- β_s is the fitted annual log growth of §9.6, used as the expected change;
+- the **excess change** is x_s = y_s − β_s.
+
+The expected change assumes that the State's growth over January–October equals its annual growth, which requires unchanged seasonality between the two years. This is stated as a limitation.
+
+### 10.2 Model
+
+- **Fit.** Weighted least squares of x_s on exposure E_s: x_s = γ0 + γ1 E_s + ε_s.
+- **Weights.** w_s = 1/(1/a_s + 1/b_s), the inverse of the Poisson variance of y_s.
+- **Primary estimand: γ1.** This is the difference in excess log change between a State with every district in the campaign and a State with none. It is also reported as exp(γ1), and per 10 percentage points of exposure as exp(0.1 γ1).
+- **The intercept γ0** is reported, with the caveat that any difference in completeness lag common to all States moves it (§10.5, S8).
+- **Model interval.** The weights set only the relative weighting; the residual variance is estimated:
+  - s² = Σ w_s r_s² / (n − 2), where r_s are the residuals of the weighted fit;
+  - SE(γ1) = √(s² / Σ w_s (E_s − Ē_w)²), with Ē_w the weighted mean exposure;
+  - the 95% interval is γ1 ± t × SE(γ1), where t is the 0.975 quantile of Student's t distribution with n − 2 degrees of freedom. t is computed in code by numerical inversion of the t distribution function, and tested against tabulated values.
+- **Minimum.** The regression needs at least 3 States and at least 2 distinct exposure values. Otherwise Q4 is descriptive (§10.7).
+- **Reported with every estimate:**
+  - the number of States, n;
+  - the spread of exposure: sample SD, minimum and maximum, and the weighted and unweighted means.
+
+  There is no power threshold. Q4 is reported with its interval whatever its width.
+
+### 10.3 Bootstrap
+
+- **Draws.** 10,000 resamples of States with replacement. Each resampled State carries its own x, E and w, and γ1 is refitted.
+- **Generator.** `random.Random(20261118)`, reset to that seed before each analysis (the primary analysis, each sensitivity analysis and the placebo). Each draw is `rng.choices(range(n), k=n)`.
+- **Degenerate draws.** A draw whose resampled exposures are all equal cannot be fitted. It is counted and excluded, and the count is reported.
+- **Interval.** The percentile interval of the valid draws: the first and last cut points of `statistics.quantiles(draws, n=40, method="inclusive")`.
+- **Role.** The model interval is primary. The bootstrap interval is reported beside it as a check.
+
+### 10.4 States not computable
+
+A State is not computable if:
+
+- it is missing from either outcome table;
+- either window count is zero;
+- its exposure is not computable (§9.3);
+- it has fewer than two trend points (§9.6).
+
+Such States are listed with the reason. No value is imputed, and no count is set to zero.
+
+### 10.5 Sensitivity analyses
+
+Each sensitivity analysis uses the model of §10.2 and reports both intervals, unless stated otherwise.
+
+- **S1. Unweighted.** w_s = 1 for every State.
+- **S2. Leave one State out.** The model is refitted n times. γ1 is reported for each omission, with the minimum, the maximum, and the State whose omission moves γ1 most. There is no bootstrap.
+- **S3. Recent trend only.** Trend points from 2022 onward: 2022, 2023 and, where the primary trend includes it, 2024.
+- **S4. Three-point trend.** Trend points 2019, 2022 and 2023 only. This excludes the 2024 annual point, which includes December 2024, after the campaign began. If the primary trend already uses these three points (§9.6), S4 is the primary analysis and is not repeated.
+- **S5. States only.** Union territories (§9.4) are excluded.
+- **S6. Partial exposure only.** The capped States, whose exposure share is 1 (§9.3), are excluded.
+- **S7. Population share as the exposure.** This is run only if a named list of campaign districts is obtained (§9.2).
+  - The share is the Census 2011 population (Primary Census Abstract, Office of the Registrar General) of the State's campaign districts, over the State's Census 2011 population.
+  - A State with a campaign district created after 2011 is not computable for S7, and is listed.
+  - If no named list is obtained, S7 is not run, and the paper says so.
+- **S8. Reporting lag.**
+  - **(a) Uniform lag.** The 2025 counts are multiplied by 0.98 and by 0.95, representing a 2025 table 2% or 5% more complete than the 2024 table. A uniform factor shifts every y_s by the same amount, so it changes γ0 but not γ1. The intercept is reported under each factor, and the invariance of γ1 is confirmed in code.
+  - **(b) State-specific lag.** A State's tendency to late updating is measured by ln r_s. Here r_s is the ratio of the State's 2023 count in Lok Sabha Question 261 (drawn in December 2024) to its 2023 count in the India TB Report 2024. ln r_s is added to the model as a covariate, and γ1 is reported with and without it. States lacking either 2023 count are excluded from S8(b) and listed.
+
+### 10.6 Placebo
+
+No State-wise January–October 2023 table of TB notifications was found (source-search note, §4). The placebo therefore uses annual counts.
+
+- **Observed:** y^P_s = ln(N_s,2023 / N_s,2022), from the India TB Reports 2024 and 2023.
+- **Expected:** β^P_s = ln(N_s,2022 / N_s,2019) / 3. This is the State's annual log growth between its two trend points before the placebo window, 2020 and 2021 being excluded. A State with no 2019 value is not computable for the placebo.
+- **Excess:** x^P_s = y^P_s − β^P_s.
+- **Fit.** WLS of x^P_s on the same exposure E_s, with w_s = 1/(1/N_s,2022 + 1/N_s,2023), and the intervals of §10.2 and §10.3.
+- **Expected result.** A campaign that began in December 2024 cannot affect 2022–2023, so the placebo slope should be close to 0.
+
+### 10.7 Descriptive fallback
+
+If comparability fails (§9.5), or the minimum of §10.2 is not met, Q4 is reported descriptively only, with the reason.
+
+- The report is a State table of a_s, b_s, y_s (with its Poisson 95% interval y_s ± 1.96 √(1/a_s + 1/b_s)), β_s, x_s and E_s.
+- There is no regression and no slope.
+
+If the exposure table fails (§9.2) and no named list replaces it, Q4 is not run.
+
+### 10.8 Interpretation, fixed in advance
+
+No P values are reported.
+
+- **Primary result.**
+  - It is described as a positive association between exposure and excess notification growth only if both the model interval and the bootstrap interval for γ1 lie wholly above 0.
+  - If both lie wholly below 0, it is described as a negative association.
+  - Otherwise it is described as showing no clear association, with the interval stated.
+- **Placebo.** If its model interval excludes 0, the paper states that the States more exposed to the campaign already differed in notification trend before it began. The primary result is then described as not separable from that difference.
+- **Sensitivity analyses** are reported in full beside the primary result. They do not replace it.
+
+### 10.9 Limitations stated in advance
+
+- **Design.** Q4 is ecological, with few units (at most about 35 after coarsening).
+- **Selection.** Campaign districts were selected on criteria related to TB burden and vulnerability. Exposure may therefore be associated with pre-existing trends or with regression to the mean. The placebo addresses part of this.
+- **Concurrent changes.** Programme changes over the same period include ACF outside the campaign and the roll-out of chest X-ray and molecular testing.
+- **Exposure measure.** Exposure is measured as district membership, not as activity performed.
+- **Timing.**
+  - The 2025 window includes the later expansion of the campaign, which dilutes the phase-1 contrast.
+  - The 2024 window ends before the campaign began, but the 2024 annual trend point includes December 2024 (§10.5, S4).
+- **Coverage and lag.** Neither outcome table states its public and private coverage (§9.5), and the completeness lags of the two tables may differ (§10.5, S8).
+- **Seasonality.** The expected change assumes unchanged seasonality (§10.1).
+
+## 11. Software and reproducibility
+
+- **Software.** Python 3.14.0, with every script run as `python -I <script>`.
+  - pdfplumber 0.11.8 is used for PDF table extraction only.
+  - All analysis uses the Python standard library (`math`, `statistics`, `random`, `csv`).
+  - The LGD files are read with `zipfile` and `xml.etree.ElementTree`, which handle the xlsx and SpreadsheetML formats.
+- **Provenance.**
+  - Every extracted value carries its source file, its PDF page or paragraph, and its table.
+  - Every count carries its window start, window end and cut-off date, with the basis of the cut-off (§5.2).
+  - In Q4, only counts with the same window and a cut-off within 60 days after the window end are compared.
+- **State names.** These come from one canonical mapping. An unknown name stops extraction.
+- **Code reuse.** Code reused from the author's earlier study (State names, extraction primitives, the fetch script and the verification suite) is copied into this repository with attribution, not imported.
+- **Numbers.** Every number in the manuscript is derived by code, and checked against the outputs by an automated check.
+- **Source files.** These are fetched and verified against the digests in §3. They are not redistributed.
+
+## 12. Reporting principles
+
+- **Discrepancies.** These are reported as properties of the published record, with the evidence for each class. "Unexplained" is not an accusation.
+- **Purpose.** The study evaluates the measurement and the evidence, not the value of ACF.
+- **The quality studies.** Their reconciliation concerns definitions and denominators, not the authors.
+- **Recommendations.** These are framed as programme actions:
+  - which figure to quote for which purpose;
+  - what to standardise in reporting: definitions, cut-off dates, and publishing the cascade with its denominators;
+  - what the evidence says about the campaign and notifications.
+- **Reporting guideline and ethics.** The reporting guideline is RECORD. Ethics approval is not required, because only published aggregate data are used.
+- **Statistics.** No P values are reported. Every estimate has a 95% interval and its n.
+
+## 13. Deviations
+
+**Registration point.** To be recorded here after the public push of this plan.
+
+Deviations from this plan are logged here, each with its date. Anything exploratory is labelled as such in code and output, and logged here.
+
+**18 November 2026.** None.

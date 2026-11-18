@@ -1,0 +1,25 @@
+Derived data licence
+
+The derived data in this repository, namely
+
+  - data/ (the search log, the figure inventory, the extracted tables and the
+    recorded source choices), and
+  - outputs/ (the results of the analyses),
+
+are licensed under the Creative Commons Attribution 4.0 International licence
+(CC BY 4.0): https://creativecommons.org/licenses/by/4.0/
+
+Attribution: Siddalingaiah H S, "India's active case-finding figures and the
+100-day TB Mukt Bharat Abhiyaan", https://github.com/hssling/india-tb-acf-campaign
+
+The underlying figures come from Government of India publications: documents
+of the Central TB Division and the Ministry of Health and Family Welfare
+(including the India TB Reports), releases of the Press Information Bureau,
+answers to questions in the Lok Sabha and Rajya Sabha, and the Local Government
+Directory of the Ministry of Panchayati Raj. Figures from two published studies
+of active case-finding quality are used under their own licences. Those
+documents remain the property of their publishers; they are not redistributed
+in this repository and are not covered by this licence. Users of the derived
+data should also cite the source publications.
+
+The code is licensed separately under the MIT licence: see LICENSE.

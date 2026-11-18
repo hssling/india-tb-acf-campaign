@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this code or the analysis plan, please cite it as below."
+title: "India's active case-finding figures and the 100-day TB Mukt Bharat Abhiyaan: analysis code and pre-registered plan"
+abstract: >-
+  Pre-registered analysis plan, and the code that implements it, for a study
+  of India's published active case-finding (ACF) and TB Mukt Bharat Abhiyaan
+  campaign figures: whether they are internally and mutually consistent,
+  whether differences in definition, window or cut-off date explain their
+  disagreements, what State-level ACF yields are, and whether TB
+  notifications rose more, against each State's own trend, in States with a
+  larger share of districts in phase 1 of the campaign.
+type: software
+authors:
+  - family-names: "Siddalingaiah"
+    given-names: "H S"
+    orcid: "https://orcid.org/0000-0002-4771-8285"
+    affiliation: >-
+      Department of Community Medicine, Shridevi Institute of Medical Sciences
+      and Research Hospital, Tumkur, Karnataka, India
+license: MIT
+repository-code: "https://github.com/hssling/india-tb-acf-campaign"
+keywords:
+  - tuberculosis
+  - India
+  - National TB Elimination Programme
+  - active case finding
+  - TB Mukt Bharat Abhiyaan
+  - data consistency
+  - pre-registration

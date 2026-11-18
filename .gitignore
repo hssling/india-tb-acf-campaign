@@ -1,0 +1,9 @@
+.superpowers/
+data_raw/
+manuscript/
+outputs/scratch/
+__pycache__/
+*.pyc
+.pytest_cache/
+**/~$*
+**/*_signed.*
