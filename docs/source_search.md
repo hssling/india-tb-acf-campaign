@@ -79,12 +79,16 @@ Leads not confirmed:
 
 The primary pair is Rajya Sabha Q. 2511 (2024) and Rajya Sabha Q. 1093 (2025).
 
+*Pointer added 18 November 2026: the primary pair is fixed in analysis plan §9.5; this section records the judgement as made during the search.*
+
 - **(b) Both cover 1 January to 31 October: met.** Both headings or notes state "January to October".
 - **(c) Both "as on" dates fall within 60 days after 31 October: met for 2024; met for 2025 by bound.**
   - 2024: the date is 19 November 2024, 19 days after 31 October.
   - 2025: the OGD note states no "as on" date. The data cannot be dated later than the answer (9 December 2025, 39 days after 31 October), so the condition holds whatever the exact date. The plan should state this bounding rule explicitly.
   - **Limitation: the completeness lags differ.** Ni-kshay counts grow as records are updated. The 2024 table was drawn 19 days after the window closed; the 2025 table up to 39 days after. If the 2025 lag is longer, the 2025 counts are more complete, which inflates the observed 2024-to-2025 change in every State. Exposure-related differences in reporting lag would also bias the gradient. The plan will pre-specify a sensitivity analysis for this difference, for example rescaling the 2025 counts by a completeness factor fixed in the plan or re-running Q4 with an alternative 2024 table of later cut-off. The design of that analysis is left to the plan.
 - **(a) Both report total (public plus private) notifications, as stated in the answer: not established.** Neither field heading nor note says "total" or "public and private". The two headings also differ in wording: "Notification" in 2024 and "Reported" in 2025.
+
+*Pointer added 18 November 2026: the outcome pairs and their comparability are fixed in analysis plan §9.5.*
 
 **Judgement: the January–October pair does not yet pass the rule.** Conditions (b) and (c) are met, but (a) cannot be confirmed from the metadata available here. Under the design, a failed condition means Q4 is reported descriptively only.
 

@@ -60,12 +60,18 @@
 - **Trend points:** 2019, 2022, 2023 and 2024; 2020 and 2021 are excluded.
   - 2019 comes from the India TB Report 2020, and 2022 from the India TB Report 2023.
   - 2023 and 2024 come from Q1216.
-  - Fallback, for 2023 and 2024 together, used if the guard fails or Q1216 fails extraction: 2023 from the India TB Report 2024, and 2024 from RS Q. 3467 (1 Apr 2025).
+  - Fallback, for 2023 and 2024 together, used if the guard fails (a failure of Q1216's own extraction checks counts as a failed guard): 2023 from the India TB Report 2024, and 2024 from RS Q. 3467 (1 Apr 2025).
   - A state with no 2019 value uses the points from 2022 onward.
 - **Guard:** each state's Q1216 2023 and 2024 counts are divided by its Q3467 "notified" counts.
-  - If the median ratio for either year lies outside [0.95, 1.05], Q1216 is judged not to be total notifications. The January–October pair (S8) then becomes primary, with the fallback trend, and the full-year contrast is reported descriptively.
-  - Any state outside [0.95, 1.05] is a Q2 discrepancy.
-  - If Q3467 fails extraction, or fewer than 10 states have both values, the guard is not run, and the full-year contrast stays primary; the paper says so.
+  - The guard fails if the median 2023 ratio lies outside [0.95, 1.05], or the median 2024 ratio is below 0.95. A 2024 median above 1.05 is expected from late reports (Q3467 drawn about 3 months after 2024, Q1216 about 13 months after), does not fail the guard, and is reported descriptively.
+  - A failure of Q1216's own extraction checks counts as a failed guard for every purpose.
+  - On failure, Q1216 is judged not to be total notifications. The January–October pair (S8) then becomes primary, with the fallback trend; S8(a) and S8(b) run on it; and the full-year contrast is reported descriptively.
+  - Any state outside [0.95, 1.05] in either year is a Q2 discrepancy.
+  - If Q1216 passes extraction but either Q3467 fails extraction or fewer than 10 states have both values for either year, the guard is not run, and the full-year contrast stays primary; the paper says so.
+- **Extraction checks for every Q4 source** (Q1216, Q3467, India TB Reports 2020/2023/2024, LS Q261, RS Q1093):
+  - a table fails if its state rows do not sum to its printed total within ±1, or a needed column cannot be read; if no total is printed, the sum check is skipped and reported;
+  - a trend source in use that fails leaves that year missing for every state, with no further substitution;
+  - an outcome table that fails makes its contrast not computable.
 - **S8, the January–October pair:** LS Starred Q. 261 (2024 Jan–Oct) against RS Q. 1093 (2025 Jan–Oct). It carries the lag analyses S8(a), a uniform scaling of the 2025 counts with weights fixed, and S8(b), the ln r covariate.
 - **Placebo:** 2023 (Q1216, or the India TB Report 2024 under the fallback) against 2022 (India TB Report 2023), with the benchmark ln(N2022/N2019)/3.
 - **Exposure:** the phase-1 district share, with the state denominator as the LGD count reconstructed at 7 Dec 2024. States with more campaign districts than LGD districts are capped at 1 and flagged (E5).
@@ -184,13 +190,17 @@
 **`figures_inventory.csv` columns** (analysis plan §5.2): `fig_id, quantity, value, value_printed, qualifier, unit, definition_verbatim, context_verbatim, definition_class, scope, series_type, window_label, window_start, window_end, as_on, as_on_basis, geography, source_file, source_url, page_or_para, table_id, pub_date`.
 
 **Rules:**
-- Check every table against its printed national total.
+- Check every table against its printed national total. For the Q4 source tables, apply the extraction checks of analysis plan §9.6 and record each pass or failure in `source_choices.csv`.
 - Keep blanks blank.
 - Name every state through `canonical`.
 - Commit `source_choices.csv` before any Q computation (the freeze rule).
 
 - [ ] **Step 1:** Write the tests:
   - for each extractor, a printed-total check;
+  - `test_q4_source_extraction_checks`:
+    - a Q4 table whose state rows differ from its printed total by 2 fails, and one that differs by 1 passes;
+    - a missing needed column fails;
+    - a table with no printed total skips the sum check and reports it;
   - `test_inventory_rows_sourced`: no empty `source_file` or `page_or_para`;
   - `test_window_fields_present`.
 - [ ] **Step 2:** RED, implement, GREEN.
@@ -259,14 +269,14 @@
 - Produces:
   - `excess(state) -> float | None`;
   - `wls(x, y, w) -> (slope, se, n)`;
-  - `guard(q1216, q3467) -> (status, medians, flagged_states)`, where status is pass, fail or not_run;
+  - `guard(q1216, q3467, q1216_extraction_ok, q3467_extraction_ok) -> (status, medians, flagged_states)`, where status is pass, fail or not_run. It returns fail whenever Q1216's extraction checks failed;
   - `bootstrap_ci(...)`.
 
 **Order of analyses:**
 1. The guard.
-2. The primary analysis: the full-year contrast, or the January–October contrast if the guard fails, with the fallback trend.
+2. The primary analysis: the full-year contrast, or the January–October contrast if the guard fails (including a failure of Q1216's extraction checks), with the fallback trend.
 3. S1–S7.
-4. S8 (the January–October contrast, if it is not already primary) with its lag analyses S8(a) and S8(b).
+4. S8 (the January–October contrast, if it is not already primary) with its lag analyses S8(a) and S8(b). If S8 is primary, S8(a) and S8(b) are then run on the primary analysis.
 5. The placebo.
 
 **Rules:** state the spread of exposure (SD and range) and n. If the comparability conditions of analysis plan §9.5 fail for the primary contrast, write only the descriptive table and the reason.
@@ -276,9 +286,13 @@
   - `test_trend_points_exclude_2020_2021`;
   - `test_trend_fallback_2022_2024` (a state with no 2019 value uses the points from 2022 onward);
   - `test_guard_median_ratio_bounds`:
-    - median ratios inside [0.95, 1.05] for both years pass, and a median outside it for either year fails;
+    - a 2023 median of 1.00 with a 2024 median of 1.00 passes;
+    - a 2023 median of 0.94 fails;
+    - a 2024 median of 1.08 passes (with 2023 at 1.00), and is reported descriptively;
+    - a 2024 median of 0.94 fails;
+    - a failure of Q1216's extraction checks gives fail, whatever the medians;
     - a failed guard switches the primary to the January–October contrast and the trend to the fallback sources;
-    - fewer than 10 states with both values gives not_run, with the full-year contrast still primary;
+    - fewer than 10 states with both values for either year gives not_run, with the full-year contrast still primary;
   - `test_wls_known_values`;
   - `test_bootstrap_seeded_reproducible`;
   - `test_placebo_uses_gate_choice`.

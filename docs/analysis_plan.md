@@ -25,7 +25,7 @@ These refinements were made before any figure was extracted. Each is stated wher
 
 1. **The primary Q4 contrast** is the full year 2025 against the full year 2024, both from one parliamentary answer with one source and one as-on date (Rajya Sabha Question 1216). It replaces the January–October contrast of design §2 and §6.4. The author decided this on 18 November 2026, before registration (§9.5.1).
    - For this contrast, condition (c) of design §9.2 becomes "one as-on date for both years, within 60 days after the end of the later window".
-   - A pre-specified guard tests whether its counts are total notifications. If the guard fails, the January–October contrast becomes primary (§9.5.2).
+   - A pre-specified guard tests whether its counts are total notifications. If the guard fails, the January–October contrast becomes primary (§9.5.2). A failure of Question 1216's own extraction checks counts as a failed guard.
 2. **The January–October contrast** becomes sensitivity analysis S8 (§9.5.3, §10.5).
    - Its 2024 table is Lok Sabha Starred Question 261, not Rajya Sabha Unstarred Question 2511 named in the source-search note, because the answer text of Question 2511 shows a different window.
    - Its comparability condition (a) of design §9.2 is fixed as "same quantity in the same words from the same source". Neither of its answers states its public and private coverage, and this is a stated limitation.
@@ -236,8 +236,8 @@ Every check is applied to every source in which its inputs appear. Its result is
 Every figure is turned into an interval [lo, hi] before any check or comparison.
 
 - **Half-unit.** h is half a unit in the last printed digit. A figure printed as an integer count has h = 0. "9.02 crore" has h = 0.005 crore, and "3.7%" has h = 0.05%.
-- **Qualifier.** It is assigned from the words immediately before or after the figure, case-insensitive, by the first matching rule:
-  - **at_least:** "more than", "over", "above", "exceeding", "at least", or a "+" after the figure;
+- **Qualifier.** It is read from the one to three words directly before the figure, or a "+" directly after it. Matching is case-insensitive and uses whole words (§7.2), except that the symbols "~" and "+" match as characters. The first matching rule wins:
+  - **at_least:** "more than", "over", "above", "exceeding", "at least", or a "+" directly after the figure;
   - **at_most:** "up to", "less than", "under", "below", "at most";
   - **about:** "nearly", "around", "approximately", "about", "almost", "close to", "~";
   - **exact:** no qualifier word.
@@ -251,7 +251,7 @@ Every figure is turned into an interval [lo, hi] before any check or comparison.
 
 Checks 1–3 are within-source checks. Check 4 runs across documents.
 
-1. **The cascade does not grow.** Within one source, for figures with the same window, cut-off, geography and scope, the order is: screened ≥ presumptive ≥ tested ≥ TB cases diagnosed ≥ TB cases notified.
+1. **The cascade does not grow.** Within one source, for figures with identical `window_start`, `window_end`, `as_on` and `window_label` (a blank matching a blank) and the same geography and scope, the order is: screened ≥ presumptive ≥ tested ≥ TB cases diagnosed ≥ TB cases notified.
    - The check is applied to every pair of steps present, adjacent or not.
    - A `tested` figure enters only if its definition class is people tested or unspecified (§7.2). Tests done are not used, because one person may have several tests. A failure involving an unspecified class is noted as such.
    - A `tb_cases` figure of unspecified class is compared only with the steps before tested and with tested.
@@ -301,14 +301,16 @@ Figures of the same quantity and geography that differ only in scope are not com
 
 Classes are assigned by keyword rules, case-insensitive, applied in the order given; the first match wins, and "unspecified" is the default. Definition classes are read from `definition_verbatim`, and scope from `context_verbatim`.
 
+Keywords match whole words (regex `\b…\b`), except the stems notif, diagnos, detect, symptom and radiograph, which match as word prefixes. A hyphen inside a keyword matches only a hyphen. Under this rule, "phase i" and "phase-i" do not match "phase ii" or "phase-ii", and "number of test" does not match "number of tested" or "number of tests". Plural forms are therefore listed where they are needed.
+
 - **`screened`:**
   1. "x-ray", "x ray", "cxr" or "radiograph" → screened by chest X-ray;
   2. "symptom" → symptom-screened;
   3. "reached", "covered", "visited" or "contacted" → population reached;
   4. otherwise → unspecified.
 - **`tested`:**
-  1. "tests", "testing done", "investigations" or "number of test" → tests done;
-  2. "tested" together with "person", "people", "individual", "patient" or "presumptive" → people tested;
+  1. "tests", "testing done", "investigation", "investigations" or "number of test" → tests done;
+  2. "tested" together with "person", "persons", "people", "individual", "individuals", "patient", "patients" or "presumptive" → people tested;
   3. otherwise → unspecified.
 - **`tb_cases`:**
   1. "notif" → notified;
@@ -317,7 +319,7 @@ Classes are assigned by keyword rules, case-insensitive, applied in the order gi
 - **Scope:**
   1. "100 day", "100-day", "100 days", "347" (as a number of districts), "phase 1", "phase i" or "phase-i" → phase 1;
   2. "expanded", "extended", "expansion", "all districts", "phase 2", "phase ii", "phase-ii" or "second phase" → expanded campaign;
-  3. "Abhiyan", "Abhiyaan" or "campaign" → unspecified;
+  3. "Abhiyan", "Abhiyaan", "campaign" or "campaigns" → unspecified;
   4. "active case finding" or "ACF" without any word of rules 1–3 → programme-wide;
   5. otherwise → unspecified.
 
@@ -332,6 +334,8 @@ Each discrepancy is given the first class that applies, and the evidence for it 
 3. **Window or cut-off difference.** Both windows are stated (§7.1), and they differ in start, end or cut-off. The row records whether the direction of the difference is consistent with the windows:
    - **3a, consistent:** for a cumulative series from the same start, or for nested windows, the later cut-off or the longer window gives the larger value; or the windows are neither nested nor from the same start, so no direction is implied;
    - **3b, inconsistent:** the later cut-off or longer window gives the smaller value. For a cumulative series this is a failure of check 4. It is reported as a window difference that does not explain the direction of the difference.
+
+   Later or longer is judged on the span (§7.1); if the spans are equal, the row is 3a.
 
    A failure of check 4 enters here directly, without passing through classes 1 and 2.
 4. **Unexplained.** None of the above applies. This includes every pair in which either window is unstated: such a pair is never placed in class 3. A failure of check 4 involving an unstated window is placed here.
@@ -505,18 +509,21 @@ Question 1216 reports cases notified in a table about the TB Mukt Bharat Abhiyan
 
 - **Reference table.** Its Annexure-I is headed "State-wise TB patients notified and treated successfully in 2023 and 2024". Its columns include "notified", with the footnote "*Treatment outcome will be due in 2025". It states no as-on date.
 - **Comparison.** At extraction, and before any Q4 computation, each State's 2023 and 2024 counts in Question 1216 are divided by its "notified" counts in Question 3467, after unit coarsening (§9.4). States lacking either value are left out of the comparison and listed.
-- **Rule.**
-  - If, for either year, the median of these State ratios lies outside 0.95 to 1.05, Question 1216 is judged not to report total notifications.
-  - In that case the primary Q4 analysis is the January–October contrast (§9.5.3), with the fallback trend sources of §9.6. The full-year contrast is then reported descriptively only (§10.7). This consequence is pre-specified and is not a deviation.
-  - Whatever the medians, any State whose ratio lies outside 0.95 to 1.05 in either year is recorded as a Q2 discrepancy (§7.4).
-- **If the guard cannot be applied.** This is the case if Question 3467 fails its extraction checks or fewer than 10 States have both values. The full-year contrast then remains primary, and the paper states that the guard could not be run.
-- **Recording.** The ratios, the medians and the decision are recorded in `data/source_choices.csv` before the freeze (§5.4).
+- **Lag between the two answers.** For 2023, both counts were drawn at least 15 months after the year ended: Question 3467 on or before 1 April 2025, and Question 1216 in February 2026. For 2024, Question 3467 was drawn about 3 months after the year ended and Question 1216 about 13 months after. Late reports alone can therefore raise the 2024 ratio above 1, so the 2024 bound is one-sided.
+- **Rule.** The guard fails, and Question 1216 is judged not to report total notifications, if either of these holds:
+  - the median 2023 ratio lies outside 0.95 to 1.05;
+  - the median 2024 ratio is below 0.95.
 
-The same consequence follows if Question 1216 fails its own extraction checks: its State rows do not sum to its printed total within ±1, or a column cannot be read.
+  A median 2024 ratio above 1.05 does not fail the guard. It is expected from late reports and is reported descriptively.
+- **If the guard fails.** The primary Q4 analysis is the January–October contrast (§9.5.3), with the fallback trend sources of §9.6. The full-year contrast is then reported descriptively only (§10.7). This consequence is pre-specified and is not a deviation.
+- **State discrepancies.** Whatever the medians, any State whose ratio lies outside 0.95 to 1.05 in either year is recorded as a Q2 discrepancy (§7.4).
+- **Failure of Question 1216's own extraction checks** (§9.6) counts as a failed guard for every purpose in this plan, whatever the state of Question 3467.
+- **If the guard cannot be applied.** This is the case if Question 1216 passes its extraction checks but either Question 3467 fails its extraction checks (§9.6) or fewer than 10 States have both values for either year. The full-year contrast then remains primary, and the paper states that the guard could not be run.
+- **Recording.** The ratios, the medians and the decision are recorded in `data/source_choices.csv` before the freeze (§5.4).
 
 #### 9.5.3 Sensitivity contrast: January–October 2025 against January–October 2024
 
-This pair is sensitivity analysis S8 (§10.5). It becomes the primary contrast if the guard of §9.5.2 fails.
+This pair is sensitivity analysis S8 (§10.5). It becomes the primary contrast if the guard of §9.5.2 fails, including when Question 1216 fails its own extraction checks.
 
 - **January–October 2024:** Lok Sabha Starred Question 261, answered 13 December 2024.
   - Annexure-I, headed "State/UT wise TB cases reported since 2022 to 2024*", column "2024 (Jan- Oct)".
@@ -575,7 +582,11 @@ If they then fail for the contrast that is primary, Q4 is reported descriptively
 | 2024 | Rajya Sabha Question 1216, column "2024 (Jan-Dec)", "No. of TB cases notified" | Rajya Sabha Question 3467, Annexure-I, the 2024 "notified" column |
 
 - **Why Question 1216 for 2023 and 2024.** It has the same cut-off as the outcome, so the latest trend points and the outcome are counted to the same date.
-- **Fallback.** The fallback column replaces the primary sources for 2023 and 2024 together, never one year alone. The replacement is recorded in `data/source_choices.csv`. If the India TB Report 2020 or 2023 fails an extraction check (its State rows do not sum to its printed total within ±1), that year is missing for every State, and the trend uses the remaining points.
+- **Fallback.** The fallback column replaces the primary sources for 2023 and 2024 together, never one year alone. It is used if the guard of §9.5.2 fails, including when Question 1216 fails its extraction checks. The replacement is recorded in `data/source_choices.csv`.
+- **Extraction checks for every Q4 source.** Every Q4 source table fails extraction if its State rows do not sum to its printed total within ±1, or if a needed column cannot be read. This covers Question 1216, Question 3467, the India TB Reports 2020, 2023 and 2024, Lok Sabha Question 261 and Rajya Sabha Question 1093.
+  - If no total is printed, the sum check is not applied, and this is reported.
+  - A trend source in use (primary or fallback) that fails leaves that year missing for every State, with no further substitution. The trend then uses the remaining points (§9.6, Fit).
+  - An outcome table that fails makes its contrast not computable. If that contrast is the primary one, Q4 is reported descriptively from the other contrast if it is computable (§10.7), and is otherwise not run, with the reason.
 - **Cross-checks.**
   - The State-level 2022 values are compared with the earlier study's public extraction, and any difference is reported.
   - The 2023 State counts of Question 1216 are compared with the India TB Report 2024, State by State, and any difference is a Q2 discrepancy (§7.4).
@@ -641,7 +652,7 @@ Such States are listed with the reason. No value is imputed, and no count is set
 
 ### 10.5 Sensitivity analyses
 
-Each sensitivity analysis uses the model of §10.2 with the primary contrast and reports both intervals, unless stated otherwise. If the guard of §9.5.2 fails, S8 becomes the primary analysis, and S1–S7 are run on the January–October contrast instead.
+Each sensitivity analysis uses the model of §10.2 with the primary contrast and reports both intervals, unless stated otherwise. If the guard of §9.5.2 fails (including when Question 1216 fails its extraction checks), S8 becomes the primary analysis. S1–S7 are then run on the January–October contrast instead, and S8(a) and S8(b) are then run on the primary analysis.
 
 - **S1. Unweighted.** w_s = 1 for every State.
 - **S2. Leave one State out.** The model is refitted n times. γ1 is reported for each omission, with the minimum, the maximum, and the State whose omission moves γ1 most. There is no bootstrap.
@@ -656,7 +667,7 @@ Each sensitivity analysis uses the model of §10.2 with the primary contrast and
   - If no named list is obtained, S7 is not run, and the paper says so.
 - **S8. January–October contrast.** The model of §10.2 is fitted to the January–October 2025 against January–October 2024 contrast (§9.5.3), with weights from the January–October counts and the trend of §9.6.
   - It is run only if the pair meets conditions (a)–(c) of §9.5.3. Otherwise it is reported descriptively (§10.7).
-  - Its cut-offs are 0–43 days after the window end in both years, against about six weeks and about 13 months in the primary contrast. It therefore addresses in part the difference in completeness of the primary counts (§10.9).
+  - Its cut-offs are 0–43 days after the window end in both years, against 32 to 59 days (2025) and about 13 months (2024) in the primary contrast. It therefore addresses in part the difference in completeness of the primary counts (§10.9).
   - Two further analyses address the difference in reporting lag between its two tables:
   - **S8(a). Uniform lag.** The January–October 2025 counts are multiplied by 0.98 and by 0.95, representing a 2025 table 2% or 5% more complete than the 2024 table.
     - The weights w_s are held fixed at their values from the unscaled counts.
@@ -689,7 +700,7 @@ Q4 is reported descriptively only, with the reason, in any of these cases:
 
 - comparability fails for the contrast that is primary (§9.5);
 - the minimum of §10.2 is not met;
-- the full-year contrast after the guard of §9.5.2 has failed. It is then reported descriptively beside the January–October primary.
+- the full-year contrast after the guard of §9.5.2 has failed (including when Question 1216 fails its extraction checks). It is then reported descriptively beside the January–October primary, as far as its columns can be read.
 
 The report is a State table of a_s, b_s, y_s (with its Poisson 95% interval y_s ± z √(1/a_s + 1/b_s), where z = `statistics.NormalDist().inv_cdf(0.975)`), β_s, x_s and E_s. There is no regression and no slope.
 
@@ -714,14 +725,16 @@ No P values are reported.
 - **Exposure measure.**
   - Exposure is measured as district membership, not as activity performed.
   - In every State, the numerator counts NTEP programme districts and the denominator counts LGD revenue districts. These are different units (§9.2, E5).
-- **Completeness of the primary counts.** Both counts were drawn on the same February 2026 date. The 2025 count was therefore taken about six weeks after its year ended, and late updates to it may be incomplete. The 2024 count, at about 13 months, is more complete.
+- **Completeness of the primary counts.** Both counts were drawn on the same February 2026 date. The 2025 count was therefore taken 32 to 59 days after its year ended, and late updates to it may be incomplete. The 2024 count, at about 13 months, is more complete.
   - This asymmetry understates 2025 relative to 2024. It biases the observed change y_s, and so the excess change, downward.
   - If the shortfall is the same proportion in every State, it moves only γ0. If it varies with exposure, it biases γ1.
   - The January–October sensitivity analysis (S8), whose two cut-offs are both 0–43 days after the window end, addresses this in part.
 - **Trend sources.** The primary trend mixes two sources: the India TB Report for 2019 and 2022, and Question 1216 for 2023 and 2024.
   - A level difference between the sources, or a difference in completeness (the Question 1216 counts were drawn later after their years ended), alters β_s. If the later points are relatively more complete, β_s is overstated and the excess change understated.
   - S3 and S4 vary the trend points, and the cross-check of Question 1216 against the India TB Report 2024 for 2023 (§9.6) measures the level difference.
-- **Total notifications.** Question 1216 reports cases notified in a table on the TB Mukt Bharat Abhiyan. The guard of §9.5.2 tests whether these are total notifications; it does so at the median, not State by State.
+- **Total notifications.** Question 1216 reports cases notified in a table on the TB Mukt Bharat Abhiyan. The guard of §9.5.2 tests whether these are total notifications, at the median and not State by State.
+  - Its 2024 test is one-sided. The 2024 counts of Question 3467 were drawn about 3 months after the year ended and those of Question 1216 about 13 months after, so late reports are expected to raise the 2024 ratio above 1.
+  - A 2024 ratio above 1 therefore cannot distinguish late reports from a wider count, and only the 2023 test bounds it from above.
 - **Lag proxy (S8(b)).**
   - The proxy measures late updating about a year after the data year, not the 0–43-day lag of the January–October tables.
   - Where the trend falls back to the India TB Report 2024 for 2023 (§9.6), ln r_s shares that value with β_s, so the two are not independent.
