@@ -1,0 +1,52 @@
+analysis,status,testing_definition,years,quantity,estimate,boot_lo,boot_hi,draws,n_valid,degenerate,n_units,n_excluded,excluded
+change,main,tested,2021->2023,dln_yield,-0.6457459004490644,-1.1774869664582261,0.1325251147559182,10000,10000,0,30,6,Andaman and Nicobar Islands 2023 D=0;Goa 2023 D=0;Lakshadweep 2021 D=0;Lakshadweep 2023 D=0;Manipur 2023 T=0/D NA;Puducherry 2021 D=0
+change,main,tested,2021->2023,testing_part,0.30466123024891,-0.38094031331807104,1.4215680924030454,10000,10000,0,30,6,Andaman and Nicobar Islands 2023 D=0;Goa 2023 D=0;Lakshadweep 2021 D=0;Lakshadweep 2023 D=0;Manipur 2023 T=0/D NA;Puducherry 2021 D=0
+change,main,tested,2021->2023,positivity_part,-0.9504071306979753,-1.5358976261518118,-0.426805575292744,10000,10000,0,30,6,Andaman and Nicobar Islands 2023 D=0;Goa 2023 D=0;Lakshadweep 2021 D=0;Lakshadweep 2023 D=0;Manipur 2023 T=0/D NA;Puducherry 2021 D=0
+level,main,tested,2018,ln_yield,-8.294767494924075,-8.803836369353355,-8.003577492289601,10000,10000,0,31,1,Puducherry 2018 D=0
+level,main,tested,2018,ln_testing,-4.8094171049978645,-5.374564292710066,-4.087799276915972,10000,10000,0,31,1,Puducherry 2018 D=0
+level,main,tested,2018,ln_positivity,-3.48535038992621,-4.195581111924294,-3.087250125920744,10000,10000,0,31,1,Puducherry 2018 D=0
+level,main,tested,2019,ln_yield,-8.39060007983905,-8.823023186851323,-7.814438449331338,10000,10000,0,31,1,Lakshadweep 2019 S=0/T NA/D NA
+level,main,tested,2019,ln_testing,-4.909204587613725,-5.534270508560446,-4.030292235599618,10000,10000,0,31,1,Lakshadweep 2019 S=0/T NA/D NA
+level,main,tested,2019,ln_positivity,-3.4813954922253254,-3.992128305802139,-3.102133686886962,10000,10000,0,31,1,Lakshadweep 2019 S=0/T NA/D NA
+level,main,tested,2021,ln_yield,-8.017880361351976,-8.477528790097558,-7.571318461324082,10000,10000,0,33,2,Lakshadweep 2021 D=0;Puducherry 2021 D=0
+level,main,tested,2021,ln_testing,-4.850130615522963,-5.272813783123504,-4.315150573630805,10000,10000,0,33,2,Lakshadweep 2021 D=0;Puducherry 2021 D=0
+level,main,tested,2021,ln_positivity,-3.167749745829012,-3.782662511128852,-2.7002008181267687,10000,10000,0,33,2,Lakshadweep 2021 D=0;Puducherry 2021 D=0
+level,main,tested,2023,ln_yield,-8.664165703857316,-9.108509410968376,-7.928532846488469,10000,10000,0,31,4,Andaman and Nicobar Islands 2023 D=0;Goa 2023 D=0;Lakshadweep 2023 D=0;Manipur 2023 T=0/D NA
+level,main,tested,2023,ln_testing,-4.547390384187535,-5.034945997426191,-3.262291626404174,10000,10000,0,31,4,Andaman and Nicobar Islands 2023 D=0;Goa 2023 D=0;Lakshadweep 2023 D=0;Manipur 2023 T=0/D NA
+level,main,tested,2023,ln_positivity,-4.116775319669781,-4.905140909653933,-3.637951561315864,10000,10000,0,31,4,Andaman and Nicobar Islands 2023 D=0;Goa 2023 D=0;Lakshadweep 2023 D=0;Manipur 2023 T=0/D NA
+variance,main,tested,2018,var_total,2.124024202763222,1.0883376344722198,3.2230902990096837,10000,10000,0,31,1,Puducherry 2018 D=0
+variance,main,tested,2018,var_testing,1.9192363420463656,1.1645319640266907,2.6076440082626156,10000,10000,0,31,1,Puducherry 2018 D=0
+variance,main,tested,2018,var_positivity,0.6845778342076864,0.27135603402075015,1.216355875666477,10000,10000,0,31,1,Puducherry 2018 D=0
+variance,main,tested,2018,cov,-0.23989498674541515,-0.8229859564386973,0.2612474254710154,10000,10000,0,31,1,Puducherry 2018 D=0
+variance,main,tested,2018,testing_share,0.7906413463256364,0.6807494659584864,0.9302204943104243,10000,10000,0,31,1,Puducherry 2018 D=0
+variance,main,tested,2018,positivity_share,0.20935865367436338,0.06977950568957558,0.31925053404151316,10000,10000,0,31,1,Puducherry 2018 D=0
+variance,main,tested,2019,var_total,2.570116996227488,1.3294994365297816,3.85360826798073,10000,10000,0,31,1,Lakshadweep 2019 S=0/T NA/D NA
+variance,main,tested,2019,var_testing,2.6577257431109316,1.222639095914389,4.187534278249633,10000,10000,0,31,1,Lakshadweep 2019 S=0/T NA/D NA
+variance,main,tested,2019,var_positivity,0.9931264720285263,0.41098977059014674,1.6633040607707892,10000,10000,0,31,1,Lakshadweep 2019 S=0/T NA/D NA
+variance,main,tested,2019,cov,-0.5403676094559846,-1.5114500791147616,0.20679278050805366,10000,10000,0,31,1,Lakshadweep 2019 S=0/T NA/D NA
+variance,main,tested,2019,testing_share,0.8238372559548389,0.5925445588578946,1.1090023561921387,10000,10000,0,31,1,Lakshadweep 2019 S=0/T NA/D NA
+variance,main,tested,2019,positivity_share,0.17616274404516127,-0.10900235619213901,0.4074554411421054,10000,10000,0,31,1,Lakshadweep 2019 S=0/T NA/D NA
+variance,main,tested,2021,var_total,1.792529080397271,1.156003264717216,2.389329542217835,10000,10000,0,33,2,Lakshadweep 2021 D=0;Puducherry 2021 D=0
+variance,main,tested,2021,var_testing,1.3555702717233797,0.8337236572030642,1.8736062079583957,10000,10000,0,33,2,Lakshadweep 2021 D=0;Puducherry 2021 D=0
+variance,main,tested,2021,var_positivity,0.71971624866549,0.4135383858205867,1.0197456110077356,10000,10000,0,33,2,Lakshadweep 2021 D=0;Puducherry 2021 D=0
+variance,main,tested,2021,cov,-0.14137871999579932,-0.46365344211091397,0.16531079908715166,10000,10000,0,33,2,Lakshadweep 2021 D=0;Puducherry 2021 D=0
+variance,main,tested,2021,testing_share,0.6773622615140414,0.5039982209475136,0.8600451021272012,10000,10000,0,33,2,Lakshadweep 2021 D=0;Puducherry 2021 D=0
+variance,main,tested,2021,positivity_share,0.3226377384859586,0.139954897872799,0.4960017790524864,10000,10000,0,33,2,Lakshadweep 2021 D=0;Puducherry 2021 D=0
+variance,main,tested,2023,var_total,1.5841644174226563,0.9242314848419881,2.2316215480687607,10000,10000,0,31,4,Andaman and Nicobar Islands 2023 D=0;Goa 2023 D=0;Lakshadweep 2023 D=0;Manipur 2023 T=0/D NA
+variance,main,tested,2023,var_testing,1.8740314861874734,0.9740652077644968,2.8102955062808888,10000,10000,0,31,4,Andaman and Nicobar Islands 2023 D=0;Goa 2023 D=0;Lakshadweep 2023 D=0;Manipur 2023 T=0/D NA
+variance,main,tested,2023,var_positivity,1.6139658917557007,0.4639111824091273,3.3601079160111924,10000,10000,0,31,4,Andaman and Nicobar Islands 2023 D=0;Goa 2023 D=0;Lakshadweep 2023 D=0;Manipur 2023 T=0/D NA
+variance,main,tested,2023,cov,-0.9519164802602593,-2.271891653762621,-0.03481267895284182,10000,10000,0,31,4,Andaman and Nicobar Islands 2023 D=0;Goa 2023 D=0;Lakshadweep 2023 D=0;Manipur 2023 T=0/D NA
+variance,main,tested,2023,testing_share,0.5820828922716506,0.17911205525925117,0.9411758157233815,10000,10000,0,31,4,Andaman and Nicobar Islands 2023 D=0;Goa 2023 D=0;Lakshadweep 2023 D=0;Manipur 2023 T=0/D NA
+variance,main,tested,2023,positivity_share,0.41791710772834895,0.058824184276618285,0.8208879447407479,10000,10000,0,31,4,Andaman and Nicobar Islands 2023 D=0;Goa 2023 D=0;Lakshadweep 2023 D=0;Manipur 2023 T=0/D NA
+variance,sensitivity,examined,2022,var_total,2.0816858026590315,1.0009493822180386,3.397061859845059,10000,10000,0,32,3,Arunachal Pradesh 2022 D=0;Lakshadweep 2022 D=0;Puducherry 2022 S=0/T NA/D NA
+variance,sensitivity,examined,2022,var_testing,1.3529192878897518,0.788601662862892,2.009847694093091,10000,10000,0,32,3,Arunachal Pradesh 2022 D=0;Lakshadweep 2022 D=0;Puducherry 2022 S=0/T NA/D NA
+variance,sensitivity,examined,2022,var_positivity,1.2277750152427276,0.5345733450540856,2.057772699294486,10000,10000,0,32,3,Arunachal Pradesh 2022 D=0;Lakshadweep 2022 D=0;Puducherry 2022 S=0/T NA/D NA
+variance,sensitivity,examined,2022,cov,-0.2495042502367244,-0.8147392861338586,0.2789579251330147,10000,10000,0,32,3,Arunachal Pradesh 2022 D=0;Lakshadweep 2022 D=0;Puducherry 2022 S=0/T NA/D NA
+variance,sensitivity,examined,2022,testing_share,0.5300583960574576,0.3542193788638622,0.8433108550194349,10000,10000,0,32,3,Arunachal Pradesh 2022 D=0;Lakshadweep 2022 D=0;Puducherry 2022 S=0/T NA/D NA
+variance,sensitivity,examined,2022,positivity_share,0.469941603942542,0.15668914498056483,0.6457806211361378,10000,10000,0,32,3,Arunachal Pradesh 2022 D=0;Lakshadweep 2022 D=0;Puducherry 2022 S=0/T NA/D NA
+change,sensitivity,tested->examined,2021->2022,dln_yield,-0.4114318217167128,-0.8665144843391406,0.1671357418568801,10000,10000,0,32,5,Arunachal Pradesh 2022 D=0;Lakshadweep 2021 D=0;Lakshadweep 2022 D=0;Puducherry 2021 D=0;Puducherry 2022 S=0/T NA/D NA
+change,sensitivity,tested->examined,2021->2022,testing_part,0.11729114784515637,-0.37882884152518903,0.5575172527516727,10000,10000,0,32,5,Arunachal Pradesh 2022 D=0;Lakshadweep 2021 D=0;Lakshadweep 2022 D=0;Puducherry 2021 D=0;Puducherry 2022 S=0/T NA/D NA
+change,sensitivity,tested->examined,2021->2022,positivity_part,-0.5287229695618687,-0.8261010811580531,-0.07514294894565507,10000,10000,0,32,5,Arunachal Pradesh 2022 D=0;Lakshadweep 2021 D=0;Lakshadweep 2022 D=0;Puducherry 2021 D=0;Puducherry 2022 S=0/T NA/D NA
+change,sensitivity,examined->tested,2022->2023,dln_yield,-0.23455828733790796,-0.5004699202133035,0.29409650182250724,10000,10000,0,29,7,Andaman and Nicobar Islands 2023 D=0;Arunachal Pradesh 2022 D=0;Goa 2023 D=0;Lakshadweep 2022 D=0;Lakshadweep 2023 D=0;Manipur 2023 T=0/D NA;Puducherry 2022 S=0/T NA/D NA
+change,sensitivity,examined->tested,2022->2023,testing_part,0.18590193123364251,-0.22909413893788128,1.0961273744024365,10000,10000,0,29,7,Andaman and Nicobar Islands 2023 D=0;Arunachal Pradesh 2022 D=0;Goa 2023 D=0;Lakshadweep 2022 D=0;Lakshadweep 2023 D=0;Manipur 2023 T=0/D NA;Puducherry 2022 S=0/T NA/D NA
+change,sensitivity,examined->tested,2022->2023,positivity_part,-0.42046021857155136,-1.1055839223143162,-0.004912111388603766,10000,10000,0,29,7,Andaman and Nicobar Islands 2023 D=0;Arunachal Pradesh 2022 D=0;Goa 2023 D=0;Lakshadweep 2022 D=0;Lakshadweep 2023 D=0;Manipur 2023 T=0/D NA;Puducherry 2022 S=0/T NA/D NA
