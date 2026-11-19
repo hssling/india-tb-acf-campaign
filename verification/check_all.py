@@ -1,13 +1,15 @@
 # Copied from hssling/india-state-tb-score (MIT), verification/check_all.py, commit 05bcaa7; modified: steps are pytest and the checks of this repository (no analysis re-run; the manuscript number check and the docx tie check skip when manuscript/ or its submission folder is absent); PASS/FAIL/SKIP labels
 """Run the whole verification: pytest and the checks (plan order, deviations, extraction totals, inventory
-trace, recomputed Q3/Q4 outputs, recomputed extension headline values and labels, and, when the private manuscript is present, its numbers and the
-tie of the submission .docx files to it).
+trace, recomputed Q3/Q4 outputs, recomputed extension headline values and labels, and, when the private manuscript of the extension paper
+(manuscript/ext) is present, its numbers and the tie of the submission .docx files to it).
 
 Run as: python -I verification/check_all.py   (steps run from the repo root)
 
 Steps run as `python -I ...` subprocesses and print PASS, FAIL or SKIP. A step that prints
 a line beginning "SKIPPED" (check_plan_order in a copy without .git; check_manuscript_numbers
-and check_docx_tie without manuscript/ or manuscript/submission/, as in a fresh clone) counts as skipped.
+and check_docx_tie without manuscript/ext/, its manuscript_src.md or its submission/, as in a fresh clone)
+counts as skipped. The audit-framed v1.0.0 manuscript (manuscript/v1_audit) is not checked here; run
+the two checks with --manuscript-dir manuscript/v1_audit for it.
 Prints "N/N checks passed (k skipped)"; exits 1 on any FAIL.
 """
 import subprocess
@@ -16,6 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PY = [sys.executable, "-I"]
+MANUSCRIPT_DIR = "manuscript/ext"  # the extension paper (the v1.0.0 manuscript is manuscript/v1_audit)
 
 STEPS = [
     ("pytest -q", PY + ["-m", "pytest", "-q"]),
@@ -25,8 +28,8 @@ STEPS = [
     ("check_inventory", PY + ["verification/check_inventory.py"]),
     ("check_outputs", PY + ["verification/check_outputs.py"]),
     ("check_ext_outputs", PY + ["verification/check_ext_outputs.py"]),
-    ("check_manuscript_numbers", PY + ["verification/check_manuscript_numbers.py"]),
-    ("check_docx_tie", PY + ["verification/check_docx_tie.py"]),
+    ("check_manuscript_numbers", PY + ["verification/check_manuscript_numbers.py", "--manuscript-dir", MANUSCRIPT_DIR]),
+    ("check_docx_tie", PY + ["verification/check_docx_tie.py", "--manuscript-dir", MANUSCRIPT_DIR]),
 ]
 
 

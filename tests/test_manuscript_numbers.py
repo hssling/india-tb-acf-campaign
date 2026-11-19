@@ -267,23 +267,23 @@ def test_skips_without_manuscript_dir(tmp_path):
 
 
 def test_skips_when_manuscript_holds_only_generated_exhibits(tmp_path):
-    (tmp_path / "manuscript" / "exhibits").mkdir(parents=True)
-    (tmp_path / "manuscript" / "exhibits" / "tables.md").write_text("# Tables\n", encoding="utf-8")
+    (tmp_path / cmn.DEFAULT_MS_DIR / "exhibits").mkdir(parents=True)
+    (tmp_path / cmn.DEFAULT_MS_DIR / "exhibits" / "tables.md").write_text("# Tables\n", encoding="utf-8")
     code, out = run_main(tmp_path)
     assert code == 0 and out.startswith("SKIPPED") and "manuscript_src.md" in out
     assert "kept private, not in this repository" in out and "not written yet" not in out
 
 
 def test_fails_when_the_phrases_file_is_missing(tmp_path):
-    (tmp_path / "manuscript").mkdir()
-    (tmp_path / "manuscript" / cmn.MS_NAME).write_text("# T\n", encoding="utf-8")
+    (tmp_path / cmn.DEFAULT_MS_DIR).mkdir(parents=True)
+    (tmp_path / cmn.DEFAULT_MS_DIR / cmn.MS_NAME).write_text("# T\n", encoding="utf-8")
     code, out = run_main(tmp_path)
     assert code == 1 and out.startswith("FAIL") and cmn.PHRASES in out
 
 
 def test_fails_when_the_manuscript_is_missing_but_phrases_exist(tmp_path):
-    (tmp_path / "manuscript").mkdir()
-    (tmp_path / "manuscript" / cmn.PHRASES).write_text(json.dumps({"sections": FIXTURE_PHRASES}),
+    (tmp_path / cmn.DEFAULT_MS_DIR).mkdir(parents=True)
+    (tmp_path / cmn.DEFAULT_MS_DIR / cmn.PHRASES).write_text(json.dumps({"sections": FIXTURE_PHRASES}),
                                                       encoding="utf-8")
     code, out = run_main(tmp_path)
     assert code == 1 and out.startswith("FAIL") and cmn.MS_NAME in out
@@ -291,9 +291,9 @@ def test_fails_when_the_manuscript_is_missing_but_phrases_exist(tmp_path):
 
 @pytest.mark.parametrize("body", ["not json", "{}", '{"sections": {}}', '{"sections": {"Abstract": "x"}}'])
 def test_fails_on_a_malformed_phrases_file(tmp_path, body):
-    (tmp_path / "manuscript").mkdir()
-    (tmp_path / "manuscript" / cmn.MS_NAME).write_text("# T\n", encoding="utf-8")
-    (tmp_path / "manuscript" / cmn.PHRASES).write_text(body, encoding="utf-8")
+    (tmp_path / cmn.DEFAULT_MS_DIR).mkdir(parents=True)
+    (tmp_path / cmn.DEFAULT_MS_DIR / cmn.MS_NAME).write_text("# T\n", encoding="utf-8")
+    (tmp_path / cmn.DEFAULT_MS_DIR / cmn.PHRASES).write_text(body, encoding="utf-8")
     code, out = run_main(tmp_path)
     assert code == 1 and out.startswith("FAIL")
 
@@ -312,22 +312,22 @@ def test_end_to_end_regenerate_then_check(tmp_path, text):
         src, dst = ROOT / rel, tmp_path / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
         (shutil.copytree if src.is_dir() else shutil.copy2)(src, dst)
-    (tmp_path / "manuscript").mkdir()
-    ms = tmp_path / "manuscript" / cmn.MS_NAME
+    (tmp_path / cmn.DEFAULT_MS_DIR).mkdir(parents=True)
+    ms = tmp_path / cmn.DEFAULT_MS_DIR / cmn.MS_NAME
     ms.write_text(text, encoding="utf-8", newline="\n")
-    (tmp_path / "manuscript" / cmn.PHRASES).write_text(json.dumps({"sections": FIXTURE_PHRASES}),
+    (tmp_path / cmn.DEFAULT_MS_DIR / cmn.PHRASES).write_text(json.dumps({"sections": FIXTURE_PHRASES}),
                                                       encoding="utf-8")
     code, out = run_main(tmp_path)
     assert code == 1 and "number_skeleton.json missing" in out
     assert run_main(tmp_path, "--regenerate")[0] == 0
-    sk = json.loads((tmp_path / "manuscript" / cmn.SKELETON).read_text(encoding="utf-8"))
+    sk = json.loads((tmp_path / cmn.DEFAULT_MS_DIR / cmn.SKELETON).read_text(encoding="utf-8"))
     assert set(sk) == {"about", "sections"}
     code, out = run_main(tmp_path)
     assert code == 0 and out.strip().endswith("0 problem(s)"), out
     ms.write_text(text.replace("0.042", "0.043", 1), encoding="utf-8", newline="\n")
     code, out = run_main(tmp_path)
     assert code == 1 and "MISSING in Abstract" in out
-    assert not re.search(r"\r", (tmp_path / "manuscript" / cmn.SKELETON).read_bytes().decode("utf-8"))
+    assert not re.search(r"\r", (tmp_path / cmn.DEFAULT_MS_DIR / cmn.SKELETON).read_bytes().decode("utf-8"))
 
 
 def test_regenerate_refuses_a_failing_text(text):
@@ -337,7 +337,8 @@ def test_regenerate_refuses_a_failing_text(text):
 
 def test_check_all_runs_the_manuscript_check():
     steps = dict(check_all.STEPS)
-    assert steps["check_manuscript_numbers"][-1] == "verification/check_manuscript_numbers.py"
+    assert steps["check_manuscript_numbers"][-3:] == ["verification/check_manuscript_numbers.py",
+                                                      "--manuscript-dir", "manuscript/ext"]
 
 
 # ------------------------------------------------------------------ the other manuscript files

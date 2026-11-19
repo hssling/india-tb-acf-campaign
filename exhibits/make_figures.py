@@ -7,7 +7,7 @@ Matplotlib is required; if it is not installed the script prints a message to st
 exits 1.
 Every figure is a plot of committed files (data/figures_inventory.csv, outputs/q4_states.csv,
 outputs/q4_summary.csv). No image is generated, edited or retouched by artificial
-intelligence or by hand. Output, in manuscript/exhibits/ (git-ignored, local):
+intelligence or by hand. Output, in manuscript/v1_audit/exhibits/ (git-ignored, local; v1.0.0):
 - figure1.pdf / figure2.pdf   vector (Public Health accepts PDF or EPS);
 - figure1.png / figure2.png   300 dpi raster, greyscale;
 - figure1_data.csv / figure2_data.csv   the plotted points, with their source rows;
@@ -35,7 +35,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.lines import Line2D  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "manuscript" / "exhibits"
+OUT = ROOT / "manuscript" / "v1_audit" / "exhibits"  # the v1.0.0 (audit) manuscript
 DPI = 300
 MINUS = "−"
 CAMPAIGN_START = "2024-12-07"

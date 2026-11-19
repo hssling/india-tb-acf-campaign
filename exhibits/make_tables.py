@@ -1,5 +1,5 @@
 # Adapted from hssling/india-state-tb-score (MIT), exhibits/make_tables.py, commit 05bcaa7; modified: rewritten for the ACF campaign study (tables of Q1-Q4 read from outputs/ and data/; every cell is traced to its source file and column); only the layout idea (a render function, Markdown output, no typed numbers) is kept
-"""Render every manuscript table from outputs/ and data/ to manuscript/exhibits/.
+"""Render every manuscript table from outputs/ and data/ to manuscript/v1_audit/exhibits/ (v1.0.0).
 
 Run as: python -I exhibits/make_tables.py   (from the repository root)
 
@@ -27,7 +27,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "manuscript" / "exhibits"
+OUT = ROOT / "manuscript" / "v1_audit" / "exhibits"  # the v1.0.0 (audit) manuscript
 
 MAIN_TABLES = ["Table 1", "Table 2", "Table 3"]  # main-text tables; the figures are Figures 1 and 2
 SUP = "ᵃᵇᶜᵈᵉᶠ"

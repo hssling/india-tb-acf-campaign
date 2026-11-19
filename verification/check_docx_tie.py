@@ -1,11 +1,13 @@
 # Adapted from hssling/india-state-tb-score (MIT), verification/check_docx_tie.py, commit 05bcaa7; modified: every paragraph, list item, table row and reference of each Public Health submission file is tied to its Markdown source (not only the number tokens); superscripts kept as ^...^; blinding of 02 and 05 checked in every part of the package; internal identifiers; Word's word counts on the title page
 """Tie the submission .docx files to their Markdown sources.
 
-Run as: python -I verification/check_docx_tie.py
+Run as: python -I verification/check_docx_tie.py [--manuscript-dir DIR]
 
-The .docx files in manuscript/submission/ (built by tools/build_submission.py) are what the
-journal receives; the Markdown files in manuscript/ are what check_manuscript_numbers.py
-verifies. This check reads the .docx files with zipfile and ElementTree only and requires:
+The manuscript folder is DIR (default manuscript/ext, the extension paper; the audit-framed
+v1.0.0 manuscript with --manuscript-dir manuscript/v1_audit; a relative DIR is taken from the
+repository root). The .docx files in <folder>/submission/ (built by tools/build_submission.py)
+are what the journal receives; the Markdown files in <folder>/ are what
+check_manuscript_numbers.py verifies. This check reads the .docx files with zipfile and ElementTree only and requires:
 
 1. Text tie. Each file's units (paragraphs outside tables, and table rows as their cells
    joined by " | ") equal, in order, the units of its Markdown source(s) (SPEC): headings,
@@ -23,7 +25,7 @@ verifies. This check reads the .docx files with zipfile and ElementTree only and
    figure files.
 3. Internal identifiers (check_manuscript_numbers.BANNED) do not occur in 02 (before the
    References) or 05.
-4. Word's counts. manuscript/word_counts_word.json (Word's ComputeStatistics on 02, written by
+4. Word's counts. <folder>/word_counts_word.json (Word's ComputeStatistics on 02, written by
    the build) belongs to the current manuscript_src.md, is within the limits (abstract 250,
    main text 3,000), and the title page quotes it.
 5. Supplementary data S1a and S1b (09 and 10, CSV): one row per row of their Q2 output, the
@@ -34,7 +36,7 @@ verifies. This check reads the .docx files with zipfile and ElementTree only and
 6. AMA: in 02, the journal title of each article reference (and nothing else in the list) is
    in italics.
 
-Prints "SKIPPED" and exits 0 when manuscript/ or manuscript/submission/ is absent (both are
+Prints "SKIPPED" and exits 0 when <folder>/ or <folder>/submission/ is absent (both are
 git-ignored). Exit 1 on any problem.
 """
 from __future__ import annotations
@@ -399,7 +401,7 @@ def italics_problems(path: Path, ms_text: str) -> list[str]:
 def word_count_problems(ms_dir: Path, title_units: list[str]) -> list[str]:
     p = ms_dir / "word_counts_word.json"
     if not p.exists():
-        return ["WORDS: manuscript/word_counts_word.json missing (build with Word: "
+        return ["WORDS: word_counts_word.json missing (build with Word: "
                 "python -I tools/build_submission.py)"]
     w = json.loads(p.read_text(encoding="utf-8"))
     out = []
@@ -421,7 +423,7 @@ def word_count_problems(ms_dir: Path, title_units: list[str]) -> list[str]:
 # Driver
 # --------------------------------------------------------------------------------------
 def problems(ms_dir: Path | None = None, root: Path = ROOT) -> list[str]:
-    ms_dir = ms_dir or root / "manuscript"
+    ms_dir = ms_dir or root / cmn.DEFAULT_MS_DIR
     sub = ms_dir / "submission"
     out: list[str] = []
     marks = markers(ms_dir, root)
@@ -466,12 +468,17 @@ def notes(ms_dir: Path) -> list[str]:
     return []
 
 
-def main(root: Path = ROOT) -> int:
+def main(root: Path = ROOT, argv: list[str] | None = None) -> int:
+    argv = sys.argv[1:] if argv is None else argv
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    ms_dir = root / "manuscript"
+    ms_dir, rest = cmn.manuscript_dir(root, argv)
+    if rest:
+        print(f"FAIL: unknown arguments {rest}")
+        return 1
+    name = cmn.rel(ms_dir, root)
     if not ms_dir.is_dir() or not (ms_dir / "submission").is_dir():
-        print("SKIPPED: manuscript/ or manuscript/submission/ not present (kept private, not in this repository)")
+        print(f"SKIPPED: {name}/ or {name}/submission/ not present (kept private, not in this repository)")
         return 0
     found = problems(ms_dir, root)
     for ln in found:

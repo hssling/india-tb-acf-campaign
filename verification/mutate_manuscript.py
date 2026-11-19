@@ -1,10 +1,10 @@
 # Adapted from hssling/india-state-tb-score (MIT), verification/mutate_manuscript.py, commit 05bcaa7; modified: named mutations of the Markdown sources and of the submission .docx files, each applied to a temporary copy of manuscript/ and run through check_manuscript_numbers and check_docx_tie; the number-token sweep kept as --sweep and extended to the anonymised .docx
 """Mutation test of the manuscript checks (check_manuscript_numbers and check_docx_tie).
 
-Run as: python -I verification/mutate_manuscript.py [--sweep]
+Run as: python -I verification/mutate_manuscript.py [--manuscript-dir DIR] [--sweep]
 
-manuscript/ (git-ignored) is copied to a temporary folder for every mutation; the real files
-are never written. Each named mutation (MUTATIONS) changes one thing in the copy, and both
+The manuscript folder DIR (default manuscript/ext; manuscript/v1_audit for v1.0.0; git-ignored)
+is copied to a temporary folder for every mutation; the real files are never written. Each named mutation (MUTATIONS) changes one thing in the copy, and both
 checks are run on it: check_manuscript_numbers.problems (on the copied Markdown, against the
 committed outputs) and check_docx_tie.problems (on the copied Markdown and .docx files). A
 mutation is caught if either check reports at least one problem. The unmutated copy must
@@ -16,7 +16,7 @@ properties), a reference number swapped, a table cell edited, a gamma sign flipp
 internal identifier inserted; also the supplementary data files (a CSV cell, a CSV row, an XLSX
 cell) and the italics of a journal title. The manuscript text a mutation edits (its anchor) quotes
 the manuscript, so it is not kept here: it is read from "mutation_anchors" in the private
-manuscript/section_phrases.json. A mutation whose anchor is missing or not found counts as NOT
+<folder>/section_phrases.json. A mutation whose anchor is missing or not found counts as NOT
 APPLIED and fails the run, so an anchor that drifts cannot pass silently.
 
 --sweep also runs two exhaustive sweeps, in memory or on single-file copies:
@@ -26,7 +26,7 @@ APPLIED and fails the run, so an anchor that drifts cannot pass silently.
     included): the same change; check_docx_tie must catch each.
 
 Prints a table of the results; exits 1 if any mutation is not applied or not caught.
-Prints "SKIPPED" and exits 0 when manuscript/ or manuscript/submission/ is absent.
+Prints "SKIPPED" and exits 0 when <folder>/ or <folder>/submission/ is absent.
 """
 from __future__ import annotations
 
@@ -393,9 +393,10 @@ def main(argv: list[str] | None = None, root: Path = ROOT) -> int:
     argv = sys.argv[1:] if argv is None else argv
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    ms = root / "manuscript"
+    ms, argv = cmn.manuscript_dir(root, argv)
+    name = cmn.rel(ms, root)
     if not ms.is_dir() or not (ms / "submission").is_dir():
-        print("SKIPPED: manuscript/ or manuscript/submission/ not present (kept private, not in this repository)")
+        print(f"SKIPPED: {name}/ or {name}/submission/ not present (kept private, not in this repository)")
         return 0
     rows = run_named(ms)
     bad = 0
@@ -415,7 +416,7 @@ def main(argv: list[str] | None = None, root: Path = ROOT) -> int:
     if "--sweep" in argv:
         text = (ms / cmn.MS_NAME).read_text(encoding="utf-8")
         gold = json.loads((ms / cmn.SKELETON).read_text(encoding="utf-8"))["sections"]
-        others = cmn.load_others(root)
+        others = cmn.load_others(ms)
         required = cmn.section_phrases(ms)
         c, t, e = sweep_md(text, lambda s: cmn.problems(root, s, gold, others, required=required))
         print(f"sweep, manuscript_src.md number tokens (check_manuscript_numbers): caught {c} of {t}")

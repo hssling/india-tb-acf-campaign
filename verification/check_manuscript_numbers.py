@@ -1,19 +1,21 @@
 # Adapted from hssling/india-state-tb-score (MIT), verification/check_manuscript_numbers.py, commit 05bcaa7; modified: rewritten for the ACF campaign study (catalogue of Q1-Q4 values from outputs/ and data/; section-scoped phrases; a golden skeleton that maps every number token to its source; checks for blinding, internal identifiers and reference order)
 """Check every number in the blinded manuscript against the committed outputs.
 
-Run as: python -I verification/check_manuscript_numbers.py [--regenerate]
+Run as: python -I verification/check_manuscript_numbers.py [--manuscript-dir DIR] [--regenerate]
 
-The manuscript (manuscript/, git-ignored) is kept private and is not in this repository. When
-manuscript/ is absent this prints "SKIPPED: manuscript/ not present (kept private, not in this
-repository)" and exits 0, and check_all counts the step as skipped. It is skipped in the same way
-when manuscript/ holds neither manuscript_src.md nor section_phrases.json (as in a clone where
-the tests have written manuscript/exhibits/). If one of those two files is present without the
-other, the check FAILS (exit 1): it never passes without its phrases.
+The manuscript folder (default manuscript/ext, the extension paper; the audit-framed v1.0.0
+manuscript is checked with --manuscript-dir manuscript/v1_audit) is git-ignored, kept private and
+not in this repository. A relative DIR is taken from the repository root. When the folder is
+absent this prints "SKIPPED: <folder>/ not present (kept private, not in this repository)" and
+exits 0, and check_all counts the step as skipped. It is skipped in the same way when the folder
+holds neither manuscript_src.md nor section_phrases.json (as in a clone where the tests have
+written <folder>/exhibits/). If one of those two files is present without the other, the check
+FAILS (exit 1): it never passes without its phrases.
 
-When manuscript/manuscript_src.md is present, these checks run on every section except the
+When <folder>/manuscript_src.md is present, these checks run on every section except the
 References (each section's text with its whitespace collapsed):
 
-1. Section phrases. manuscript/section_phrases.json (git-ignored, kept with the manuscript
+1. Section phrases. <folder>/section_phrases.json (git-ignored, kept with the manuscript
    because the phrases quote it) lists, for each section, phrases with {label}
    placeholders. Each label is a value of catalogue(), derived from outputs/ (and, where
    the outputs are built from them, data/, the registered plan and ENVIRONMENT.md), and
@@ -23,7 +25,7 @@ References (each section's text with its whitespace collapsed):
    the placeholder of a phrase occurrence that covers it, or a FIXED pattern (exhibit,
    question, analysis and class names, years 2018-2026, dates that are catalogue values,
    reference superscripts, the plan's constants). A token with no label is UNACCOUNTED.
-3. The golden skeleton. manuscript/number_skeleton.json holds, for each section, the
+3. The golden skeleton. <folder>/number_skeleton.json holds, for each section, the
    ordered list of {token, label, source} of the reviewed text. The current text must
    give the same tokens with the same labels in the same order, and each golden label
    must still resolve in the catalogue to the same token. Regenerate only after review:
@@ -41,6 +43,7 @@ Exit 1 on any problem.
 """
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 import math
@@ -52,8 +55,10 @@ from functools import lru_cache
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SKIP_DIR = "SKIPPED: manuscript/ not present (kept private, not in this repository)"
-SKIP_MS = "SKIPPED: manuscript/manuscript_src.md not present (kept private, not in this repository)"
+DEFAULT_MS_DIR = "manuscript/ext"  # the extension paper; the v1.0.0 audit manuscript is manuscript/v1_audit
+V1_EXHIBITS = "manuscript/v1_audit/exhibits"  # where exhibits/make_figures.py writes the v1.0.0 figures
+SKIP_DIR = "SKIPPED: {d}/ not present (kept private, not in this repository)"
+SKIP_MS = "SKIPPED: {d}/manuscript_src.md not present (kept private, not in this repository)"
 MS_NAME = "manuscript_src.md"
 PHRASES = "section_phrases.json"
 SKELETON = "number_skeleton.json"
@@ -460,8 +465,8 @@ def catalogue(root: Path) -> dict[str, tuple[str, str]]:
     big = fig_value(root, "PIB2335615.p013.s-48-64-lakh-new-tb-cases.tb_cases")
     put("fig.48", big["value_printed"], "data/figures_inventory.csv: PIB2335615 p013 value_printed")
     put("date.pib2335615", day(big["pub_date"]), "data/figures_inventory.csv: PIB2335615 pub_date")
-    fig1 = (root / "manuscript" / "exhibits" / "figure1_data.csv")
-    if fig1.exists() and not any(r["fig_id"] == big["fig_id"] for r in read_csv(root, "manuscript/exhibits/figure1_data.csv")):
+    fig1 = root / V1_EXHIBITS / "figure1_data.csv"
+    if fig1.exists() and not any(r["fig_id"] == big["fig_id"] for r in read_csv(root, f"{V1_EXHIBITS}/figure1_data.csv")):
         raise ValueError("Figure 1 does not plot the 48.64 lakh point")
 
     # ---- software and the AI disclosure --------------------------------------------------------
@@ -567,7 +572,7 @@ def claims(root: Path) -> list[str]:
 
 
 # --------------------------------------------------------------------------------------
-# Section phrases: private, read at run time from manuscript/section_phrases.json
+# Section phrases: private, read at run time from <manuscript folder>/section_phrases.json
 # --------------------------------------------------------------------------------------
 def load_phrase_file(ms_dir: Path) -> dict:
     """The private phrases file of a manuscript folder (git-ignored, like the manuscript).
@@ -580,7 +585,7 @@ def load_phrase_file(ms_dir: Path) -> dict:
     if not isinstance(secs, dict) or not secs or not all(
             isinstance(k, str) and isinstance(v, list) and all(isinstance(x, str) for x in v)
             for k, v in secs.items()):
-        raise ValueError(f"manuscript/{PHRASES}: 'sections' must map section names to lists of phrases")
+        raise ValueError(f"{PHRASES}: 'sections' must map section names to lists of phrases")
     return d
 
 
@@ -898,8 +903,26 @@ def wording_problems(text: str, root: Path) -> list[str]:
 # --------------------------------------------------------------------------------------
 # Driver
 # --------------------------------------------------------------------------------------
-def load_gold(root: Path) -> dict | None:
-    p = root / "manuscript" / SKELETON
+def manuscript_dir(root: Path, argv: list[str]) -> tuple[Path, list[str]]:
+    """(the manuscript folder, the other arguments): --manuscript-dir DIR (default
+    manuscript/ext); a relative DIR is taken from `root`."""
+    ap = argparse.ArgumentParser(add_help=False)
+    ap.add_argument("--manuscript-dir", default=DEFAULT_MS_DIR)
+    a, rest = ap.parse_known_args(argv)
+    d = Path(a.manuscript_dir)
+    return (d if d.is_absolute() else root / d), rest
+
+
+def rel(p: Path, root: Path) -> str:
+    """A folder's name for messages: relative to `root` where it can be, with '/'."""
+    try:
+        return p.relative_to(root).as_posix()
+    except ValueError:
+        return p.as_posix()
+
+
+def load_gold(ms_dir: Path) -> dict | None:
+    p = ms_dir / SKELETON
     if not p.exists():
         return None
     return json.loads(p.read_text(encoding="utf-8"))["sections"]
@@ -920,11 +943,11 @@ def declaration_problems(text: str, title_page: str) -> list[str]:
     return []
 
 
-def load_others(root: Path) -> dict[str, str]:
-    """The other manuscript files that exist, by name (none in a fresh clone)."""
+def load_others(ms_dir: Path) -> dict[str, str]:
+    """The other manuscript files of the folder that exist, by name (none in a fresh clone)."""
     out = {}
     for name in OTHER_FILES:
-        p = root / "manuscript" / name
+        p = ms_dir / name
         if p.exists():
             out[name] = p.read_text(encoding="utf-8")
     return out
@@ -934,7 +957,7 @@ def problems(root: Path, text: str, gold: dict | None, others: dict[str, str] | 
              required: dict[str, list[str]]) -> list[str]:
     """Every problem of the manuscript text; `required` is the section phrases (section_phrases())."""
     if not required:
-        return [f"PHRASES: no section phrases (manuscript/{PHRASES} missing or empty)"]
+        return [f"PHRASES: no section phrases ({PHRASES} missing or empty)"]
     now, out = skeleton(text, root, required)
     for name, body in (others or {}).items():
         out += other_file_problems(name, body, root, OTHER_FILES[name])
@@ -953,7 +976,7 @@ def golden(text: str, root: Path, required: dict[str, list[str]]) -> dict:
     if probs:
         raise SystemExit("cannot regenerate the skeleton while phrases or numbers fail:\n" + "\n".join(probs))
     return {
-        "about": "Golden numeric skeleton of manuscript/manuscript_src.md: for each section, every number "
+        "about": "Golden numeric skeleton of manuscript_src.md: for each section, every number "
                  "token in reading order with the catalogue label that accounts for it and that label's "
                  "source (file and column). Written by verification/check_manuscript_numbers.py "
                  "--regenerate after review; checked on every run.",
@@ -965,37 +988,38 @@ def main(root: Path = ROOT, argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # problems quote "−" and "≥"
-    ms_dir = root / "manuscript"
+    ms_dir, argv = manuscript_dir(root, argv)
+    name = rel(ms_dir, root)
     if not ms_dir.is_dir():
-        print(SKIP_DIR)
+        print(SKIP_DIR.format(d=name))
         return 0
     ms, ph = ms_dir / MS_NAME, ms_dir / PHRASES
     if not ms.exists() and not ph.exists():
-        print(SKIP_MS)
+        print(SKIP_MS.format(d=name))
         return 0
     if not ms.exists() or not ph.exists():
         have, lack = (MS_NAME, PHRASES) if ms.exists() else (PHRASES, MS_NAME)
-        print(f"FAIL: manuscript/{have} is present but manuscript/{lack} is missing; the check cannot "
+        print(f"FAIL: {name}/{have} is present but {name}/{lack} is missing; the check cannot "
               f"run without both (the section phrases are kept, git-ignored, beside the manuscript)")
         return 1
     try:
         required = section_phrases(ms_dir)
     except ValueError as e:  # json.JSONDecodeError is a ValueError
-        print(f"FAIL: manuscript/{PHRASES} cannot be read: {e}")
+        print(f"FAIL: {name}/{PHRASES} cannot be read: {e}")
         return 1
     text = ms.read_text(encoding="utf-8")
     if "--regenerate" in argv:
         g = golden(text, root, required)
-        (root / "manuscript" / SKELETON).write_text(json.dumps(g, indent=1, ensure_ascii=False) + "\n",
-                                                    encoding="utf-8", newline="\n")
+        (ms_dir / SKELETON).write_text(json.dumps(g, indent=1, ensure_ascii=False) + "\n",
+                                       encoding="utf-8", newline="\n")
         n = sum(len(v) for v in g["sections"].values())
-        print(f"wrote manuscript/{SKELETON}: {n} number tokens in {len(g['sections'])} sections")
+        print(f"wrote {name}/{SKELETON}: {n} number tokens in {len(g['sections'])} sections")
         return 0
-    others = load_others(root)
-    found = problems(root, text, load_gold(root), others, required=required)
+    others = load_others(ms_dir)
+    found = problems(root, text, load_gold(ms_dir), others, required=required)
     for ln in found:
         print(ln)
-    gold = load_gold(root) or {}
+    gold = load_gold(ms_dir) or {}
     n_tok = sum(len(v) for v in gold.values())
     n_traced = sum(1 for v in gold.values() for x in v if not x["label"].startswith("fixed:"))
     n_ph = sum(len(v) for v in required.values())

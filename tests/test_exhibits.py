@@ -99,7 +99,7 @@ def test_build_writes_local_files():
     r = subprocess.run([sys.executable, "-I", str(ROOT / "exhibits" / "make_tables.py")], cwd=ROOT,
                        capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
-    t = (ROOT / "manuscript" / "exhibits" / "tables.md").read_text(encoding="utf-8")
+    t = (mt.OUT / "tables.md").read_text(encoding="utf-8")
     assert "\r" not in t
 
 
@@ -109,7 +109,7 @@ def test_figures_build():
                        capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
     for n in ("figure1.png", "figure1.pdf", "figure2.png", "figure2.pdf"):
-        assert (ROOT / "manuscript" / "exhibits" / n).stat().st_size > 5000
+        assert (mt.OUT / n).stat().st_size > 5000
 
 
 def test_md_table_escapes_a_pipe_inside_a_cell():

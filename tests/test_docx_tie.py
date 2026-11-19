@@ -102,10 +102,10 @@ def test_identifiers_before_references_only():
 
 
 def test_skips_without_manuscript(tmp_path, capsys):
-    assert tie.main(root=tmp_path) == 0
+    assert tie.main(root=tmp_path, argv=[]) == 0
     assert capsys.readouterr().out.startswith("SKIPPED")
-    (tmp_path / "manuscript").mkdir()
-    assert tie.main(root=tmp_path) == 0
+    (tmp_path / "manuscript" / "ext").mkdir(parents=True)
+    assert tie.main(root=tmp_path, argv=[]) == 0
     assert capsys.readouterr().out.startswith("SKIPPED")
 
 

@@ -1,6 +1,6 @@
 # Exhibit sources
 
-Every number in an exhibit is read from the files below (or is a count of their rows, with the filter recorded in `manuscript/exhibits/trace.json`). Nothing is typed in the scripts. `tests/test_exhibits.py` re-derives the traced cells.
+Every number in an exhibit is read from the files below (or is a count of their rows, with the filter recorded in `manuscript/v1_audit/exhibits/trace.json` (the v1.0.0 manuscript; the extension exhibits are in EXT_EXHIBIT_SOURCES.md)). Nothing is typed in the scripts. `tests/test_exhibits.py` re-derives the traced cells.
 
 | Exhibit | Cell group | File | Column or rule |
 |---|---|---|---|

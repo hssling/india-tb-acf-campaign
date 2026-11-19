@@ -1,12 +1,16 @@
 # Adapted from hssling/india-state-tb-score (MIT), manuscript/build_docx.py, commit 05bcaa7; modified: Public Health (Elsevier) submission set; sources are the private manuscript_src.md, first_page_src.md, cover_letter.md, record_checklist.md and exhibits/tables.md; tables with top, header and bottom rules only; superscript letter footnotes; line numbers; TIFF from the vector PDF
-"""Build the Public Health submission set into manuscript/submission/ (git-ignored, private).
+"""Build the Public Health submission set into <manuscript folder>/submission/ (git-ignored, private).
 
-Run as: python -I tools/build_submission.py [--doi 10.5281/zenodo.NNNNNNN] [--no-word]
+Run as: python -I tools/build_submission.py [--manuscript-dir DIR] [--doi 10.5281/zenodo.NNNNNNN] [--no-word]
+
+The manuscript folder is DIR: default manuscript/ext (the extension paper); the audit-framed
+v1.0.0 manuscript is built with --manuscript-dir manuscript/v1_audit. A relative DIR is taken
+from the repository root.
 
 Needs pandoc on PATH, python-docx, Pillow and PyMuPDF (fitz); Microsoft Word (through
-PowerShell COM) for the word counts unless --no-word. Sources (manuscript/, git-ignored):
+PowerShell COM) for the word counts unless --no-word. Sources (in the folder, git-ignored):
 manuscript_src.md (blinded), first_page_src.md, cover_letter.md, record_checklist.md and
-exhibits/ (tables.md, figure1.pdf, figure2.pdf). Nothing is written outside manuscript/.
+exhibits/ (tables.md, figure1.pdf, figure2.pdf). Nothing is written outside the folder.
 
 Output (docs/journal_rules.md; Elsevier generic style): A4, 2.5 cm margins, Times New Roman
 12 pt, double spacing, page numbers at the foot; continuous line numbers in the anonymised
@@ -20,14 +24,14 @@ as superscript lowercase letters; 10 pt single-spaced cells (9 pt in the landsca
   05_supplementary_material.docx  Tables S1 to S4 and the column dictionary of the data (blinded)
   09_supplementary_data_S1a_registered.csv, 10_supplementary_data_S1b_corrected.csv
                                   Supplementary data S1a and S1b: every Q2 entry pair (copied from
-                                  manuscript/exhibits/, written there by exhibits/make_tables.py)
+                                  <folder>/exhibits/, written there by exhibits/make_tables.py)
   11_supplementary_data_S1.xlsx   both, one sheet each (only if openpyxl is installed)
   06_cover_letter.docx
   07_RECORD_checklist.docx
   08_declaration_of_interests.docx
 
 Word's own counts of the abstract and the main text of 02 go to
-manuscript/word_counts_word.json (tools/word_count_word.ps1); the title page must quote them
+<folder>/word_counts_word.json (tools/word_count_word.ps1); the title page must quote them
 (verification/check_docx_tie.py checks it). The text of every .docx is tied to its Markdown
 source by verification/check_docx_tie.py.
 """
@@ -55,9 +59,16 @@ from docx.shared import Cm, Pt
 from docx.text.run import Run
 
 ROOT = Path(__file__).resolve().parents[1]
-MS = ROOT / "manuscript"
+DEFAULT_MS_DIR = "manuscript/ext"  # the extension paper; v1.0.0 (audit framing) is manuscript/v1_audit
+MS = ROOT / DEFAULT_MS_DIR
 EX = MS / "exhibits"
 OUT = MS / "submission"
+
+
+def configure(ms_dir: Path) -> None:
+    """Point the build at a manuscript folder: its sources, exhibits/ and submission/."""
+    global MS, EX, OUT
+    MS, EX, OUT = ms_dir, ms_dir / "exhibits", ms_dir / "submission"
 FONT = "Times New Roman"
 DOI_PLACEHOLDER = "10.5281/zenodo.XXXXXXX"
 DOI_RE = re.compile(r"^10\.5281/zenodo\.\d+$")
@@ -656,11 +667,15 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--doi", help="the Zenodo version DOI (10.5281/zenodo.NNNNNNN) for the title page")
     ap.add_argument("--no-word", action="store_true", help="skip Word's word counts")
+    ap.add_argument("--manuscript-dir", default=DEFAULT_MS_DIR,
+                    help="the manuscript folder (default manuscript/ext; v1.0.0: manuscript/v1_audit)")
     a = ap.parse_args(argv)
     if a.doi and not DOI_RE.match(a.doi):
         raise SystemExit(f"--doi must look like 10.5281/zenodo.NNNNNNN, not {a.doi!r}")
+    d = Path(a.manuscript_dir)
+    configure(d if d.is_absolute() else ROOT / d)
     if not MS.is_dir():
-        raise SystemExit("manuscript/ not present (it is private)")
+        raise SystemExit(f"{a.manuscript_dir} not present (it is private)")
     OUT.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)
