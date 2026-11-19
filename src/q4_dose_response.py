@@ -728,11 +728,19 @@ def load_trend(fallback: bool, ext: dict[str, str]) -> dict[int, dict]:
     return out
 
 
+def exposure_share(campaign_count: int, lgd_count: int) -> float:
+    """E = min(1, c/L) (§9.3), computed exactly from the counts (combined units hold
+    the summed c and L, §9.4), not from the rounded share printed in the file."""
+    return min(1.0, campaign_count / lgd_count)
+
+
 def load_exposure(dset: str) -> dict[str, dict]:
     out = {}
     for r in _read(EXPOSURE_FILES[dset]):
         ok = r["computable"] == "yes"
-        out[r["unit"]] = {"E": float(r["share"]) if ok else None, "computable": ok,
+        E = (exposure_share(int(r["campaign_count"]), int(r["lgd_count"])) if ok
+             else None)
+        out[r["unit"]] = {"E": E, "computable": ok,
                           "capped": r["capped"] == "yes",
                           "flagged": r["flagged_e5"] == "yes",
                           "campaign_count": r["campaign_count"],
@@ -980,7 +988,9 @@ def run_q4(draws: int = DRAWS) -> dict:
         summary.append(_summary(
             "S2 leave one out", dset, primary_c, p_tr, wdesc,
             {"status": f"{len(rows)} refits, each on n - 1 States; no bootstrap (§10.5)",
-             "n": len(prim) - 1, "label": "not applicable (no bootstrap, §10.5 S2)"},
+             "n": len(prim) - 1, "label": "not applicable (no bootstrap, §10.5 S2)",
+             # spread of exposure of the full sample the omissions are taken from (§10.2)
+             **_exposure_stats([r["E"] for r in prim], [r["w"] for r in prim])},
             note="per-omission γ1 in outputs/q4_s2_leave_one_out.csv", **stats))
         for name, yrs in (("S3 trend 2022-2024", S3_YEARS),
                           ("S4 trend 2019, 2022, 2023", S4_YEARS)):

@@ -242,9 +242,22 @@ One row per analysis × denominator set (`R`, `D`).
 | label_note | On the primary row: the placebo consequence of §10.8, if its model interval excludes 0 |
 | note | Trend sources, scaling factor, placebo sources |
 
-S8(b) is not computable under either denominator. The 2023 count in LS Q261 equals the India TB Report
-2024 count in every State, so r = 1 and ln r = 0 everywhere, and ln r is collinear with the intercept
-(§10.5). The `without ln r` row is therefore the S8 fit.
+**S8(b) is not computable under either denominator.**
+
+- **Why.** In every State, the 2023 count in LS Q261 equals the India TB Report 2024 count. So r = 1 and
+  ln r = 0 everywhere, and ln r is collinear with the intercept (§10.5). The `without ln r` row is
+  therefore the S8 fit.
+- **What the equality means.** RS Q1216's 2023 column (as on 6 February 2026) also equals the India TB
+  Report 2024 in every State, so the published annual 2023 figure appears frozen. Equal counts show
+  that the ln r proxy cannot measure late updating. They do not show that no late updating occurred.
+- **The §9.6 cross-check.** Q1216's 2023 counts against the India TB Report 2024 give zero differences
+  in all 35 units. The 2023 level difference between the trend sources named in §10.9 is therefore
+  nil.
+
+The S2 row gives the exposure spread of the full sample from which the omissions are taken (§10.2).
+
+The exposure share is computed exactly as E = min(1, c/L) from the counts (§9.3). The `share` column of
+the exposure files is rounded to 6 decimals, and is not used.
 
 ### q4_states.csv
 

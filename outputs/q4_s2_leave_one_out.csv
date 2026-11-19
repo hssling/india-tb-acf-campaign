@@ -14,7 +14,7 @@ R,Puducherry,15,0.056036,0.001206,fitted
 R,Sikkim,15,0.054884,0.000054,fitted
 R,Tripura,15,0.055346,0.000516,fitted
 R,Uttar Pradesh,15,0.033056,-0.021775,fitted
-R,West Bengal,15,-0.015111,-0.069942,fitted
+R,West Bengal,15,-0.015112,-0.069942,fitted
 D,Andaman and Nicobar Islands,34,0.042251,0.000035,fitted
 D,Andhra Pradesh,34,0.042170,-0.000046,fitted
 D,Arunachal Pradesh,34,0.041851,-0.000366,fitted
@@ -26,7 +26,7 @@ D,Dadra and Nagar Haveli and Daman and Diu,34,0.042385,0.000168,fitted
 D,Delhi,34,0.018548,-0.023668,fitted
 D,Goa,34,0.042584,0.000367,fitted
 D,Gujarat,34,0.042253,0.000036,fitted
-D,Haryana,34,0.042204,-0.000013,fitted
+D,Haryana,34,0.042203,-0.000013,fitted
 D,Himachal Pradesh,34,0.042710,0.000493,fitted
 D,Jammu and Kashmir (incl. Ladakh),34,0.042197,-0.000019,fitted
 D,Jharkhand,34,0.045774,0.003557,fitted
@@ -48,5 +48,5 @@ D,Tamil Nadu,34,0.039496,-0.002721,fitted
 D,Telangana,34,0.045579,0.003362,fitted
 D,Tripura,34,0.042261,0.000044,fitted
 D,Uttar Pradesh,34,0.039857,-0.002359,fitted
-D,Uttarakhand,34,0.043133,0.000916,fitted
+D,Uttarakhand,34,0.043132,0.000916,fitted
 D,West Bengal,34,0.035247,-0.006970,fitted

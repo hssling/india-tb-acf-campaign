@@ -271,6 +271,24 @@ def test_runs_under_both_exposure_sets(result):
     assert len([r for r in result["loo"] if r["denominator_set"] == "R"]) == 16
 
 
+def test_exposure_is_exact_min_1_c_over_l():
+    assert q4.exposure_share(1, 26) == 1 / 26
+    assert q4.exposure_share(11, 11) == 1.0
+    assert q4.exposure_share(12, 11) == 1.0                    # capped (E5)
+    ex = q4.load_exposure("D")
+    assert ex["Andhra Pradesh"]["E"] == 1 / 26                # file prints 0.038462
+    assert ex["Uttarakhand"]["E"] == 8 / 13
+    assert q4.load_exposure("R")["Assam"]["E"] is None
+
+
+def test_s2_row_reports_full_sample_exposure_spread(result):
+    for d in ("R", "D"):
+        s2, p = _row(result, "S2 leave one out", d), _row(result, q4.PRIMARY, d)
+        for k in ("exposure_sd", "exposure_min", "exposure_max", "exposure_mean_weighted",
+                  "exposure_mean_unweighted"):
+            assert s2[k] != "" and s2[k] == p[k]
+
+
 def test_no_p_values_in_outputs(result):
     for rows in (result["summary"], result["states"], result["loo"]):
         for k in rows[0]:
