@@ -818,3 +818,7 @@ Deviations from this plan are logged here, each with its date. Anything explorat
 **19 November 2026 (after registration; clarification of §5.2).** India TB Report State annexures print no year. Their window is taken from the data year fixed for each edition in §3.1.1 and §3.2, with a note on each row. This clarifies §5.2's "as stated".
 
 **19 November 2026 (after registration; factual).** The guard (§9.5.2) was computed and recorded in data/source_choices.csv on 19 November 2026, before any other Q computation.
+
+**19 November 2026 (after registration; clarification of the guard-order entry above, added at commit 11cfbe4).** The guard result was recorded as a dated addendum (OUT-08, GRD-01..06) after source-choice freeze commit dbb71b3, whereas §9.5.2 had placed it before the freeze. No other Q computation existed at either commit.
+
+**19 November 2026 (after registration; factual).** Part D (19 November 2026): include = yes web pages were read online and entered in the inventory after the source-choice freeze commit and before any Q1–Q3 computation; they are recorded as a dated addendum to data/source_choices.csv.

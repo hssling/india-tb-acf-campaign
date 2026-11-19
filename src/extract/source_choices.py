@@ -231,8 +231,10 @@ def named() -> list[dict]:
 
 
 def scope() -> list[dict]:
+    from src.extract import online_pages as W   # Part D rows are a later addendum (WEB-*)
     out = []
-    rows = sorted(_read("inventory_scope_decisions.csv"),
+    rows = sorted((r for r in _read("inventory_scope_decisions.csv")
+                   if r["source_file"] not in W.OWN_FILES),
                   key=lambda r: (r["source_file"], r["kind"] != "rule", r["doc"],
                                  int(r["page"]) if r["page"].isdigit() else 0,
                                  r["where"], r["figures"]))
@@ -587,10 +589,98 @@ def guard_rows() -> list[dict]:
     ]
 
 
+WEB_DATE = "2026-11-19"
+WEB_T = "web pages read online (§3.3, §5.3)"
+SIX_PDFS = ("Lok Sabha Starred Q. 79; Rajya Sabha Unstarred Q. 414 (6 Feb 2024), Q. 278 and "
+            "Q. 279 (4 Feb 2025), Q. 2051 (18 Mar 2025); the MHA advisory of 8 Jan 2025")
+
+
+def online_rows() -> list[dict]:
+    """Dated addendum: the include = yes web pages and the pages they cite (§5.3), read online
+    and entered in the inventory after the freeze commit dbb71b3 and the guard addendum
+    (11cfbe4), before any Q1-Q3 computation. Built from data/transcribed/online_pages.csv and
+    src/extract/online_pages.py."""
+    from src.extract import online_pages as W
+    summ = W.page_summary()
+    src = "data/transcribed/online_pages.csv; src/extract/online_pages.py"
+    read = [p for p in summ if p["availability"] == "read"]
+    una = [p for p in summ if p["availability"] != "read"]
+    cited = [p for p in read if p["cited_by"]]
+    inc = [p for p in read if not p["cited_by"]]
+    inc_fig = [p for p in inc if p["n_rows"]]
+    inc_none = [p for p in inc if not p["n_rows"]]
+    cit_fig = [p for p in cited if p["n_rows"]]
+    cit_none = [p for p in cited if not p["n_rows"]]
+    n_rows = sum(p["n_rows"] for p in summ)
+    lab = lambda ps: "; ".join(f"{p['page_key']} ({p['n_rows']})" if p["n_rows"]
+                               else p["page_key"] for p in ps)
+    d = WEB_DATE
+    rows = [
+        _rec("WEB-01", WEB_T, src, "the include = yes web pages and the cited sources",
+             "The include = yes web pages were read online and entered in the inventory after "
+             "the source-choice freeze commit (dbb71b3) and the guard addendum (11cfbe4), "
+             "before any Q1-Q3 computation. They are recorded here as a dated addendum; no "
+             "frozen row is changed",
+             f"{len(read)} pages read, {n_rows} inventory rows, {len(una)} pages unavailable",
+             "§3.3; §5.3; §5.4; §13 (Part D, 19 November 2026)",
+             "figures_inventory.csv; inventory_scope_decisions.csv", d),
+        _rec("WEB-02", WEB_T, "each page's URL", "reading method",
+             "Raw HTML fetched with curl to standard output (user agent 'Mozilla/5.0') and the "
+             "visible text extracted with python -I and html.parser; sentences and table cells "
+             "copied from that text; nothing saved to the repository or data_raw; URL, access "
+             "time (UTC) and method recorded for each page. No login, form or CAPTCHA",
+             "applied; for ntep.in the user agent 'Mozilla/5.0' was refused (HTTP 406, "
+             "Mod_Security) and the page was read with the user agent 'curl/8.0'",
+             "§3.3 (read online, cited with URL and access date)", src, d),
+        _rec("WEB-03", WEB_T, "include = yes pages with in-scope figures",
+             "Pages entered in the inventory (inventory rows in brackets)", lab(inc_fig),
+             "§5.1; §5.3 (first set)", src, d),
+        _rec("WEB-04", WEB_T, "include = yes pages without an in-scope figure",
+             "Pages read; no figure entered; what was left out is in inventory_scope_decisions.csv",
+             lab(inc_none), "§5.1; §7.2 rule 3 and 4 of the campaign scope rule", src, d),
+        _rec("WEB-05", WEB_T, "cited sources (§5.3, second set)",
+             "Pages that an included page names as the source of a figure, by footnote or "
+             "reference list, read and entered (rows in brackets). PIB PRID 2199422 is the "
+             "release cited by footnote 2 of the 24 March 2026 PIB note for the Cough Against TB "
+             "figures", lab(cit_fig), "§5.3 (documents cited by name as the source of a figure; "
+                                      "their own references are not followed)", src, d),
+        _rec("WEB-06", WEB_T, "cited sources without an in-scope figure",
+             "Cited pages read; no figure entered", lab(cit_none), "§5.3", src, d),
+        _rec("WEB-07", WEB_T, "PIB PRID 2115334 (provisional row of the search log)",
+             "Resolved before any figure was taken: the release (Gujarati text, 26 March 2025, "
+             "PIB Ahmedabad) is a message of thanks that prints no figure of a §5.1 quantity, "
+             "so it is excluded", "excluded", "§5.3 (the provisional row)",
+             "data/search_log.csv is left as registered; the decision is recorded here and in "
+             "inventory_scope_decisions.csv", d),
+        _rec("WEB-08", WEB_T, "pages unavailable",
+             "Pages that could not be read verbatim are listed as unavailable",
+             "unavailable: " + "; ".join(f"{p['page_key']} ({p['url']})" for p in una),
+             "§3.3 (a source that cannot be obtained is reported as unavailable)", src, d),
+        _rec("WEB-09", WEB_T, "not in scope of this addendum",
+             "Not read here: " + SIX_PDFS + " (PDF downloads by the author, entered later); the "
+             "data.gov.in mirrors (§3.4: cross-checks only; not reachable); the PMC, PLOS, "
+             "Figshare and LGD pages (read in Part C and the LGD work); the WHO pages, social "
+             "media posts and PDF links among the references (not official PIB or Ministry "
+             "pages, or downloads)", "not entered", "§3.3; §3.4; §5.1", src, d),
+    ]
+    for k, p in enumerate(summ, start=1):
+        if p["availability"] == "read":
+            res = (f"{p['n_rows']} inventory rows" if p["n_rows"]
+                   else "read; no in-scope figure")
+            dec = f"{p['title'][:110]} (read with: {p['method'][:60]}...)"
+        else:
+            res, dec = "unavailable", "page could not be read"
+        if p["cited_by"]:
+            res += "; cited source: " + p["cited_by"]
+        rows.append(_rec(f"WEB-P{k:02d}", WEB_T, p["url"], f"accessed {p['accessed_utc']}",
+                         dec, res, "§3.3; §5.3", src, d))
+    return rows
+
+
 def build() -> list[dict]:
     rows = (exposure() + lgd() + labels_() + totals() + named() + scope() + quality()
             + general() + q4() + outcome_tables() + trend() + coarsening() + q3_tables()
-            + guard_rows())
+            + guard_rows() + online_rows())
     ids = [r["decision_id"] for r in rows]
     dup = sorted({i for i in ids if ids.count(i) > 1})
     if dup:
