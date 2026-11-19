@@ -289,3 +289,5 @@ The registration point (commit and UTC time of the public push) is recorded in `
 **19 November 2026.** None.
 
 **Registration point.** Registered by the public push of commit 6a98549 on 19 November 2026 at 16:21:19 UTC (GitHub API); no extension estimate, module or output existed at that commit.
+
+**19 November 2026 (after registration; after the registered tier results were seen).** Post hoc sensitivity: State tiers and ranks recomputed with a within-State random-effects mean over 2021–2023 that includes between-year variation, because the registered plug-in intervals reflect binomial variance only and the within-State between-year SD was a median of about 20 times the posterior SD. Reported beside the registered tiers; a tier is described as robust only if it agrees under both.

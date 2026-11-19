@@ -164,3 +164,76 @@ def test_pooled_state_yield_matches_output():
     m, sd = Y.pooled_state_yield("Kerala")
     assert repr(m) == states["Kerala"]["post_mean_log"]
     assert repr(sd) == states["Kerala"]["post_sd_log"]
+
+
+def test_rank_order_known():
+    lo, hi = Y.rank_intervals(np.array([2.0, 0.0, -2.0]), np.full(3, 0.01),
+                              np.random.default_rng(20261119))
+    assert list(lo) == [1, 2, 3] and list(hi) == [1, 2, 3]
+
+
+@needs_data
+def test_build_reproduces_committed_outputs():
+    built = Y.build()
+    assert set(built) == {"d1_pooled.csv", "d1_states.csv", "d1_excluded.csv",
+                          "d1_states_betweenyear.csv", "d1_pooled_betweenyear.csv"}
+    for name, text in built.items():
+        assert (OUT / name).read_bytes() == text.encode("utf-8"), name
+    assert Y.build() == built  # a second run is identical
+
+
+# ---- POST HOC between-year sensitivity (extension plan section 10, 19 November 2026)
+
+def _synthetic_panel():
+    rows = []
+    # unit A: yields vary across years (100, 400, 25 per 100,000)
+    for year, d in ((2021, 100), (2022, 400), (2023, 25)):
+        rows.append({"unit": "A", "year": year, "screened": 100000, "diagnosed": d})
+    # unit B: a single usable year (2022 zero, 2023 NA)
+    rows += [{"unit": "B", "year": 2021, "screened": 50000, "diagnosed": 40},
+             {"unit": "B", "year": 2022, "screened": 50000, "diagnosed": 0},
+             {"unit": "B", "year": 2023, "screened": 50000, "diagnosed": None}]
+    # units C, D: steady yields, so the cross-State pooling has k = 4
+    for u, d in (("C", 60), ("D", 90)):
+        for year in (2021, 2022, 2023):
+            rows.append({"unit": u, "year": year, "screened": 100000, "diagnosed": d})
+    return rows
+
+
+def test_betweenyear_se_wider_than_binomial():
+    D, S = [100, 400, 25], [100000] * 3
+    y, se, t2 = Y.within_state_yield(D, S)
+    binomial_se = math.sqrt(1 / sum(D) - 1 / sum(S))  # registered pooled-sum variance
+    assert t2 > 0 and se > 5 * binomial_se
+    # through the analysis: A's state variance exceeds its registered binomial variance
+    _, states, _ = Y.analyse_betweenyear(rows=_synthetic_panel())
+    a = {s["unit"]: s for s in states}["A"]
+    assert a["v_log"] > 1 / 525 - 1 / 300000 and a["single_year"] is False
+
+
+def test_betweenyear_single_year_flagged():
+    pool, states, excl = Y.analyse_betweenyear(rows=_synthetic_panel())
+    st = {s["unit"]: s for s in states}
+    assert st["B"]["single_year"] is True and st["B"]["n_years"] == 1
+    assert st["B"]["within_tau2"] is None
+    assert st["B"]["y_log"] == pytest.approx(math.log(40 / 50000))
+    assert st["B"]["v_log"] == pytest.approx(1 / 40 - 1 / 50000)
+    assert {(e["unit"], e["year"]) for e in excl} == {("B", 2022), ("B", 2023)}
+    assert pool["k"] == 4
+
+
+@needs_data
+def test_betweenyear_output():
+    rows = _csv("d1_states_betweenyear.csv")
+    registered = {r["unit"]: r["tier"] for r in _csv("d1_states.csv")
+                  if r["analysis"] == "2021-2023"}
+    assert {r["unit"] for r in rows} == set(registered)
+    for r in rows:
+        assert r["tier_registered"] == registered[r["unit"]]
+        assert r["tier_agrees"] == ("yes" if r["tier"] == r["tier_registered"] else "no")
+        assert r["single_year"] == ("yes" if r["n_years"] == "1" else "no")
+        for lo, hi in (("post_lo_log", "post_hi_log"), ("rank_lo", "rank_hi")):
+            assert float(r[lo]) <= float(r[hi])
+    (s,) = _csv("d1_pooled_betweenyear.csv")
+    assert s["ci_lo_log"] != "" and s["pi_lo_log"] != ""
+    assert int(s["n_tier_agrees"]) == sum(r["tier_agrees"] == "yes" for r in rows)

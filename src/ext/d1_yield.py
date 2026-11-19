@@ -4,7 +4,11 @@ shrinkage, rank intervals and tiers (extension plan sections 3.3, 4.1, 4.2 and 9
 Run as `python -I src/ext/d1_yield.py` to write, under outputs/ext/ (UTF-8, LF):
   d1_pooled.csv    one row per analysis (each data year, and the pooled 2021-2023 yield);
   d1_states.csv    one row per unit in each analysis (posterior, rank interval, tier);
-  d1_excluded.csv  unit-years left out of each analysis, with the reason (section 3.3).
+  d1_excluded.csv  unit-years left out of each analysis, with the reason (section 3.3);
+  d1_states_betweenyear.csv, d1_pooled_betweenyear.csv
+                   POST HOC sensitivity (plan section 10, 19 November 2026): tiers and
+                   ranks with a within-State random-effects mean over 2021-2023 that
+                   includes between-year variation, beside the registered tiers.
 Columns are documented in outputs/ext/README.md.
 
 The intensity-stratum repeat of the 2021-2023 tiers (section 4.2, last bullet) needs the
@@ -14,6 +18,7 @@ there or later through `analyse_pooled(units=...)`, not here.
 from __future__ import annotations
 
 import csv
+import io
 import math
 import sys
 from pathlib import Path
@@ -197,11 +202,13 @@ def pooled_sample(years=POOLED_YEARS, rows=None, units=None) -> tuple:
 
 # ---------------------------------------------------------------- analysis
 
-def _analyse(units, D, S) -> tuple:
+def _analyse(units, D, S, y=None, v=None) -> tuple:
     """Pooling, posterior, ranks and tiers for one analysis. The generator is reset
-    here (section 9: one rank-draw set is one analysis)."""
-    y = np.log(D / S)
-    v = 1.0 / D - 1.0 / S
+    here (section 9: one rank-draw set is one analysis). y and v default to ln(D/S) and
+    1/D - 1/S; the post hoc between-year sensitivity passes its own."""
+    if y is None:
+        y = np.log(D / S)
+        v = 1.0 / D - 1.0 / S
     pool = dl_pool(y, v)
     m, sd, lo, hi, tiers = classify(y, v, pool["mu"], pool["tau2"])
     rng = np.random.default_rng(SEED)
@@ -253,9 +260,57 @@ def pooled_state_yield(unit: str) -> tuple:
     return pooled_posterior(POOLED_YEARS).get(unit, (None, None))
 
 
+# ------------------------------------- POST HOC: between-year sensitivity (plan section 10)
+# Added 19 November 2026, after registration and after the registered tiers were seen.
+# The registered pooled yield ln(sum D / sum S) has binomial variance only. Here each
+# unit's usable 2021-2023 yearly log-yields are combined by a within-State
+# DerSimonian-Laird random-effects mean, whose SE includes between-year variation; the
+# section 4.2 cross-State procedure is then applied unchanged.
+
+BETWEEN_LABEL = "2021-2023 between-year (post hoc)"
+
+
+def within_state_yield(D, S) -> tuple:
+    """(log-yield, SE, within-State tau2) from one unit's yearly counts: a DL
+    random-effects mean of ln(D_t/S_t) with variances 1/D_t - 1/S_t. A single year
+    keeps its own value and binomial SE, and tau2 is None."""
+    D = np.asarray(D, dtype=float)
+    S = np.asarray(S, dtype=float)
+    y = np.log(D / S)
+    v = 1.0 / D - 1.0 / S
+    if y.size == 1:
+        return float(y[0]), math.sqrt(float(v[0])), None
+    r = dl_pool(y, v)
+    return r["mu"], r["se"], r["tau2"]
+
+
+def analyse_betweenyear(years=POOLED_YEARS, rows=None, units=None) -> tuple:
+    """(pool, states, excluded) for the post hoc sensitivity. The units, contributing
+    unit-years and exclusions are those of `pooled_sample`. Each state row also has
+    `single_year` (flag) and `within_tau2`."""
+    rows = _rows(rows, units)
+    keep, D, S, yrs, excl = pooled_sample(years, rows)
+    by = {(r["unit"], r["year"]): r for r in rows}
+    ys, vs, t2s = [], [], []
+    for u, yl in zip(keep, yrs):
+        y, se, t2 = within_state_yield([by[(u, t)]["diagnosed"] for t in yl],
+                                       [by[(u, t)]["screened"] for t in yl])
+        ys.append(y)
+        vs.append(se * se)
+        t2s.append(t2)
+    pool, states = _analyse(keep, D, S, np.array(ys), np.array(vs))
+    for st, yl, t2 in zip(states, yrs, t2s):
+        st["years"] = ";".join(map(str, yl))
+        st["n_years"] = len(yl)
+        st["single_year"] = len(yl) == 1
+        st["within_tau2"] = t2
+    return pool, states, excl
+
+
 # ---------------------------------------------------------------- outputs
 
-POOLED_FIELDS = ("analysis", "k", "n_units_without_value", "n_listed", "mu_log", "se_log", "ci_lo_log", "ci_hi_log",
+POOLED_FIELDS = ("analysis", "k", "n_units_without_value", "n_listed", "mu_log", "se_log",
+                 "ci_lo_log", "ci_hi_log",
                  "pi_lo_log", "pi_hi_log", "yield_per_100k", "ci_lo_per_100k",
                  "ci_hi_per_100k", "pi_lo_per_100k", "pi_hi_per_100k", "tau2", "i2", "q",
                  "n_above", "n_overlaps", "n_below")
@@ -264,6 +319,11 @@ STATE_FIELDS = ("analysis", "unit", "small_ut", "years", "n_years", "diagnosed",
                 "post_hi_log", "post_per_100k", "post_lo_per_100k", "post_hi_per_100k",
                 "rank_lo", "rank_hi", "n_ranked", "tier")
 EXCL_FIELDS = ("analysis", "unit", "year", "reason")
+BETWEEN_FIELDS = STATE_FIELDS + ("tier_registered", "tier_agrees", "single_year",
+                                 "within_tau2")
+BETWEEN_POOLED_FIELDS = POOLED_FIELDS + ("n_single_year", "n_tier_agrees", "robust_above",
+                                         "robust_overlaps", "robust_below")
+TIERS = ("above", "overlaps", "below")
 
 
 def _fmt(v) -> str:
@@ -276,65 +336,105 @@ def _fmt(v) -> str:
     return str(v)
 
 
-def _write(path: Path, fields: tuple, rows: list) -> None:
-    with open(path, "w", encoding="utf-8", newline="") as f:
-        w = csv.writer(f, lineterminator="\n")
-        w.writerow(fields)
-        for r in rows:
-            w.writerow([_fmt(r.get(k)) for k in fields])
+def render(fields: tuple, rows: list) -> str:
+    """CSV text (LF line endings) exactly as written to disk."""
+    buf = io.StringIO()
+    w = csv.writer(buf, lineterminator="\n")
+    w.writerow(fields)
+    for r in rows:
+        w.writerow([_fmt(r.get(k)) for k in fields])
+    return buf.getvalue()
 
 
 def _ex(x: float) -> float:
     return PER * math.exp(x)
 
 
-def build() -> tuple:
+def _pooled_row(label, pool, states, excl, n_units) -> dict:
+    mu = pool["mu"]
+    counts = {t: sum(s["tier"] == t for s in states) for t in TIERS}
+    return {
+        "analysis": label, "k": pool["k"],
+        "n_units_without_value": n_units - pool["k"],
+        "n_listed": len(excl),
+        "mu_log": mu, "se_log": pool["se"], "ci_lo_log": pool["ci"][0],
+        "ci_hi_log": pool["ci"][1], "pi_lo_log": pool["pi"][0],
+        "pi_hi_log": pool["pi"][1], "yield_per_100k": _ex(mu),
+        "ci_lo_per_100k": _ex(pool["ci"][0]), "ci_hi_per_100k": _ex(pool["ci"][1]),
+        "pi_lo_per_100k": _ex(pool["pi"][0]), "pi_hi_per_100k": _ex(pool["pi"][1]),
+        "tau2": pool["tau2"], "i2": pool["i2"], "q": pool["q"],
+        "n_above": counts["above"], "n_overlaps": counts["overlaps"],
+        "n_below": counts["below"]}
+
+
+def _state_row(s, label, small, n) -> dict:
+    row = dict(s)
+    row.update({"analysis": label, "small_ut": small[s["unit"]],
+                "post_per_100k": _ex(s["post_mean_log"]),
+                "post_lo_per_100k": _ex(s["post_lo_log"]),
+                "post_hi_per_100k": _ex(s["post_hi_log"]),
+                "n_ranked": n})
+    return row
+
+
+def build() -> dict:
+    """file name -> CSV text for every file under outputs/ext written by this module."""
     rows = panel.load_panel()
     small = {r["unit"]: r["small_ut"] for r in rows}
+    n_units = len({r["unit"] for r in rows})
     pooled_out, states_out, excl_out = [], [], []
     runs = [(str(y), *analyse_year(y, rows)) for y in YEARS]
     runs.append(("2021-2023", *analyse_pooled(POOLED_YEARS, rows)))
+    registered_tier = {}
     for label, pool, states, excl in runs:
-        mu = pool["mu"]
-        counts = {t: sum(s["tier"] == t for s in states) for t in ("above", "overlaps", "below")}
-        pooled_out.append({
-            "analysis": label, "k": pool["k"],
-            "n_units_without_value": len({r["unit"] for r in rows}) - pool["k"],
-            "n_listed": len(excl),
-            "mu_log": mu, "se_log": pool["se"], "ci_lo_log": pool["ci"][0],
-            "ci_hi_log": pool["ci"][1], "pi_lo_log": pool["pi"][0],
-            "pi_hi_log": pool["pi"][1], "yield_per_100k": _ex(mu),
-            "ci_lo_per_100k": _ex(pool["ci"][0]), "ci_hi_per_100k": _ex(pool["ci"][1]),
-            "pi_lo_per_100k": _ex(pool["pi"][0]), "pi_hi_per_100k": _ex(pool["pi"][1]),
-            "tau2": pool["tau2"], "i2": pool["i2"], "q": pool["q"],
-            "n_above": counts["above"], "n_overlaps": counts["overlaps"],
-            "n_below": counts["below"]})
+        pooled_out.append(_pooled_row(label, pool, states, excl, n_units))
         for s in states:
-            row = dict(s)
-            row.update({"analysis": label, "small_ut": small[s["unit"]],
-                        "post_per_100k": _ex(s["post_mean_log"]),
-                        "post_lo_per_100k": _ex(s["post_lo_log"]),
-                        "post_hi_per_100k": _ex(s["post_hi_log"]),
-                        "n_ranked": len(states)})
+            row = _state_row(s, label, small, len(states))
             if label != "2021-2023":
                 row["years"], row["n_years"] = label, 1
+            else:
+                registered_tier[s["unit"]] = s["tier"]
             states_out.append(row)
         for e in excl:
             excl_out.append({"analysis": label, **e})
-    return pooled_out, states_out, excl_out
+
+    # post hoc between-year sensitivity, beside the registered pooled tiers
+    pool, states, excl = analyse_betweenyear(POOLED_YEARS, rows)
+    between_out = []
+    for s in states:
+        row = _state_row(s, BETWEEN_LABEL, small, len(states))
+        row["tier_registered"] = registered_tier[s["unit"]]
+        row["tier_agrees"] = row["tier"] == row["tier_registered"]
+        between_out.append(row)
+    summary = _pooled_row(BETWEEN_LABEL, pool, states, excl, n_units)
+    summary["n_single_year"] = sum(r["single_year"] for r in between_out)
+    summary["n_tier_agrees"] = sum(r["tier_agrees"] for r in between_out)
+    for t in TIERS:
+        summary["robust_" + t] = sum(r["tier_agrees"] and r["tier"] == t for r in between_out)
+
+    return {"d1_pooled.csv": render(POOLED_FIELDS, pooled_out),
+            "d1_states.csv": render(STATE_FIELDS, states_out),
+            "d1_excluded.csv": render(EXCL_FIELDS, excl_out),
+            "d1_states_betweenyear.csv": render(BETWEEN_FIELDS, between_out),
+            "d1_pooled_betweenyear.csv": render(BETWEEN_POOLED_FIELDS, [summary])}
 
 
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    pooled_out, states_out, excl_out = build()
-    _write(OUT / "d1_pooled.csv", POOLED_FIELDS, pooled_out)
-    _write(OUT / "d1_states.csv", STATE_FIELDS, states_out)
-    _write(OUT / "d1_excluded.csv", EXCL_FIELDS, excl_out)
-    for p in pooled_out:
-        print(f"{p['analysis']:>9}  k={p['k']:2d}  yield/100k={p['yield_per_100k']:.1f} "
-              f"[{p['ci_lo_per_100k']:.1f}, {p['ci_hi_per_100k']:.1f}]  "
-              f"tau2={p['tau2']:.3f}  I2={p['i2']:.1f}  "
-              f"above/overlaps/below={p['n_above']}/{p['n_overlaps']}/{p['n_below']}")
+    for name, text in build().items():
+        with open(OUT / name, "w", encoding="utf-8", newline="") as f:
+            f.write(text)
+    for name in ("d1_pooled.csv", "d1_pooled_betweenyear.csv"):
+        with open(OUT / name, encoding="utf-8", newline="") as f:
+            for p in csv.DictReader(f):
+                print(f"{p['analysis']:>9}  k={p['k']}  "
+                      f"yield/100k={float(p['yield_per_100k']):.1f} "
+                      f"[{float(p['ci_lo_per_100k']):.1f}, {float(p['ci_hi_per_100k']):.1f}]  "
+                      f"tau2={float(p['tau2']):.3f}  I2={float(p['i2']):.1f}  "
+                      f"above/overlaps/below={p['n_above']}/{p['n_overlaps']}/{p['n_below']}"
+                      + (f"  agree={p['n_tier_agrees']} robust="
+                         f"{p['robust_above']}/{p['robust_overlaps']}/{p['robust_below']}"
+                         if "n_tier_agrees" in p else ""))
 
 
 if __name__ == "__main__":
