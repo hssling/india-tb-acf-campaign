@@ -1,0 +1,10 @@
+classification,tier,n_units,units,campaign_districts,total_campaign_districts,share
+registered pooled 2021-2023,above,13,Andhra Pradesh;Arunachal Pradesh;Assam;Bihar;Delhi;Kerala;Madhya Pradesh;Manipur;Nagaland;Odisha;Tamil Nadu;Telangana;Uttarakhand,144,347,0.414985590778098
+registered pooled 2021-2023,overlaps,4,Andaman and Nicobar Islands;Jharkhand;Sikkim;Uttar Pradesh,21,347,0.06051873198847262
+registered pooled 2021-2023,below,17,Chandigarh;Chhattisgarh;Dadra and Nagar Haveli and Daman and Diu;Goa;Gujarat;Haryana;Himachal Pradesh;Jammu and Kashmir (incl. Ladakh);Karnataka;Maharashtra;Meghalaya;Mizoram;Puducherry;Punjab;Rajasthan;Tripura;West Bengal,182,347,0.5244956772334294
+registered pooled 2021-2023,no tier,1,Lakshadweep,0,347,0.0
+robust (post hoc),above,8,Andhra Pradesh;Arunachal Pradesh;Bihar;Kerala;Nagaland;Odisha;Tamil Nadu;Telangana,79,347,0.2276657060518732
+robust (post hoc),overlaps,4,Andaman and Nicobar Islands;Jharkhand;Sikkim;Uttar Pradesh,21,347,0.06051873198847262
+robust (post hoc),below,9,Dadra and Nagar Haveli and Daman and Diu;Goa;Haryana;Karnataka;Meghalaya;Mizoram;Puducherry;Punjab;West Bengal,95,347,0.2737752161383285
+robust (post hoc),not robust,13,Assam;Chandigarh;Chhattisgarh;Delhi;Gujarat;Himachal Pradesh;Jammu and Kashmir (incl. Ladakh);Madhya Pradesh;Maharashtra;Manipur;Rajasthan;Tripura;Uttarakhand,152,347,0.43804034582132567
+robust (post hoc),no tier,1,Lakshadweep,0,347,0.0

@@ -250,3 +250,118 @@ Added columns:
 | stratum_tau2, stratum_i2 | the stratum's τ² and I² (per cent) |
 | tier_all_units | the unit's registered pooled 2021–2023 tier, against the all-unit μ |
 | tier_agrees | `yes` if the stratum tier equals `tier_all_units` |
+
+## D2: targeting alignment, tier shares and the marginal-shift scenario
+
+Written by `python -I src/ext/d2_targeting.py` (plan §3.3, §5.1, §5.2, §9). Exposure is
+E_s = min(1, c_s/L_s), the State's share of districts in phase 1 of the campaign, computed from
+the counts. The main denominator is the reconstructed one; the registered denominator (16
+computable units) is a variant. The generator `default_rng(20261119)` is reset before each
+bootstrap and before each permutation.
+
+- **Reading.** These are observational State-level associations. Low or negative alignment is
+  described as campaign districts not being concentrated in States of higher prior yield. This
+  is consistent with selection on the published criteria (burden, vulnerability, mortality)
+  rather than on yield; that is not tested, and it is not read as a targeting failure. No
+  conditioning model is fitted. The §8 label of ρ needs the specification curve and is given
+  by a later script, not here.
+
+### d2_alignment.csv (one row per specification)
+
+Rows:
+
+- `main`: pooled 2021–2023 empirical-Bayes posterior mean (`d1_states.csv`), reconstructed
+  denominator, weighted by 2023 screened, all units;
+- `unweighted`, `registered denominator`, `2023 yield` and `2023 empirical Bayes`: the main
+  specification with one axis changed.
+
+The full 24-entry grid of §7.1 (including the small-UT axis) is written later, with the
+robustness analyses.
+
+| Column | Meaning |
+|---|---|
+| analysis | as above |
+| measure | `pooled_eb` (pooled 2021–2023 posterior mean, §4.2), `yield_2023` (D/S in 2023; a zero yield is kept and takes the lowest rank) or `eb_2023` (single-year 2023 posterior mean, §4.2; zero-diagnosed units excluded) |
+| denominator | `reconstructed` or `registered` |
+| weights | `screened_2023` (w_s = S_s,2023) or `none` (w_s = 1) |
+| units | `all` |
+| estimate | ρ: average ranks (`scipy.stats.rankdata`, unweighted), then the weighted Pearson correlation of the ranks, Σw(x − x̄_w)(y − ȳ_w)/√(Σw(x − x̄_w)²·Σw(y − ȳ_w)²) |
+| null | 0 |
+| boot_lo, boot_hi | bootstrap of units (`rng.integers(0, n, size=n)`; ranks recomputed in each draw), percentile interval (`numpy.quantile`, linear). The yield measure is held fixed (not re-estimated) in the bootstrap |
+| draws, n_valid, degenerate | bootstrap draws (10,000), draws used, and draws in which either variable was constant (counted and excluded) |
+| perm_lo, perm_hi | null band: 2.5th and 97.5th percentiles (linear) of ρ over 10,000 permutations (`rng.permutation(n)`) of the exposure ranks over units; the yield ranks and the weights stay with their units. No P value is computed |
+| permutations | 10,000 |
+| outside_band | `yes` if the observed ρ lies outside the null band |
+| n | units in the correlation |
+| n_listed, listed | units lacking an exposure, a measure value or a weight, with the reason |
+
+With weights S_s,2023, a few States with very large screening volumes carry most of the weight.
+The unweighted row shows the correlation with every State counted once.
+
+### d2_tier_shares.csv (one row per tier)
+
+These are descriptive counts (§5.1).
+
+| Column | Meaning |
+|---|---|
+| classification | `registered pooled 2021-2023` (the tiers of `d1_states.csv`), or `robust (post hoc)`: the registered tier where it agrees with the between-year tier of `d1_states_betweenyear.csv` (plan §10, 19 November 2026), otherwise `not robust` |
+| tier | `above`, `overlaps`, `below`, `not robust` (post hoc only) or `no tier` (no pooled value) |
+| n_units, units | units in the tier |
+| campaign_districts | phase-1 campaign districts (`campaign_count`) in those units |
+| total_campaign_districts | all phase-1 campaign districts in the exposure file |
+| share | campaign_districts ÷ total_campaign_districts |
+
+### d2_scenario.csv (one row per scenario)
+
+The scenario is an illustration, not a forecast. It assumes the within-State association ε
+(§4.3) would hold under reallocation.
+
+- **The shift.** B is the `below` units and A the `above` units, each with 2023 screened and
+  diagnosed present (a printed zero is kept). Each B unit loses 10% of its 2023 screening
+  (r = −0.10). The moved volume M = 0.10·Σ_B S goes to A in proportion to 2023 volume
+  (r = M/Σ_A S for every A unit). Total screening is unchanged.
+- **Expected change.** ΔD = Σ_{A∪B} D_2023[(1 + r)^ε − 1], with D_2023 held fixed. The
+  interval applies the formula to each valid bootstrap draw of ε from `d1_elasticity.csv` (the
+  same draws, in the same order) and takes the percentile interval (linear).
+
+Rows:
+
+- `main`: the registered pooled 2021–2023 tiers and the main ε;
+- `stratum elasticity` (registered sensitivity, §5.2): each unit takes the ε of its intensity
+  stratum (`d1_intensity_strata.csv`); stratum draws are paired by draw index, and a pair with a
+  degenerate draw in either stratum is excluded;
+- `robust tiers (post hoc)`: A and B are the units whose tier is `above` or `below` under both
+  the registered and the between-year analysis, with the main ε.
+
+| Column | Meaning |
+|---|---|
+| analysis, status | as above; `main`, `sensitivity` or `post hoc sensitivity` |
+| tiers | the tier classification used |
+| elasticity, epsilon | `main` or `intensity stratum`, and the point ε (per stratum for the stratum row) |
+| share | the share of B's 2023 screening moved (0.1) |
+| computable | `no` if A or B is empty (then `reason` says which) |
+| n_gainers, gainers | A: units that gain screening |
+| n_losers, losers | B: units that lose screening |
+| screened_before, screened_after | Σ_{A∪B} 2023 screened before and after the shift (equal up to rounding) |
+| moved | M |
+| r_gain, r_loss | the proportional change in screening for A and for B units |
+| diagnosed_2023 | Σ_{A∪B} D_2023 |
+| delta | ΔD, the expected change in diagnoses at the point ε |
+| ci_lo, ci_hi | percentile interval of ΔD over the valid ε draws |
+| pct, pct_lo, pct_hi | ΔD and its interval as a percentage of Σ_{A∪B} D_2023 |
+| draws, n_valid, degenerate | ε draws (10,000), draws used, and degenerate draws excluded |
+| n_excluded, excluded | `above` or `below` units left out for lack of 2023 screened or diagnosed |
+| reason | why a scenario is not computable (blank otherwise) |
+
+### d2_scenario_units.csv (one row per gaining or losing unit per scenario)
+
+| Column | Meaning |
+|---|---|
+| analysis | the scenario row of `d2_scenario.csv` |
+| unit, tier | the unit and its tier in that classification |
+| side | `gains` (A) or `loses` (B) |
+| screened_2023, diagnosed_2023 | the unit's 2023 S and D |
+| r | its proportional change in screening |
+| screened_after | S·(1 + r) |
+| epsilon | the ε applied to the unit |
+| delta | D·[(1 + r)^ε − 1] at the point ε |
