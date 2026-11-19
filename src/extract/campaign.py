@@ -36,7 +36,7 @@ from dataclasses import dataclass, field
 
 from src import inventory_rules as R
 from src import states
-from src.extract import labels
+from src.extract import invrow, labels
 from src.extract.cells import parse_int
 from src.extract.pdftext import page_lines
 
@@ -1175,7 +1175,7 @@ def _row(spec: Spec, man: dict) -> dict:
     dcls, dkw = R.definition_class(q, spec.definition)
     scope, skw, snote = R.scope(ctx)
     has_end = bool(spec.wend or spec.as_on)
-    basis = "stated" if spec.as_on else ("window_end" if spec.wend else "bounded")
+    basis = invrow.as_on_basis(spec.as_on)
     notes = []
     if dcls:
         notes.append(f"definition_class keyword: '{dkw}'" if dkw

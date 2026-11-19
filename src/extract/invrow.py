@@ -19,6 +19,13 @@ from src import inventory_rules as R
 CELL = " | "
 
 
+def as_on_basis(as_on: str) -> str:
+    """'stated' when the source states an as-on date; otherwise 'bounded': the answer or
+    publication date is the latest possible cut-off (§5.2; §9.5.2, §9.5.3). A window's
+    end is not taken as its cut-off."""
+    return "stated" if as_on else "bounded"
+
+
 def slug(s: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
 
@@ -52,7 +59,7 @@ def row(*, doc: str, page: int, quantity: str, printed: str, unit: str,
     qual = "exact" if is_table else R.qualifier(ctx, printed, occurrence)
     dcls, dkw = R.definition_class(quantity, definition)
     scope, skw, snote = R.scope(ctx)
-    basis = "stated" if as_on else ("window_end" if wend else "bounded")
+    basis = as_on_basis(as_on)
     n = []
     if dcls:
         n.append(f"definition_class keyword: '{dkw}'" if dkw

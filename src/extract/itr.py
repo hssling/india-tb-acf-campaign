@@ -438,8 +438,8 @@ def q4_checks(exts: dict[str, list[dict]]) -> list[dict]:
             if not c.needed:
                 continue
             rows = [r for r in ext if r["column"] == c.key]
-            cols[c.key] = [int(r["value"]) if r["value"] != "" else None
-                           for r in rows if r["is_total"] == "no"]
+            cols[c.key] = {r["label_printed"]: int(r["value"]) if r["value"] != ""
+                           else None for r in rows if r["is_total"] == "no"}
             tot = [r["value"] for r in rows if r["is_total"] == "yes"]
             tots[c.key] = int(tot[0]) if tot and tot[0] != "" else None
         rec = sc.q4_extraction_check(t.source, cols, tots, tuple(cols))
@@ -663,6 +663,34 @@ def _prose_specs() -> list[Prose]:
                 "those tested) were diagnosed", s2, CH4, note=a17, **w23),
           Prose("ITR2024", 54, "other:pct_diagnosed_among_tested", "1.6%", "percent",
                 "out of those tested", s2, CH4, note=a17, **w23)]
+    s1 = ("5.29 crores (3.7% of estimated population) individuals were identified as "
+          "vulnerable population, 2.86 crores individuals screened for TB, 5.23 lakh "
+          "individuals (1.8% of screened population) were identified with symptoms "
+          "suggestive of TB and were offered TB testing service.")
+    s2 = ("Total 4.39 lakh individuals were tested for TB and 11,806 new TB cases were "
+          "identified;")
+    NC = ("Chapter 14, 'National-level campaign in 2023' ('TB Mukt Bharat@AB-HWCs "
+          "through Jan Arogya Samitis'), list of key achievements")
+    wc = dict(wstart="2023-03-24", wend="2023-04-13")
+    nc = ("window stated in the preceding paragraph ('from 24 March to 13 April 2023', "
+          "PDF page 159; ruling A17); the campaign's first listed focus area is 'Active "
+          "Case Finding of TB among identified vulnerable population' (rule 1, review "
+          "ruling of 19 November 2026)")
+    P += [Prose("ITR2024", 160, "population_targeted", "5.29 crores", "persons",
+                "individuals were identified as vulnerable population", s1, NC,
+                note=nc, **wc),
+          Prose("ITR2024", 160, "other:pct_population_identified_vulnerable", "3.7%",
+                "percent", "of estimated population", s1, NC, note=nc, **wc),
+          Prose("ITR2024", 160, "screened", "2.86 crores", "persons",
+                "individuals screened for TB", s1, NC, note=nc, **wc),
+          Prose("ITR2024", 160, "presumptive", "5.23 lakh", "persons",
+                "were identified with symptoms suggestive of TB", s1, NC, note=nc, **wc),
+          Prose("ITR2024", 160, "other:pct_symptomatic_among_screened", "1.8%",
+                "percent", "of screened population", s1, NC, note=nc, **wc),
+          Prose("ITR2024", 160, "tested", "4.39 lakh", "persons",
+                "individuals were tested for TB", s2, NC, note=nc, **wc),
+          Prose("ITR2024", 160, "tb_cases", "11,806", "cases",
+                "new TB cases were identified", s2, NC, note=nc, **wc)]
     T11 = "Table 1.1: NSP indicators and progress"
     row8 = ("Proportion of identified targeted key affected population undergoing "
             "active case finding")
@@ -747,8 +775,12 @@ def _table_method(t: Table) -> str:
 
 
 def _window_note(t: Table) -> str:
-    return (f"window stated in the report's chapter: '{t.window_stated}' (ruling A17)"
-            if t.window_stated else "")
+    if t.window_stated:
+        return (f"window stated in the report's chapter: '{t.window_stated}' (ruling "
+                "A17)")
+    return ("the table prints no year: window from the edition's data year fixed in "
+            "the analysis plan (§3.1.1, §3.2), as clarified in §13 (19 November 2026; "
+            "ruling A23)")
 
 
 def table_inventory(t: Table, ext: list[dict], url: str) -> tuple[list[dict], list[dict]]:
@@ -758,7 +790,7 @@ def table_inventory(t: Table, ext: list[dict], url: str) -> tuple[list[dict], li
     for r in ext:
         base_col = r["column"].removesuffix("_pct")
         col = next(c for c in t.columns if c.key == base_col)
-        if not col.inventory or r["value"] == "":
+        if not col.inventory or r["value"] == "" or t.edition in NOT_IN_INVENTORY:
             continue
         is_pct = r["column"].endswith("_pct")
         quantity = col.pct_quantity if is_pct else col.quantity
@@ -768,9 +800,7 @@ def table_inventory(t: Table, ext: list[dict], url: str) -> tuple[list[dict], li
                  f"{step}: {r['label_evidence']}" if step not in ("", "1", 1) else "",
                  _window_note(t), r["note"], EDITIONS[t.edition][3],
                  "percentage printed with the count in the same cell" if is_pct else ""]
-        wstart = wend = ""
-        if t.window_stated:
-            wstart, wend = f"{year}-01-01", f"{year}-12-31"
+        wstart, wend = f"{year}-01-01", f"{year}-12-31"
         inv = invrow.row(
             doc=t.edition, page=int(r["pdf_page"]), quantity=quantity,
             printed=r["value_printed"], unit="percent" if is_pct else col.unit,
@@ -790,9 +820,15 @@ def table_inventory(t: Table, ext: list[dict], url: str) -> tuple[list[dict], li
     return rows, prov
 
 
+# Editions without a §5.3 basis for the inventory: their tables stay in data/extracted.
+NOT_IN_INVENTORY = frozenset({"ITR2020"})
+
+
 def prose_inventory(man: dict) -> tuple[list[dict], list[dict]]:
     rows, prov = [], []
     for s in _prose_specs():
+        if s.edition in NOT_IN_INVENTORY:
+            continue
         file, _, pub, pub_note = EDITIONS[s.edition]
         is_table = bool(s.col)
         inv = invrow.row(
@@ -857,13 +893,19 @@ SCOPE_RULE_ITR = (
     "named quantities, and other ACF figures as `other:`, enter when their sentence, "
     "list item or table (title, column heading or row label), or the heading of their "
     "chapter, section or box, names active case finding (ACF) or the TB Mukt Bharat "
-    "Abhiyaan campaign. (2) Resources and targets enter only when their own sentence or "
+    "Abhiyaan campaign, or when the section describes a TB campaign that lists ACF "
+    "among its activities (§5.1 covers any ACF or campaign figure; review ruling of 19 "
+    "November 2026). (2) Resources and targets enter only when their own sentence or "
     "table row names ACF or the campaign (campaign documents' rule 3). (3) A figure for "
     "a district, block, city or project population is not entered: the §5.2 geography "
     "field takes India or a State/UT. (4) The State notification counts of the 2024 "
     "edition enter because §7.4 enters and classifies them; the notification annexures "
     "of the 2020 and 2023 editions are outcome data only (not ACF or campaign figures, "
-    "not named in §7.4). (5) Media, IEC, nutrition-support and Ni-kshay Mitra campaigns "
+    "not named in §7.4). (4a) The India TB Report 2020 has no §5.3 basis (it is not "
+    "marked include = yes in data/search_log.csv, is not cited by an included document "
+    "as the source of a figure, and is not Question 3477): none of its figures enters "
+    "the inventory; its tables stay in data/extracted (Q3 may use its ACF annexure as a "
+    "published table, §8). (5) Media, IEC, nutrition-support and Ni-kshay Mitra campaigns "
     "are not TB case-finding campaigns; their figures are programme-wide and not "
     "entered. (6) Benchmark thresholds of the ACF guidance are not entered (ruling "
     "A20). (7) Pictures of social-media posts reproduced as illustrations are not "
@@ -886,19 +928,11 @@ SCOPE_EXCLUSIONS: list[tuple[str, int, str, str, str, str]] = [
      "figures of a project covering selected districts of several States (rule 3)"),
     ("ITR2019", 178, "2 blocks", "Annexure 1.7, note on Madhya Pradesh", "survey design",
      "not a figure of a §5.1 quantity"),
-    ("ITR2020", 105, "19 Blocks", "Global Fund grantee SHIS", "project",
-     "sub-State area (rule 3)"),
-    ("ITR2020", 112, "395; about 10,000", "Procurement (digital X-ray; tablet "
-     "computers)", "resource", "the sentences do not name ACF (rule 2)"),
-    ("ITR2020", 168, "seven; More than 80,000; ~13 per 100,000; >500 per 100,000; nine; "
-     "~85,000", "CHAI, Greater Chennai Corporation", "sub-State",
-     "city figures (rule 3)"),
-    ("ITR2020", 169, "22", "TVHA, ACF in schools and monasteries", "project",
-     "project figure (rule 3)"),
-    ("ITR2020", 255, "all cells", "Annexure 6, 'Estimated Population (Lakhs)' column",
-     "entered", "entered as printed; several rows' populations look shifted between "
-                "States in the printed column (e.g. the India row prints 2287.7); no "
-                "value is corrected (§5.1)"),
+    ("ITR2020", 0, "all figures (Annexure 6: 302 cells; Chapter 4 and procurement "
+     "text: 5 figures)", "whole edition", "no §5.3 basis",
+     "the edition is not marked include = yes in data/search_log.csv, is not cited by "
+     "an included document as the source of a figure, and is not Question 3477 (§5.3; "
+     "rule 4a); data/extracted/itr2020_a6_acf.csv and itr2020_a1_2.csv are kept"),
     ("ITR2022", 7, "8.37 lakh; 35,519", "Message of the DDG (TB)", "not given as ACF",
      "the sentence refers to 'these efforts' (door-to-door ACF campaigns and "
      "bi-directional TB-COVID-19 screening together) and names neither; no heading "
@@ -932,13 +966,13 @@ SCOPE_EXCLUSIONS: list[tuple[str, int, str, str, str, str]] = [
      "Evaluation of active case finding, aim sentence and indicator thresholds",
      "study design and benchmarks", "the aim sentence's scope and the benchmark "
      "thresholds (rule 6); the findings are entered"),
-    ("ITR2024", 160, "89,973; 32; 5.29 crores (3.7%); 2.86 crores; 5.23 lakh (1.8%); "
-     "4.39 lakh; 11,806; 58,986; 4.37 lakh; 81,424; 5.91 lakh; 91,689; 85,384; 57,611 "
-     "(64%)", "National-level campaign in 2023 ('TB Mukt Bharat@AB-HWCs through Jan "
-     "Arogya Samitis', 24 March-13 April 2023)", "not given as ACF",
-     "the section is headed 'National-level campaign in 2023' and the figures' list "
-     "items name neither ACF nor the TB Mukt Bharat Abhiyaan; ACF is one of the "
-     "campaign's listed focus areas, but no figure is given as an ACF figure (rule 1)"),
+    ("ITR2024", 160, "89,973; 32; 58,986; 4.37 lakh; 81,424; 5.91 lakh; 91,689; 4.68 "
+     "lakh; 85,384; 34,650; 47,597; 57,611 (64%); 21 days",
+     "National-level campaign in 2023 ('TB Mukt Bharat@AB-HWCs through Jan Arogya "
+     "Samitis'), lead-in and the orientation, Gram Sabha, VHSNC, TB Champion and "
+     "Ni-kshay Diwas items", "not ACF figures",
+     "reporting coverage and community-engagement activity counts, not figures of the "
+     "screening cascade (rule 1); the cascade item of the same list is entered"),
     ("ITR2024", 111, "89,973; 33; 58,986; 4.37 lakh; 81,424; 5.91 lakh; 91,689; 4.68 "
      "lakh; 85,384", "the same 21-day campaign (Chapter 10)", "not given as ACF",
      "orientation, Gram Sabha and TB-champion counts (rule 1)"),
@@ -953,7 +987,7 @@ def scope_decisions() -> list[dict]:
             "category": "", "decision": "", "reason": SCOPE_RULE_ITR}]
     for doc, p, figs, where, cat, why in SCOPE_EXCLUSIONS:
         out.append({"kind": "exclusion" if cat != "entered" else "note", "doc": doc,
-                    "source_file": EDITIONS[doc][0], "page": p, "figures": figs,
+                    "source_file": EDITIONS[doc][0], "page": p or "", "figures": figs,
                     "where": where, "category": cat,
                     "decision": "entered" if cat == "entered" else "not entered",
                     "reason": why})

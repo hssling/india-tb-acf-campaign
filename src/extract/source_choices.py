@@ -198,6 +198,13 @@ def totals() -> list[dict]:
     return out
 
 
+def _tot_ids(source: str, table_part: str, passed: str) -> list[str]:
+    """decision_ids of the printed-total rows of one table with a given result."""
+    return [r["decision_id"] for r in totals() if r["source_file"] == source
+            and table_part in r["locator"]
+            and r["result"].startswith({"no": "fail", "yes": "pass"}[passed])]
+
+
 def named() -> list[dict]:
     rows = _read("named_list_check.csv")
     tot = [r for r in rows if r["state"] == "TOTAL"][0]
@@ -432,7 +439,9 @@ def q3_tables() -> list[dict]:
          ("Q3T-2022", ITR + "ITR2023.pdf", "Annexure 6, PDF pages 299-300 (printed "
           "269-270)", 2022, "screened, 'TB symptomatic identified and examined', "
           "diagnosed (yield, NNS); its State rows do not sum to the printed India row "
-          "(recorded under printed totals)", "itr2023_a6_acf.csv"),
+          "in any column (failed printed-total checks "
+          + ", ".join(_tot_ids(ITR + "ITR2023.pdf", "Annexure 6", "no")) + ")",
+          "itr2023_a6_acf.csv"),
          ("Q3T-2023", ITR + "ITR2024.pdf", "Annexure 6, PDF page 279 (printed 248)", 2023,
           "screened, tested, diagnosed (yield, NNS)", "itr2024_a6_acf.csv")]
     out = [_rec(i, "Q3 tables (§8.4)", f, loc, f"Q3 table for {y}: the edition that "

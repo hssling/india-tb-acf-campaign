@@ -28,8 +28,8 @@ def test_q4_source_extraction_checks():
     one = sc.q4_extraction_check("T", {"n": [10, 20, 31]}, {"n": 60}, ("n",))
     assert two["result"] == "fail" and two["sum_check"] == "fail"
     assert one["result"] == "pass" and one["sum_check"] == "pass"
-    # a missing (or unreadable, or blank-celled) needed column fails
-    for cols in ({}, {"n": None}, {"n": [1, None, 3]}):
+    # a missing or unreadable needed column fails
+    for cols in ({}, {"n": None}, {"n": []}):
         r = sc.q4_extraction_check("T", cols, {"n": None}, ("n",))
         assert r["result"] == "fail" and r["column_check"] == "fail"
         assert "not readable" in r["note"]
@@ -55,6 +55,43 @@ def test_q4_source_extraction_checks():
     assert c["full-year 2025 vs 2024"] == "computable"
     c = sc.contrast_status(ok | {sc.Q1216: "fail"})
     assert c["full-year 2025 vs 2024"].startswith("not computable")
+
+
+def test_blank_state_cell_is_missing_not_failure():
+    """A blank State cell: that State is missing and listed; the table does not fail
+    (§9.6; §10.4). The sum check runs over the printed values."""
+    r = sc.q4_extraction_check("T", {"n": {"Goa": 10, "Delhi": None, "Assam": 20}},
+                               {"n": 30}, ("n",))
+    assert r["result"] == "pass" and r["column_check"] == "pass"
+    assert r["sum_check"] == "pass"
+    assert "Delhi" in r["note"] and "missing" in r["note"]
+    r = sc.q4_extraction_check("T", {"n": [10, None, 20]}, {"n": None}, ("n",))
+    assert r["result"] == "pass" and "missing" in r["note"]
+
+
+@pytest.mark.skipif(not RAW_PQ.exists(), reason="data_raw absent")
+def test_campaign_main_keeps_other_extractors_total_checks(tmp_path, monkeypatch):
+    """A non-campaign row of table_total_checks.csv survives a campaign main() run."""
+    from src.extract import campaign
+    monkeypatch.setattr(campaign, "EXTRACTED", tmp_path)
+    monkeypatch.setattr(campaign, "INVENTORY", tmp_path / "figures_inventory.csv")
+    monkeypatch.setattr(campaign, "SCOPE_DECISIONS",
+                        tmp_path / "inventory_scope_decisions.csv")
+    fields = ["table", "source_file", "page", "rows", "sum_of_rows", "printed_total",
+              "difference", "pass", "note"]
+    other = {"table": "RS Unstarred Q. 1216, Annexure: test row",
+             "source_file": "data_raw/pq/AU1216_WFw8li.pdf", "page": "2", "rows": "36",
+             "sum_of_rows": "1", "printed_total": "", "difference": "", "pass": "n/a",
+             "note": "kept"}
+    with open(tmp_path / "table_total_checks.csv", "w", newline="\n",
+              encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=fields, lineterminator="\n")
+        w.writeheader()
+        w.writerow(other)
+    campaign.main()
+    rows = _read(tmp_path / "table_total_checks.csv")
+    assert other in rows
+    assert any(r["source_file"] == campaign.CTD_FILE for r in rows)
 
 
 def test_q1216_failure_counts_as_failed_guard():

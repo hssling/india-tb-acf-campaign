@@ -335,7 +335,7 @@ def extracted_rows(t: Table, read: Read | None = None) -> list[dict]:
         res = labels.resolve_or_list(lab)
         for c in t.columns:
             pv = vals[c.index]
-            basis = "stated" if t.as_on else ("window_end" if c.wend else "bounded")
+            basis = invrow.as_on_basis(t.as_on)
             out.append({
                 "question": t.question, "table_id": t.table_id, "table_title": t.title,
                 "source_file": t.file, "pdf_page": p, "row_order": k,
@@ -371,10 +371,13 @@ def table_checks(t: Table, rows: list[dict]) -> list[dict]:
 
 RECHECK: dict[str, str] = {
     "Q1216": (
-        "Re-check at extraction (§9.5.4): the title, the column headings '2023 "
-        "(Jan-Dec)', '2024 (Jan-Dec)', '2025 (Jan-Dec)' and 'Number of TB cases "
-        "notified' are as in the masked reading (§9.5.1); the only note is 'Data Source: "
-        "Ni-kshay (As on 06th February 2026)' (the masked day is the 6th). No note on a "
+        "Re-check at extraction (§9.5.4): the title and the column headings '2023 "
+        "(Jan-Dec)', '2024 (Jan-Dec)' and '2025 (Jan-Dec)' are as in the masked reading "
+        "(§9.5.1); the sub-headings are printed 'Number of TB cases notified' and 'Number "
+        "of Beneficiaries paid at least once' (§9.5.1 quotes them as 'No. of TB cases "
+        "notified' and 'Beneficiaries paid at least once': same words, abbreviated); the "
+        "only note is 'Data Source: Ni-kshay (As on 06th February 2026)' (the masked day "
+        "is the 6th). No note on a "
         "row; no note changes the window, cut-off or source of one State or of the whole "
         "table. Comparability (§9.5.1): (a) one table, one heading, one source and one "
         "as-on date; (b) full calendar years; (c) one as-on date for both years, 6 "
@@ -413,7 +416,8 @@ def q4_checks(reads: dict[str, list[dict]]) -> list[dict]:
         if not t.source:
             continue
         rows = reads[t.key]
-        cols = {c.key: [r["value"] for r in rows if r["column"] == c.key]
+        cols = {c.key: {r["label_printed"]: r["value"] for r in rows
+                        if r["column"] == c.key}
                 for c in t.columns if c.q4}
         rec = sc.q4_extraction_check(t.source, cols, {k: None for k in cols},
                                      tuple(cols))

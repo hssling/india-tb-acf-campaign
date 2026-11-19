@@ -34,7 +34,7 @@ from decimal import Decimal
 
 from src import inventory_rules as R
 from src import states
-from src.extract import labels
+from src.extract import invrow, labels
 from src.extract.campaign import INVENTORY_COLUMNS
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -360,7 +360,7 @@ def _inv(*, doc, loc, row, col, quantity, printed, unit, definition, context, so
                      "column heading | row label (§5.2)")
     if note:
         notes.append(note)
-    basis = "window_end" if wend else "bounded"
+    basis = invrow.as_on_basis("")
     key = ".".join(x for x in (doc, _slug(loc), _slug(row), _slug(col),
                                quantity.replace(":", "_")) if x)
     return {

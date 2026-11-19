@@ -42,28 +42,35 @@ def total_check(values: list[int], printed_total: int | None) -> dict:
             "pass": "yes" if abs(d) <= 1 else "no", "note": ""}
 
 
-def q4_extraction_check(source: str, columns: dict[str, list[int | None] | None],
+def q4_extraction_check(source: str,
+                        columns: dict[str, dict[str, int | None] | list[int | None] | None],
                         printed_totals: dict[str, int | None],
                         needed: tuple[str, ...]) -> dict:
     """The §9.6 extraction check of one Q4 source table.
 
-    `columns` maps a column name to its State values (None for an unreadable column;
-    a None value inside the list is a blank cell). `printed_totals` gives the printed
-    total of each column (None when no total is printed). A needed column that is
-    absent, unreadable or has a blank cell cannot be read. The sum check is applied to
-    every needed column that has a printed total."""
+    `columns` maps a column name to its State values, as {State: value} (or a list);
+    None for a column that cannot be read. A needed column that is absent or unreadable
+    fails the table. A blank State cell does not: that State is missing from the
+    column and is listed (§10.4), and the sum check runs over the printed values.
+    `printed_totals` gives each column's printed total (None when none is printed);
+    the sum check is applied to every needed column that has one."""
     unreadable, sums, notes = [], [], []
     for c in needed:
         vals = columns.get(c)
-        if vals is None or not vals or any(v is None for v in vals):
+        if vals is None or len(vals) == 0:
             unreadable.append(c)
             continue
-        t = total_check([v for v in vals], printed_totals.get(c))
+        items = list(vals.items()) if isinstance(vals, dict) else list(enumerate(vals))
+        blank = [str(k) for k, v in items if v is None]
+        t = total_check([v for _, v in items if v is not None], printed_totals.get(c))
         sums.append((c, t))
+        if blank:
+            notes.append(f"{c}: blank cell, State missing and listed: "
+                         + ", ".join(blank))
     sum_fail = [c for c, t in sums if t["pass"] == "no"]
     no_total = [c for c, t in sums if t["pass"] == "n/a"]
     if unreadable:
-        notes.append("needed column not readable: " + ", ".join(unreadable))
+        notes.insert(0, "needed column not readable: " + ", ".join(unreadable))
     for c, t in sums:
         if t["pass"] == "n/a":
             notes.append(f"{c}: {NO_TOTAL}")
