@@ -77,6 +77,7 @@ One row per unit × data year. Values are taken from the `value` column of the e
   - Analyses on the count or rank scale keep it: the Poisson sensitivity, the D2 2023 yield measure, the scenario, and D3 on the absolute scale.
   - +0.5 is a specification-curve axis only (§7.1).
 - **Inconsistent rows.** A unit-year with S = 0 or D ≥ S (log-yield variance undefined or ≤ 0) is listed and excluded from log-scale analyses.
+- **Zero notifications.** A unit-year with N = 0 is excluded from the 1/N-weighted and log-scale D3 entries and listed. (No State notification count in the sources is zero.)
 
 ## 4. D1: yield, saturation and the cascade
 
@@ -240,7 +241,7 @@ Each grid is the full crossing below. The first level of each axis is the main s
   - The 2023 empirical-Bayes measure is the 2023 posterior mean of §4.2; zero-diagnosed units are excluded from it (§3.3) and listed.
   - The small-UT axis restricts the correlation sample only. The pooled measure is not recomputed.
 - **D3.** The weighted level is the inverse Poisson variance of the outcome: 1/N_st on the absolute scale and N_st on the log scale, where N is that entry's outcome. It is the main level.
-- **Limitation.** The weights D, 1/N and N are functions of the outcome; the unweighted entries and the Poisson model address this.
+- **Limitation.** The weights D, 1/N and N are functions of the outcome; the unweighted entries (and, for ε, the Poisson model) address this.
 
 ### 7.2 Leave one out
 
