@@ -70,8 +70,8 @@ def test_pairs_drop_missing_units_with_reason():
                 as_on="2026-01-15", value="7"),
             row("A", "2024_notified", as_on="2026-01-15", value="1"),  # combined member: summed
             row("B", "2024_notified", as_on="2026-01-15", value="3")]
-    dropped = []
-    assert cp.full_year_pairs(rows, dropped) == {"A": (6, 7)}
+    pairs, dropped = cp.full_year_pairs(rows)
+    assert pairs == {"A": (6, 7)}
     assert dropped == [("B", "missing in 2025_notified")]
 
 
@@ -79,8 +79,7 @@ def test_full_year_pairs_real_q1216():
     if not (cp.EX / "pq_q1216.csv").exists():
         pytest.skip("pq_q1216.csv absent")
     rows = cp.load_pq("pq_q1216")
-    dropped = []
-    pairs = cp.full_year_pairs(rows, dropped)
+    pairs, dropped = cp.full_year_pairs(rows)
     assert len(pairs) == 35 and dropped == []
     assert {r["source_file"] for r in rows} == {"data_raw/pq/AU1216_WFw8li.pdf"}
     assert {r["as_on"] for r in rows} == {"2026-02-06"}
@@ -96,8 +95,7 @@ def test_jan_oct_pairs_real_s8_files():
     if not (cp.EX / "pq_q261.csv").exists() or not (cp.EX / "pq_q1093.csv").exists():
         pytest.skip("S8 files absent")
     rows = cp.load_pq("pq_q261") + cp.load_pq("pq_q1093")
-    dropped = []
-    pairs = cp.jan_oct_pairs(rows, dropped)
+    pairs, dropped = cp.jan_oct_pairs(rows)
     assert len(pairs) == 35 and dropped == []
     a = next(r for r in rows if r["column"] == "2024_jan_oct_reported")
     b = next(r for r in rows if r["column"] == "2025_jan_oct_reported")
@@ -105,3 +103,50 @@ def test_jan_oct_pairs_real_s8_files():
     assert cp.comparable(a, b) == (True, "")
     assert (cp.effective_as_on(a) - date(2024, 10, 31)).days == 43
     assert (cp.effective_as_on(b) - date(2025, 10, 31)).days == 39
+
+
+PAID = "2024 (Jan-Dec): Number of Beneficiaries paid at least once"
+
+
+def test_title_does_not_spill_into_other_columns():
+    t = "State/UT wise Number of TB Case notified and Number of patients paid"
+    kw = dict(start="2025-01-01", end="2025-12-31", as_on="2026-01-15", title=t)
+    assert not cp.comparable(row(as_on="2025-01-15", heading=PAID, title=t), row(**kw))[0]
+    assert cp.quantity_wording(row(heading=PAID, title=t)) != "tb case notified"
+
+
+def test_case_cases_same_quantity_and_period_only_heading_uses_title():
+    kw = dict(start="2025-01-01", end="2025-12-31", as_on="2026-01-15")
+    assert cp.comparable(row(as_on="2025-01-15", heading="TB case notified"),
+                         row(heading="TB cases notified", **kw))[0]
+    a = row(heading="2024 (Jan- Oct)", title="TB cases reported since 2022 to 2024*")
+    assert cp.quantity_wording(a) == "tb case reported"
+
+
+def test_stated_asof_missing_raises_and_asof_before_window_end_refused():
+    with pytest.raises(ValueError, match="stated as_on missing"):
+        cp.effective_as_on(row(as_on=""))
+    a = row(as_on="2024-12-01")  # before the 31 Dec window end
+    b = row(start="2025-01-01", end="2025-12-31", as_on="2026-01-15", doc="b.pdf")
+    assert not cp.comparable(a, b)[0]
+
+
+def test_non_integer_value_raises_and_every_member_is_checked():
+    rows = [row("A", "2024_notified", as_on="2026-01-15", value="5.5"),
+            row("A", "2025_notified", start="2025-01-01", end="2025-12-31",
+                as_on="2026-01-15")]
+    with pytest.raises(ValueError):
+        cp.full_year_pairs(rows)
+    good = row("A", "2024_notified", as_on="2026-01-15")
+    bad = row("A", "2024_notified", as_on="2026-01-15", source="HMIS")
+    y25 = row("A", "2025_notified", start="2025-01-01", end="2025-12-31", as_on="2026-01-15")
+    pairs, dropped = cp.full_year_pairs([good, bad, y25])
+    assert pairs == {} and dropped[0][0] == "A"
+
+
+def test_every_q4_pq_source_has_a_data_source():
+    for name in ("pq_q1216", "pq_q261", "pq_q1093"):
+        if not (cp.EX / f"{name}.csv").exists():
+            pytest.skip("pq file absent")
+        rows = cp.load_pq(name)
+        assert rows and all(r["data_source"] for r in rows)

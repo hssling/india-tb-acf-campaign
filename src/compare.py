@@ -55,14 +55,37 @@ def _norm(s) -> str:
     return re.sub(r"\s+", " ", s).strip(" .:;,")
 
 
+_PERIOD_WORDS = {"jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov",
+                 "dec", "january", "february", "march", "april", "june", "july", "august",
+                 "september", "october", "november", "december", "since", "to", "for"}
+
+
+def _phrase(text) -> str | None:
+    m = _QUANTITY.search(_norm(text))
+    return re.sub(r"\s+", " ", m.group(0).replace("cases", "case")) if m else None
+
+
+def _period_only(heading: str) -> bool:
+    """True if the heading is only years, months, ranges and punctuation (Q261: '2024
+    (Jan- Oct)'): no quantity words such as number, beneficiaries, cases, notified."""
+    words = re.findall(r"[a-z]+", _norm(heading))
+    return all(w in _PERIOD_WORDS for w in words)
+
+
 def quantity_wording(row: dict) -> str:
-    """The normalised quantity phrase: from the heading, else the title, else the whole
-    normalised heading (which then differs from any phrase and is refused)."""
-    for field in ("column_heading", "table_title"):
-        m = _QUANTITY.search(_norm(row.get(field)))
-        if m:
-            return re.sub(r"\s+", " ", m.group(0))
-    return _norm(row.get("column_heading"))
+    """The normalised quantity phrase ("tb case reported|notified"; case/cases are one
+    form, grammatical number is not a different quantity). Taken from the heading; only
+    if the heading is period-only is the table title used. Otherwise the normalised
+    heading, so no other column inherits the title's phrase."""
+    heading = row.get("column_heading")
+    p = _phrase(heading)
+    if p:
+        return p
+    if _period_only(heading or ""):
+        p = _phrase(row.get("table_title"))
+        if p:
+            return p
+    return _norm(heading)
 
 
 def source_name(row: dict) -> str:
@@ -88,11 +111,16 @@ def _same_window(a: dict, b: dict) -> tuple[bool, str]:
 def effective_as_on(row: dict) -> date:
     """The stated as-on date or, where none is stated ("bounded"), the answer date, the
     upper bound of the cut-off (§9.5.3)."""
-    if str(row.get("as_on_basis", "")).strip() == "bounded" or not row.get("as_on"):
+    basis = str(row.get("as_on_basis", "")).strip()
+    if basis == "bounded":
         if not row.get("answer_date"):
-            raise ValueError("no as-on date and no answer date to bound the cut-off")
+            raise ValueError("bounded as_on with no answer date")
         return _d(row["answer_date"])
-    return _d(row["as_on"])
+    if basis == "stated":
+        if not row.get("as_on"):
+            raise ValueError("stated as_on missing")
+        return _d(row["as_on"])
+    raise ValueError(f"unknown as_on_basis {basis!r}")
 
 
 def _lag_ok(as_on: date, window_end: date) -> bool:
@@ -127,61 +155,67 @@ def comparable(a: dict, b: dict) -> tuple[bool, str]:
                    f"({asa} vs {ea}; {asb} vs {eb})")
 
 
-def _unit_totals(rows, col: str) -> tuple[dict, dict]:
-    """unit -> summed value, and unit -> first row; combined members are summed (§9.4)."""
-    tot, first = {}, {}
+def _unit_rows(rows, col: str) -> dict:
+    """unit -> member rows of that column (combined members are summed, §9.4)."""
+    out = {}
     for r in rows:
         if r.get("column") != col or str(r.get("is_total", "no")) == "yes":
             continue
-        v = str(r.get("value", "")).strip()
-        if not v:
+        if not str(r.get("value", "")).strip():
             continue
-        u = r["coarse_unit"]
-        tot[u] = tot.get(u, 0) + int(float(v))
-        first.setdefault(u, r)
-    return tot, first
-
-
-def _pairs(rows, cols, dropped):
-    rows = list(rows)
-    (ta, fa), (tb, fb) = (_unit_totals(rows, c) for c in cols)
-    out = {}
-    for u in sorted({r["coarse_unit"] for r in rows if r.get("column") in cols}):
-        if u not in ta or u not in tb:
-            if dropped is not None:
-                dropped.append((u, f"missing in {cols[0] if u not in ta else cols[1]}"))
-            continue
-        ok, why = comparable(fa[u], fb[u])
-        if not ok:
-            if dropped is not None:
-                dropped.append((u, "not comparable: " + why))
-            continue
-        out[u] = (ta[u], tb[u])
+        out.setdefault(r["coarse_unit"], []).append(r)
     return out
 
 
-def full_year_pairs(rows, dropped: list | None = None) -> dict:
-    """unit -> (N2024, N2025), full-year 'notified' columns of Q1216 (§9.5.1). Dropped
-    units are appended to `dropped` as (unit, reason) when a list is given (§10.4)."""
-    return _pairs(rows, FULL_YEAR_COLS, dropped)
+def _int(v) -> int:
+    f = float(str(v).strip())
+    if f != int(f):
+        raise ValueError(f"count is not an integer: {v!r}")
+    return int(f)
 
 
-def jan_oct_pairs(rows, dropped: list | None = None) -> dict:
-    """unit -> (Jan-Oct 2024, Jan-Oct 2025), LS Q261 and RS Q1093 (S8, §9.5.3)."""
-    return _pairs(rows, JAN_OCT_COLS, dropped)
+def _pairs(rows, cols):
+    rows = list(rows)
+    ra, rb = (_unit_rows(rows, c) for c in cols)
+    out, dropped = {}, []
+    for u in sorted({r["coarse_unit"] for r in rows if r.get("column") in cols}):
+        if u not in ra or u not in rb:
+            dropped.append((u, f"missing in {cols[0] if u not in ra else cols[1]}"))
+            continue
+        bad = next(((x, y) for x in ra[u] for y in rb[u] if not comparable(x, y)[0]), None)
+        if bad:
+            dropped.append((u, "not comparable: " + comparable(*bad)[1]))
+            continue
+        out[u] = (sum(_int(r["value"]) for r in ra[u]), sum(_int(r["value"]) for r in rb[u]))
+    return out, dropped
+
+
+def full_year_pairs(rows) -> tuple[dict, list]:
+    """(pairs, dropped): pairs is unit -> (N2024, N2025) from the full-year 'notified'
+    columns of Q1216 (§9.5.1); dropped lists (unit, reason) for every unit left out
+    (§10.4). Comparability is checked for every member row of a coarsened unit."""
+    return _pairs(rows, FULL_YEAR_COLS)
+
+
+def jan_oct_pairs(rows) -> tuple[dict, list]:
+    """(pairs, dropped) for S8: Jan-Oct 2024 (LS Q261) against Jan-Oct 2025 (RS Q1093)."""
+    return _pairs(rows, JAN_OCT_COLS)
+
+
+# Stated data source of each Q4 pq document: the note printed with each table
+# ("Data Source: Ni-kshay" in Q1216 and Q261; "Data source: Ni-kshay portal" in Q1093),
+# as read in the re-check of data/extracted/q4_source_checks.csv (§9.5.4).
+DATA_SOURCE = {
+    "data_raw/pq/AU1216_WFw8li.pdf": "Ni-kshay",
+    "data_raw/pq/AS261_lP7nYE.pdf": "Ni-kshay",
+    "data_raw/pq/AU1093_dH065I.pdf": "Ni-kshay portal",
+}
 
 
 def load_pq(name: str) -> list[dict]:
-    """Read data/extracted/<name>.csv and attach `data_source`, the source named in the
-    re-check note of q4_source_checks.csv ('Data source: Ni-kshay')."""
+    """Read data/extracted/<name>.csv and attach `data_source` (DATA_SOURCE)."""
     with open(EX / f"{name}.csv", encoding="utf-8", newline="") as f:
         rows = list(csv.DictReader(f))
-    src = {}
-    with open(EX / "q4_source_checks.csv", encoding="utf-8", newline="") as f:
-        for c in csv.DictReader(f):
-            m = re.search(r"data source:\s*([A-Za-z\-]+(?:\s+portal)?)", c["recheck_954"], re.I)
-            if m:
-                src[c["source_file"]] = m.group(1)
     for r in rows:
-        r["data_source"] = src.get(r["source_file"], "")
+        r["data_source"] = DATA_SOURCE.get(r["source_file"], "")
     return rows
