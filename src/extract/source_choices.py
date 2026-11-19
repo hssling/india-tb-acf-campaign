@@ -498,11 +498,11 @@ def q3_tables() -> list[dict]:
         # rows above did not cover.
         _rec("Q3T-SHARE-2021", "Q3 tables (§8.4)", "data_raw/studies/ZGHA_A_2256129_SM2351.docx",
              "S2 Annex (ACF-detected and public notified TB, 2021)",
-             "ACF share of notifications, 2021: GHA S2 is the only table that gives both "
+             "ACF share of public-sector notifications, 2021: GHA S2 is the only table that gives both "
              "figures, so it is the single value for the summary (§8.4 applied "
              "mechanically: one candidate); the denominator is public-sector notifications "
              "only, and the numerator is 'ACF cases diagnosed among tested'",
-             "used; summary indicator acf_share_pct, 2021 only",
+             "used; summary indicator acf_share_of_public_sector_notifications_pct, 2021 only",
              "§8.1; §8.4", "India TB Report ACF annexures print no notification count "
                            "(Q3T-SHARE); an ITR notification annexure is not combined "
                            "with an ACF annexure because §8.1 requires one published "

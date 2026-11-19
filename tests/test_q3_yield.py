@@ -102,3 +102,11 @@ def test_real_data_national_rows():
     # every State row of the printed tables is either computed or listed with a reason
     for r in res["rows"]:
         assert r["status"] == "computed" or r["reason"]
+
+
+def test_gha_s2_share_named_public_sector():
+    res = q3.run()
+    r = [x for x in res["rows"] if x["source_id"] == "GHA2023-S2" and x["state"] == "India"]
+    assert len(r) == 1
+    assert r[0]["indicator"] == "acf_share_of_public_sector_notifications_pct"
+    assert "public-sector" in r[0]["note"]

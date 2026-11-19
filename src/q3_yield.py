@@ -6,7 +6,8 @@ denominator:
 
 - yield = 100,000 x diagnosed / screened (the table's 'diagnosed' column);
 - NNS = screened / diagnosed;
-- ACF share = TB patients found through ACF / all TB patients notified, from one table.
+- ACF share of public-sector notifications = TB patients found through ACF / public-sector
+  TB notifications, from one table (GHA S2 only).
 
 Intervals (§8.2): Wilson score interval with z = NormalDist().inv_cdf(0.975). Yield: the
 Wilson interval of diagnosed/screened x 100,000. NNS: (1/upper, 1/lower) of the same
@@ -40,7 +41,7 @@ OUT_SUMMARY = ROOT / "outputs/q3_yield_summary.csv"
 Z = NormalDist().inv_cdf(0.975)
 YIELD = "yield_diagnosed_per_100000"
 NNS = "nns"
-SHARE = "acf_share_pct"
+SHARE = "acf_share_of_public_sector_notifications_pct"
 
 COLUMNS = ["state", "year", "indicator", "source_id", "source_table", "pdf_page",
            "printed_page", "numerator", "denominator", "value", "lower", "upper", "unit",
@@ -147,7 +148,7 @@ def indicator_rows(tab, rec) -> list[dict]:
 
 
 def share_rows(tab, rec) -> list[dict]:
-    """ACF share for a record {state, acf, notified, ...}."""
+    """ACF share of public-sector notifications for a record {state, acf, notified, ...}."""
     a, n, state = rec.get("acf"), rec.get("notified"), rec["state"]
     why = _unavailable_reason(rec, a, n, "ACF diagnosed", "notified")
     if why:

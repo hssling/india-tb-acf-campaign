@@ -131,7 +131,7 @@ whether the published value lies within its own rounding of the recomputation, t
 it is not recomputable), and the setting. Differences that remain are differences of setting and
 denominator, not errors (§7.5, §12).
 
-## Q3: yield, NNS and ACF share (analysis plan §8)
+## Q3: yield, NNS and ACF share of public-sector notifications (analysis plan §8)
 
 Written by `python -I src/q3_yield.py`. Wilson intervals, z = `statistics.NormalDist().inv_cdf(0.975)`.
 
@@ -144,8 +144,8 @@ reason, note.
 
 - Indicators: `yield_diagnosed_per_100000` (100,000 x diagnosed / screened; the tables print
   "diagnosed", so the name says so), `nns` (screened / diagnosed; interval = 1/upper, 1/lower of
-  the Wilson bounds of diagnosed/screened), `acf_share_pct` (ACF-diagnosed / public notified, in
-  percent).
+  the Wilson bounds of diagnosed/screened), `acf_share_of_public_sector_notifications_pct`
+  (ACF-diagnosed / public-sector notified, in percent).
 - Status: `computed`; `not_computable` (zero diagnosed: NNS has no value and its upper bound is
   `unbounded`; the yield of 0 is computed with its Wilson interval); `not_available` (listed with
   the reason, never imputed: no row printed, value printed as NA or #DIV/0!, or a year without a
@@ -156,7 +156,7 @@ reason, note.
 - India rows are the printed national rows (note: "India row as printed"). The ITR2023 annexure's
   State rows do not sum to its India row (checks TOT-012 to TOT-014); each row is computed as
   printed and the note is carried on every ITR2023 row.
-- ACF share: the India TB Report ACF annexures print no notification count, and §8.1 requires one
+- ACF share of public-sector notifications: the India TB Report ACF annexures print no notification count, and §8.1 requires one
   published table to give numerator and denominator, so no ACF annexure is combined with a
   notification annexure. The only table that prints both is GHA S2 (2021); its denominator is
   public-sector notifications only. Its India value (2.9%) is that table's, not a national share
