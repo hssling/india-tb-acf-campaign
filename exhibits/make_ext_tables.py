@@ -35,6 +35,7 @@ MINUS = "−"
 
 H = "outputs/ext/headline.csv"
 EL = "outputs/ext/d1_elasticity.csv"
+ELS = "outputs/ext/d1_elasticity_samedef.csv"
 DEC = "outputs/ext/d1_decomposition.csv"
 POOL = "outputs/ext/d1_pooled.csv"
 POOLB = "outputs/ext/d1_pooled_betweenyear.csv"
@@ -400,6 +401,11 @@ def supp_elasticity(tr: Trace, fn: Notes):
         rA.append([EL_NAMES[r["analysis"]], tr.value(EL, i, "estimate", "dec2"), tr.rng(EL, i, "boot_lo", "boot_hi", "dec2"),
                    tr.rng(EL, i, "model_ci_lo", "model_ci_hi", "dec2"), tr.value(EL, i, "n_obs", "round0"),
                    tr.value(EL, i, "n_units", "round0")])
+    i = row_index(ELS, analysis="same screened definition (post hoc)")
+    same = fn.mark("same", "Post hoc sensitivity, added after every registered estimate was seen: the main model on 2019 and 2021 only, the two data years whose screened column has the same printed heading (population screened amongst the mapped vulnerable population). Changing definitions of people screened would most likely bias the elasticity towards 0.")
+    rA.append(["Same screened definition, 2019 and 2021 (post hoc)" + same, tr.value(ELS, i, "estimate", "dec2"),
+               tr.rng(ELS, i, "boot_lo", "boot_hi", "dec2"), tr.rng(ELS, i, "model_ci_lo", "model_ci_hi", "dec2"),
+               tr.value(ELS, i, "n_obs", "round0"), tr.value(ELS, i, "n_units", "round0")])
     hB = ["Years", "Testing definition" + fn.mark("def", "In the 2022 data year the tested column counts people examined; rows involving 2022 are sensitivity analyses."),
           "Component" + fn.mark("comp", "ln(diagnosed ÷ screened) = ln(tested ÷ screened) + ln(diagnosed ÷ tested): the testing step plus the positivity step, from national sums over the States with all three counts; the two steps add up to the change in log yield exactly."),
           "Point estimate", "Cluster-bootstrap 95% interval", "States (n)"]
@@ -417,8 +423,8 @@ def supp_elasticity(tr: Trace, fn: Notes):
                          ("National levels by year", ["Year", "Testing definition", "Quantity", "Point estimate",
                                                       "Cluster-bootstrap 95% interval", "States (n)"], rC),
                          ("Between-State variance of the log yield and its split by step", hD, rD)])
-    notes = ["Elasticity: ln(diagnosed) on ln(screened) with State and year fixed effects, five data years. "
-             "Intensity strata as in Table 1. Every interval is 95%."]
+    notes = ["Elasticity: ln(diagnosed) on ln(screened) with State and year fixed effects, five data years "
+             "(the post hoc row: two). Intensity strata as in Table 1. Every interval is 95%."]
     return header, rows, notes + fn.lettered()
 
 

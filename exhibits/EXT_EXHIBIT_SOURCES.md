@@ -27,7 +27,7 @@ Nothing is typed in the scripts. Every numeric table cell is recorded in `trace.
 | Table S1 | Pooled yield by year; between-year row | outputs/ext/d1_pooled.csv; outputs/ext/d1_pooled_betweenyear.csv | `k`, yields and intervals, `tau2`, `i2`, `n_above`, `n_overlaps`, `n_below` |
 | Table S1 | National yield | outputs/q3_yield_summary.csv | `value`, `lower`, `upper` (India) |
 | Table S2 | State tiers | outputs/ext/d1_states.csv; outputs/ext/d1_states_betweenyear.csv; outputs/ext/d1_tiers_by_intensity.csv; outputs/ext/d1_excluded.csv | `years`, posterior and interval, `rank_lo`, `rank_hi`, `tier`, `tier_agrees`, `single_year`, `stratum`; the unit with no pooled value |
-| Table S3 | Elasticity variants; decomposition | outputs/ext/d1_elasticity.csv; outputs/ext/d1_decomposition.csv | `estimate`, `boot_*`, `model_ci_*`, `n_obs`, `n_units` |
+| Table S3 | Elasticity variants (with the post hoc same-heading row); decomposition | outputs/ext/d1_elasticity.csv; outputs/ext/d1_elasticity_samedef.csv; outputs/ext/d1_decomposition.csv | `estimate`, `boot_*`, `model_ci_*`, `n_obs`, `n_units` |
 | Table S4 | Alignment variants; tier shares; scenario; scenario by State | outputs/ext/d2_alignment.csv; d2_tier_shares.csv; d2_scenario.csv; d2_scenario_units.csv | every reported column |
 | Table S5 | θ specifications; leave one out | outputs/ext/d3.csv; outputs/ext/leave_one_out.csv | `estimate`, `boot_*`, `model_ci_*`, `n_obs`, `n_units`; `value`, `diff`, `same_side_as_main`, `n`, `note` |
 | Table S6 | The full specification grid | outputs/ext/spec_curve.csv | every entry |

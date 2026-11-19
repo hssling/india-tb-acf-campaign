@@ -700,6 +700,14 @@ def catalogue_ext(root: Path) -> dict[str, tuple[str, str]]:
         put(f"eps.{key}.model", rng(num(r["model_ci_lo"], 2), num(r["model_ci_hi"], 2)), f + ", model_ci_lo/hi")
         put(f"eps.{key}.units", count(r["n_units"]), f + ", n_units")
         put(f"eps.{key}.obs", count(r["n_obs"]), f + ", n_obs")
+    r = one(ext_csv(root, "d1_elasticity_samedef"), "d1_elasticity_samedef",
+            analysis="same screened definition (post hoc)")
+    f = "outputs/ext/d1_elasticity_samedef.csv: same screened definition (post hoc)"
+    put("eps.samedef.est", num(r["estimate"], 2), f + ", estimate")
+    put("eps.samedef.boot", rng(num(r["boot_lo"], 2), num(r["boot_hi"], 2)), f + ", boot_lo/hi")
+    put("eps.samedef.model", rng(num(r["model_ci_lo"], 2), num(r["model_ci_hi"], 2)), f + ", model_ci_lo/hi")
+    put("eps.samedef.units", count(r["n_units"]), f + ", n_units")
+    put("eps.samedef.obs", count(r["n_obs"]), f + ", n_obs")
     ins = ext_csv(root, "d1_intensity_strata")
     put("int.switched", count(sum(r["stratum"] != r["stratum_registered_rule"] for r in ins)),
         "outputs/ext/d1_intensity_strata.csv: stratum differs from stratum_registered_rule")
@@ -784,6 +792,10 @@ def catalogue_ext(root: Path) -> dict[str, tuple[str, str]]:
     f = "outputs/ext/d2_scenario.csv: robust tiers (post hoc)"
     put("sc.robust.delta", count(round(float(r["delta"]))), f + ", delta")
     put("sc.robust.ci", rng(count(round(float(r["ci_lo"]))), count(round(float(r["ci_hi"])))), f + ", ci_lo/hi")
+    r = one(sc, "scenario", analysis="stratum elasticity")
+    f = "outputs/ext/d2_scenario.csv: stratum elasticity"
+    put("sc.stratum.delta", count(round(float(r["delta"]))), f + ", delta")
+    put("sc.stratum.ci", rng(count(round(float(r["ci_lo"]))), count(round(float(r["ci_hi"])))), f + ", ci_lo/hi")
 
     # ---- notifications -----------------------------------------------------------------------
     d3 = ext_csv(root, "d3")
@@ -964,7 +976,7 @@ FIXED_EXT: list[tuple[str, str]] = [
     ("campaign", r"\b100[- ]day\b|\bphase[- ]1\b"),
     ("yield_scale", r"per 100,000(?: people)? screened"),
     ("unit_change", r"\b(?:each|a) 1% "),
-    ("null", r"ε < 1\b|θ = [01]\b|\b(?:exclude[sd]?|excluding|including|includes|below|exceed|side of) [01]\b"
+    ("null", r"ε < 1\b|θ = [01]\b|\b(?:exclude[sd]?|excluding|including|includes|below|exceed|side of|towards) [01]\b"
              r"|\bby 0 and 1\b"),
     ("date", r"\b\d{1,2} (?:" + "|".join(MONTHS) + r") 20\d\d\b"),
     ("year", r"(?<![\d.,])20(?:1[89]|2[0-6])(?![\d]|[.,]\d)"),
