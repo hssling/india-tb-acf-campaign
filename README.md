@@ -20,13 +20,14 @@ side of the null (plan §8); otherwise it is labelled "not established".
 
 | Question | Headline estimate (95% bootstrap interval) | Label |
 |---|---|---|
-| **D1. Where does screening still pay?** Within a State, how do ACF diagnoses scale with the number screened? | Elasticity 0.24 (0.02 to 0.51); null 1 | **Diminishing returns supported:** within States, diagnoses rose less than proportionally with screening volume |
-| **D2. Was campaign screening aimed where yield was highest?** | Spearman correlation of a State's phase-1 district share with its pooled 2021-2023 yield -0.82 (-0.93 to 0.02); null 0 | **Targeting alignment not established** |
-| **D3. Do notifications move with ACF diagnoses within a State?** | Difference in public notifications per additional ACF diagnosis -0.17 (-2.20 to 1.80); reference values 0 and 1 | **Additionality not established** |
+| **D1. Where does screening still pay?** Within a State, how do ACF diagnoses scale with the number screened? | Elasticity 0.24 (0.02 to 0.51); null 1. Within States, diagnoses rose less than proportionally with screening volume, consistent with diminishing returns | **Supported** |
+| **D2. Was campaign screening aimed where yield was highest?** | Spearman correlation of a State's phase-1 district share with its pooled 2021-2023 yield -0.82 (-0.93 to 0.02); null 0 | **Not established** |
+| **D3. Do notifications move with ACF diagnoses within a State?** | Difference in public notifications per additional ACF diagnosis -0.17 (-2.20 to 1.80); null 0; reference values 0 and 1 | **Not established** |
 
-- The D1 label is "supported" and the other two are "not established". The
-  D1 interval is wide at its lower end. Leave-one-out and specification-curve
-  results are beside it in `outputs/ext/headline.csv`.
+- The D1 label is "supported" and the other two are "not established". The D1
+  cluster-robust model interval is -0.08 to 0.56; both D1 intervals exclude 1.
+  Leave-one-out and specification-curve results are beside each estimate in
+  `outputs/ext/headline.csv`.
 - The ITR 2023 State rows do not sum to that table's India row; they are used
   as printed and flagged.
 - D1 also gives pooled State yields with tiers, a screening-intensity
@@ -37,7 +38,7 @@ side of the null (plan §8); otherwise it is labelled "not established".
 
 ### Deviations
 
-Both are dated entries in §10 of the extension plan (the text above §10 is
+Each is a dated entry in §10 of the extension plan (the text above §10 is
 frozen):
 
 - **Post hoc between-year tier sensitivity.** The registered State tiers use
@@ -48,6 +49,13 @@ frozen):
   misaligned with its State rows as printed. It is not used, and screening
   intensity uses the ITR 2022 population. The registered rule is still
   computed beside it.
+- **Post hoc same-definition elasticity.** The printed screened heading
+  differs between editions. State-specific shifts in the screened count would
+  most likely bias the elasticity towards 0. After every registered estimate
+  was seen, the main elasticity was refitted on the two data years whose
+  screened heading is the same, 2019 and 2021
+  (`outputs/ext/d1_elasticity_samedef.csv`). It changes no registered estimate
+  or label.
 
 `verification/check_plan_order.py` checks that the extension registration commit
 precedes every commit touching `outputs/ext/` or the D1, D2, D3 and robustness
@@ -59,8 +67,9 @@ bootstrap or permutation intervals; the seeded build reproduces them.
 
 ### Reproducing the extension
 
-Run after the v1.0.0 pipeline of Part 2 (the panel reads `data/extracted/`),
-from the repository root, in this order. Software versions are in
+The panel reads the committed tables in `data/extracted/`, so the v1.0.0
+pipeline of Part 2 and the source documents are not needed. Run from the
+repository root, in this order. Software versions are in
 [`ENVIRONMENT.md`](ENVIRONMENT.md); the extension needs numpy and scipy.
 
 ```
@@ -76,6 +85,14 @@ None of these scripts takes arguments. `panel.py` writes `data/ext/`; the others
 write `outputs/ext/`. The seeded bootstraps make the full extension build take
 several minutes, and the full test suite about six. `python -I
 verification/check_all.py` (Part 2, step 3) then checks everything.
+
+The extension's tables and figures are built from `outputs/ext/` (the figures
+need matplotlib) and written to `manuscript/ext/exhibits/`, which is git-ignored:
+
+```
+python -I exhibits/make_ext_tables.py
+python -I exhibits/make_ext_figures.py
+```
 
 ## Part 2: the v1.0.0 audit (India's active case-finding figures and the 100-day TB Mukt Bharat Abhiyaan)
 
@@ -149,7 +166,7 @@ Two deviations change what is reported:
 | `data/ext/` | the State-by-year panel built from `data/extracted/` by `src/ext/panel.py` |
 | `outputs/ext/` | extension results (CSV) and their README |
 | `outputs/` | results (CSV) and their README |
-| `exhibits/` | builders of the tables and figures (written to `manuscript/exhibits/`, which is git-ignored) |
+| `exhibits/` | builders of the tables and figures (written to the git-ignored `manuscript/v1_audit/exhibits/` for v1.0.0 and `manuscript/ext/exhibits/` for the extension) |
 | `verification/` | checks of plan order (both registrations), deviations, extraction totals, inventory, outputs and the extension's headline values and labels |
 | `tests/` | pytest suite |
 | `tools/` | `fetch_sources.py`; the submission build (`build_submission.py`, `*.ps1`, Windows and Microsoft Word only) |
@@ -215,7 +232,8 @@ python -I exhibits/make_figures.py
 - `online_pages.py` reads web pages that were transcribed into
   `data/transcribed/online_pages.csv`, not live pages.
 - `make_figures.py` needs matplotlib.
-- The exhibits are written to `manuscript/exhibits/`.
+- The exhibits are written to `manuscript/v1_audit/exhibits/`, which is
+  git-ignored.
 
 #### 3. Verify
 
@@ -229,7 +247,9 @@ manuscript is not in this repository.
 
 ### Status
 
-A manuscript is under peer review; it is not included in this repository.
+A manuscript based on the extension is being submitted; the v1.0.0 audit has
+not been published as an article. The manuscript is not included in this
+repository.
 
 ### Licences
 
@@ -242,8 +262,11 @@ stated here and in `LICENSE-DATA` instead.
 
 ### Citation
 
-See [`CITATION.cff`](CITATION.cff). The archived release's DOI will be added
-there when the release is made.
+See [`CITATION.cff`](CITATION.cff). The releases are archived on Zenodo. The
+concept DOI [10.5281/zenodo.24371584](https://doi.org/10.5281/zenodo.24371584)
+always resolves to the latest version. Each release also has its own version
+DOI; that of v1.0.0 is
+[10.5281/zenodo.24371585](https://doi.org/10.5281/zenodo.24371585).
 
 ### Author
 

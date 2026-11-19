@@ -27,6 +27,7 @@ authors:
       Department of Community Medicine, Shridevi Institute of Medical Sciences
       and Research Hospital, Tumkur, Karnataka, India
 license: MIT
+doi: 10.5281/zenodo.24371584
 repository-code: "https://github.com/hssling/india-tb-acf-campaign"
 keywords:
   - tuberculosis
@@ -36,5 +37,4 @@ keywords:
   - TB Mukt Bharat Abhiyaan
   - data consistency
   - pre-registration
-  - diminishing returns
   - screening yield

@@ -1,6 +1,6 @@
 # Exhibit plan (Public Health: at most 5 tables and figures in the main text)
 
-Built by `exhibits/make_tables.py` and `exhibits/make_figures.py` from `outputs/` and `data/` only. Output is local, in `manuscript/exhibits/` (git-ignored). Source map: `exhibits/EXHIBIT_SOURCES.md`.
+Built by `exhibits/make_tables.py` and `exhibits/make_figures.py` from `outputs/` and `data/` only. Output is local, in `manuscript/v1_audit/exhibits/` (git-ignored). Source map: `exhibits/EXHIBIT_SOURCES.md`.
 
 ## Main text (5)
 
