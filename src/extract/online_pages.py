@@ -137,9 +137,10 @@ def _build_specs() -> None:
         "food baskets have been distributed", notes=(NOUNIT.format("food baskets"),))
     # ---- PIB 24 Mar 2025 backgrounder
     add("2114549", "s1", "tb_cases", "3 Lakh", "cases", "Additional Cases Found via House-to-House Screening",
-        notes=("house-to-house screening of high-risk groups is active case finding in "
-               "substance; the item names neither the campaign nor ACF, so scope is "
-               "unspecified (§5.1: figures of active case finding enter)",))
+        notes=("a case-finding result: house-to-house screening of high-risk groups is active "
+               "case finding by definition, and the cited DGHS NTEP page files the same "
+               "figure ('an additional ~3 lakh TB cases') under 'Active Case Finding'; the "
+               "item names neither the campaign nor ACF, so scope is unspecified",))
     # ---- PIB 24 Mar 2025 summit
     add("2114554", "s1", "other:nikshay_shivirs_conducted", "13.46 lakh", "",
         "Nikshay Shivirs, or community screening and awareness camps were organised",
@@ -168,30 +169,19 @@ def _build_specs() -> None:
         "new Ni-kshay Mitras joined the effort")
     # ---- PIB explainer 24 Mar 2026 (press note 157923 and Backgrounder 2244661: same text)
     for pk in ("note157923", "2244661"):
-        gp = "Gram Panchayats have been awarded TB-free certification"
-        add(pk, "s0", "other:gram_panchayats_tb_free_certified", "46,118", "", gp,
-            period="the year 2024", wstart="2024-01-01", wend="2024-12-31",
-            notes=(NOUNIT.format("Gram Panchayats"),))
-        add(pk, "s1", "screened", "20 crore", "persons", "vulnerable population is screened for TB",
+        add(pk, "b1", "screened", "20 crore", "persons", "vulnerable population is screened for TB",
             wstart="2024-12-07", series="cumulative")
-        add(pk, "s1", "tb_cases", "28 lakh", "cases", "TB patients diagnosed",
+        add(pk, "b1", "tb_cases", "28 lakh", "cases", "TB patients diagnosed",
             wstart="2024-12-07", series="cumulative")
         add(pk, "s2", "districts_selected", "347", "districts", "347 high-priority districts")
         add(pk, "s2", "other:states_uts_selected", "33", "", "States/UTs",
             notes=(NOUNIT.format("States/UTs"),))
-        add(pk, "s3", "other:elected_representatives_involved", "30,000", "persons",
-            "elected representatives")
-        add(pk, "s3", "other:line_ministries_involved", "24", "", "24-line ministries",
-            notes=(NOUNIT.format("ministries"),))
         add(pk, "s4", "screened", "20 crore", "persons", "vulnerable population is screened for TB",
             wstart="2024-12-07", series="cumulative")
         add(pk, "s4", "tb_cases", "28 lakh", "cases", "TB patients are diagnosed",
             wstart="2024-12-07", series="cumulative")
         add(pk, "s4", "other:asymptomatic_tb_cases", "9 lakh", "cases", "asymptomatic cases",
             wstart="2024-12-07", series="cumulative")
-        add(pk, "s5", "other:gram_panchayats_tb_free_certified", "46,118", "", gp,
-            period="the year 2024", wstart="2024-01-01", wend="2024-12-31",
-            notes=(NOUNIT.format("Gram Panchayats"),))
         add(pk, "s6", "other:treatment_success_rate", "90%", "percent", "treatment success rate")
         add(pk, "s7", "screened", "1,250", "persons", "the team screened 1,250 people",
             geography="Jammu and Kashmir", period="three days",
@@ -248,14 +238,14 @@ def _build_specs() -> None:
         add(pk, "s2", "other:high_risk_villages_wards", "1.58 lakh", "", "high-risk villages and urban wards",
             notes=(NOUNIT.format("villages and wards"),))
     add("2297901", "s4", "screened", "2.02 crore", "persons", "screened over 2.02 crore vulnerable individuals",
-        period="march 24 to july 4, 2026", wstart="2026-03-24", wend="2026-07-04",
+        wstart="2026-03-24", wend="2026-07-04",
         notes=("window from the preceding sentence (lead-in s3: 'which ran from March 24 to "
                "July 4, 2026')",))
     add("2297901", "s4", "tb_cases", "7 lakh", "cases", "detected over 7 lakh new TB cases",
-        period="march 24 to july 4, 2026", wstart="2026-03-24", wend="2026-07-04",
+        wstart="2026-03-24", wend="2026-07-04",
         notes=("window from the preceding sentence (lead-in s3)",))
     add("2297901", "s4", "other:asymptomatic_tb_cases", "1.97 lakh", "cases", "asymptomatic cases",
-        period="march 24 to july 4, 2026", wstart="2026-03-24", wend="2026-07-04",
+        wstart="2026-03-24", wend="2026-07-04",
         notes=("window from the preceding sentence (lead-in s3)",))
     add("2297901", "s5", "other:naat_machines", "11,000", "",
         "molecular testing from a few hundred machines a decade ago to over 11,000 today",
@@ -275,9 +265,6 @@ def _build_specs() -> None:
         "Gram Panchayats awarded TB-free certification", notes=(NOUNIT.format("Gram Panchayats"),))
     add(pk, "s2", "districts_selected", "347", "districts", "347 high-priority districts")
     add(pk, "s2", "other:states_uts_selected", "33", "", "States/UTs", notes=(NOUNIT.format("States/UTs"),))
-    add(pk, "s3", "other:elected_representatives_involved", "30,000", "persons", "elected representatives")
-    add(pk, "s3", "other:line_ministries_involved", "24", "", "24 line ministries",
-        notes=(NOUNIT.format("ministries"),))
     add(pk, "s4", "screened", "28.1 crore", "persons", "people screened",
         notes=("'As of June 2026' gives a month only: as_on left blank",))
     add(pk, "s4", "other:tpt_individuals_provided", "20 lakh", "persons",
@@ -320,8 +307,6 @@ def _build_specs() -> None:
     add(pk, "l4", "tb_cases", "48.64 lakh", "cases", "new TB cases identified", **win)
     add(pk, "l4", "other:asymptomatic_tb_cases", "14.97 lakh", "cases", "asymptomatic cases", **win)
     add(pk, "s5", "other:asymptomatic_tb_cases", "15 lakh", "cases", "asymptomatic cases")
-    add(pk, "s6", "other:gram_panchayats_tb_free_certified", "67933", "", "Panchayats have been declared TB Free",
-        period="2025", wstart="2025-01-01", wend="2025-12-31", notes=(NOUNIT.format("Panchayats"),))
     # ---- year-end reviews of the Ministry (2023, 2022)
     add("1990674", "s1", "tb_cases", "3 lakh", "cases", "diagnosis of an additional ~3 lakh TB cases",
         period="since its inception")
@@ -423,7 +408,6 @@ def _build_specs() -> None:
     add("2275402", "b3", "other:high_risk_villages_wards", "1.2 Lakh", "",
         "High-Risk Villages, Wards and Congregate Settings",
         **{**sp, "notes": sp["notes"] + (NOUNIT.format("villages and wards"),)})
-    add("2275402", "b4", "other:my_bharat_volunteers_participating", "1.9 Lakh", "persons", "Volunteers", notes=HB)
     add("2189415", "b1", "other:treatment_success_rate", "90%", "percent", "Treatment success rate", notes=HB)
     add("2189415", "b2", "tb_cases", "24.5 lakh", "cases", "diagnosis of 24.5 lakh patients", notes=HB)
     add("2189415", "b2", "other:asymptomatic_tb_cases", "8.61 lakh", "cases", "asymptomatic TB cases", notes=HB)
@@ -539,14 +523,14 @@ EXCLUSIONS: list[tuple] = [
      "a data chart printed as an image: no text to read; the same chart in the PDF version of "
      "the backgrounder is recorded under PIBBG"),
     ("2080069", "17.7%; 237; 195; 21.4%; 28; 22", "headline bullets and para 1", "background", R_BG),
-    ("2080069", "18,05,670; 21,35,830; 24,22,121; 25,52,257; 21,69,438", "table 'TB cases Notified' "
+    ("2080069", "18,05,670; 21,35,830; 24,22,121; 25,52,257; 21,69,438; 18.05 Lakh; 25.52 Lakh", "table 'TB cases Notified' "
      "2020-2024*, 'as on 19th Nov 2024'", "programme-wide",
      "national notifications of a Rajya Sabha answer, not given as campaign or ACF figures (rule 4)"),
     ("2085802", "1.75 lakh", "Ayushman Arogya Mandirs", "resource", R_RES),
     ("2085802", "28% to 22%; 32%", "para 5", "background", R_BG),
     ("2090668", "156", "ESIC hospitals have started screening", "resource", R_RES),
     ("2090668", "17.7%; 53% to 85%; 21.4%; 28 to 22 lakhs", "para 3", "background", R_BG),
-    ("2105575", "over 26 lakh; over 36%", "highlight bullet 3 and the body sentence 'In 2024, India notified over 26 lakh TB patients'",
+    ("2105575", "over 26 lakh; over 36%", "highlight bullet 5 and the body sentence 'In 2024, India notified over 26 lakh TB patients'",
      "programme-wide", "national notifications in 2024, not given as campaign figures (rule 4)"),
     ("2114205", "none", "whole page", "no figure", "the President's message prints no figure"),
     ("2114549", "17.7%; 237; 195; 28; 22; 15 lakh; 2.5 lakh; 83%; 68%; 75%; 80%", "NTEP achievements, "
@@ -588,6 +572,28 @@ EXCLUSIONS: list[tuple] = [
      "campaign)"),
     ("2244703", "over 3,000; 9,800+; 1.8 lakh", "handheld X-ray units, NAAT laboratories, Ayushman "
      "Arogya Mandirs", "resource", R_RES),
+    ("note157923", "over 30,000 elected representatives; 24-line ministries",
+     "para 52, 'The Jan Andolan also led to active involvement of ...'", "participation",
+     "the sentence does not name the campaign or active case finding, so the same-sentence rule (rule 3) does not admit it; the page-level campaign context is not used"),
+    ("2244661", "over 30,000 elected representatives; 24-line ministries",
+     "para 52, 'The Jan Andolan also led to active involvement of ...'", "participation",
+     "the sentence does not name the campaign or active case finding, so the same-sentence rule (rule 3) does not admit it; the page-level campaign context is not used"),
+    ("2322820", "over 30,000 elected representatives; 24 line ministries",
+     "para 52, 'The Jan Andolan also led to active involvement of ...'", "participation",
+     "the sentence does not name the campaign or active case finding, so the same-sentence rule (rule 3) does not admit it; the page-level campaign context is not used"),
+    ("note157923", "46,118", "Key Takeaways item 'Over 46,118 Gram Panchayats ...' and the sentence "
+     "'As a result of all-round targeted and collaborative efforts, ...'", "programme-wide",
+     "TB-free certification of Gram Panchayats: neither sentence names the campaign or active case "
+     "finding (rule 3)"),
+    ("2244661", "46,118", "Key Takeaways item 'Over 46,118 Gram Panchayats ...' and the sentence "
+     "'As a result of all-round targeted and collaborative efforts, ...'", "programme-wide",
+     "TB-free certification of Gram Panchayats: neither sentence names the campaign or active case "
+     "finding (rule 3)"),
+    ("2335615", "67933", "'With these efforts, 67933 Panchayats have been declared TB Free in 2025.'",
+     "programme-wide", "TB-free certification of Panchayats: the sentence names neither the campaign "
+     "nor active case finding (rule 3)"),
+    ("2275402", "1.9 Lakh", "highlight bullet 8 'More Than 1.9 Lakh MY Bharat Volunteers Join ...'",
+     "participation", "the sentence does not name the campaign or active case finding, so the same-sentence rule (rule 3) does not admit it; the page-level campaign context is not used"),
     ("2279976", "30", "'more than 30 region-specific indicators'", "method parameter",
      "a parameter of the vulnerability-mapping method, not a campaign figure"),
     ("2291403", "21%; 12%; 92%; 78%", "para 5", "background", R_BG),

@@ -127,7 +127,7 @@ def test_highlight_bullet_figures_enter_as_printed():
     assert len(bullets) >= 20
     pages = {p["page_key"]: p["url"] for p in _pages()}
     rows = [r for r in _own() if "(highlight bullet)" in r["page_or_para"]]
-    assert len(rows) == 39
+    assert len(rows) == 42
     for r in rows:
         assert r["context_verbatim"] in bullets.values(), r["fig_id"]
     r = [x for x in rows if x["value_printed"] == "3.57 lakh"]
@@ -135,6 +135,37 @@ def test_highlight_bullet_figures_enter_as_printed():
     assert r[0]["context_verbatim"].startswith("Since the launch of 100-day campaign")
     dec = [d for d in _read(SCOPE) if d["source_file"] in W.OWN_FILES]
     assert not [d for d in dec if d["category"] == "headline bullet"]
+
+
+def test_window_label_is_derived_from_the_context_only():
+    """§7.1 as clarified in §13: the label comes from context_verbatim; the dates of a
+    lead-in may fill window_start/window_end (ruling A17) but never the label."""
+    from src import inventory_rules as R
+
+    def words(t):
+        return re.sub(r"\s+", " ", t.lower().replace("-", " ").replace("–", " ")).strip()
+    for r in _own():
+        ctx = r["context_verbatim"]
+        label = r["window_label"]
+        by_rule = R.window_label(ctx, "", bool(r["window_end"] or r["as_on"]))
+        assert label == by_rule or (label and label in words(ctx)), (r["fig_id"], label)
+    r = [x for x in _own() if x["fig_id"].startswith("PIB2297901") and x["quantity"] == "screened"]
+    assert r and r[0]["window_label"] == "" and r[0]["window_start"] == "2026-03-24"
+
+
+def test_same_sentence_scope_rule_exclusions_are_recorded():
+    rows = _own()
+    texts = " ".join(r["context_verbatim"] for r in rows)
+    assert "Jan Andolan also led to" not in texts
+    assert "67933" not in " ".join(r["value_printed"] for r in rows)
+    assert not [r for r in rows if r["quantity"] == "other:gram_panchayats_tb_free_certified"
+                and "Abhiyaan" not in r["context_verbatim"]]
+    dec = " ".join(d["figures"] for d in _read(SCOPE) if d["source_file"] in W.OWN_FILES)
+    for f in ("over 30,000 elected representatives", "67933", "1.9 Lakh", "46,118"):
+        assert f in dec, f
+    kept = [r for r in rows if r["value_printed"] == "3 Lakh" and "House-to-House" in
+            r["context_verbatim"]]
+    assert kept and "active case finding by definition" in kept[0]["note"]
 
 
 def test_no_duplicate_fig_ids():

@@ -637,7 +637,7 @@ def online_rows() -> list[dict]:
              "§5.1; §5.3 (first set)", src, d),
         _rec("WEB-04", WEB_T, "include = yes pages without an in-scope figure",
              "Pages read; no figure entered; what was left out is in inventory_scope_decisions.csv",
-             lab(inc_none), "§5.1; §7.2 rule 3 and 4 of the campaign scope rule", src, d),
+             lab(inc_none), "§5.1; rules 3–4 of the inventory scope rule", src, d),
         _rec("WEB-05", WEB_T, "cited sources (§5.3, second set)",
              "Pages that an included page names as the source of a figure, by footnote or "
              "reference list, read and entered (rows in brackets). PIB PRID 2199422 is the "
@@ -661,7 +661,8 @@ def online_rows() -> list[dict]:
              "data.gov.in mirrors (§3.4: cross-checks only; not reachable); the PMC, PLOS, "
              "Figshare and LGD pages (read in Part C and the LGD work); the WHO pages, social "
              "media posts and PDF links among the references (not official PIB or Ministry "
-             "pages, or downloads)", "not entered", "§3.3; §3.4; §5.1", src, d),
+             "pages, or downloads); https://nikshay.in/Home/AboutUs (reference list of PIB "
+             "2114549), cited for a description of the portal, not for a figure", "not entered", "§3.3; §3.4; §5.1", src, d),
     ]
     for k, p in enumerate(summ, start=1):
         if p["availability"] == "read":
