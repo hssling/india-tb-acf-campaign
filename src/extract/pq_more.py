@@ -119,24 +119,13 @@ class Prose:
 
 _SU = "unit (States/UTs) not in the §5.2 unit vocabulary"
 _ACT = "unit ({}) not in the §5.2 unit vocabulary"
-_SEL = ("selection attribute of the campaign districts (rule 2, as the campaign "
-        "documents enter 'These districts include 38 tribal districts, ...')")
-
-
-def _selection(key, page, s_main, s_sel, where, sel_note="", **kw) -> list[Prose]:
+def _selection(key, page, s_main, where, **kw) -> list[Prose]:
     return [
         Prose(key, page, "districts_selected", "347", "districts", "priority districts",
               s_main, where, **kw),
         Prose(key, page, "other:states_uts_selected", "33", "", "States/UTs" if
               "States/UTs" in s_main else "State/UTs", s_main, where, note=_SU, **kw),
-    ] + ([
-        Prose(key, page, "other:tribal_districts_selected", "38", "districts",
-              "tribal", s_sel, where, note=sel_note, **kw),
-        Prose(key, page, "other:mining_districts_selected", "27", "districts",
-              "mining", s_sel, where, note=sel_note, **kw),
-        Prose(key, page, "other:aspirational_districts_selected", "46", "districts",
-              "aspirational", s_sel, where, note=sel_note, **kw),
-    ] if s_sel else [])
+    ]
 
 
 LAUNCH = ("Since the launch of the campaign on 7th December, 2024, as per available "
@@ -150,15 +139,12 @@ def _prose_specs() -> list[Prose]:
          "the government has identified 347 priority districts spread across 33 "
          "States/UTs for a “100 Days intensified Campaign” based on TB burden and "
          "mortality.")
-    s2 = "This includes 38 tribal districts, 27 mining districts and 46 aspirational districts."
-    P += _selection("Q278", 1, s, s2, "answer (a) to (c), paragraph 1",
-                    sel_note=_SEL + "; 'This' is the 347 priority districts of the "
-                                    "preceding sentence")
+    P += _selection("Q278", 1, s, "answer (a) to (c), paragraph 1")
     s = ("To accelerate the progress to achieve Sustainable Development Goals (SDGs) "
          "towards TB, the government has identified 347 priority districts spread across "
          "33 States/UTs for a “100 Days intensified TB Campaign” based on burden and "
          "mortality.")
-    P += _selection("Q279", 1, s, "", "answer (a) to (f), paragraph 1")
+    P += _selection("Q279", 1, s, "answer (a) to (f), paragraph 1")
     s = ("Further, the Government has launched a 100 days intensified TB Mukt Bharat "
          "Abhiyan in identified 347 priority districts across 33 State/UTs, to accelerate "
          "the endeavour to achieve Sustainable Development Goals related to TB, wherein "
@@ -167,14 +153,14 @@ def _prose_specs() -> list[Prose]:
          "help groups, anganwadis, local non-government organisations (NGOs) and civil "
          "society organizations to increase awareness on TB to combat stigma and to "
          "encourage early health seeking behaviour among the citizen.")
-    P += _selection("Q2051", 2, s, "", "answer (b)")
+    P += _selection("Q2051", 2, s, "answer (b)")
     # ---------------- Lok Sabha Q. 79 (Statement)
     s = ("The Government has launched a 100 days intensified TB mukt bharat abhiyan in "
          "identified 347 priority districts across 33 State/UTs, including 8 districts of "
          "Himachal Pradesh, to accelerate the endeavour to achieve Sustainable "
          "Development Goals related to TB.")
     st = "Statement, (a) to (d)"
-    P += _selection("LSQ79", 0, s, "", st)
+    P += _selection("LSQ79", 0, s, st)
     P.append(Prose("LSQ79", 0, "districts_selected", "8", "districts",
                    "districts of Himachal Pradesh", s, st, geography="Himachal Pradesh",
                    idkey="s-the-government-has-launched-a-100.himachal-pradesh"))
@@ -210,10 +196,10 @@ def _prose_specs() -> list[Prose]:
         ("110 MPs, 426 Members of Legislative Assembly (MLAs) and 27,949 Members of "
          "Legislative Councils (MLCs) and elected Panchayati Raj representatives have "
          "participated in the campaign.",
-         [("other:mps_participated", "110", "persons", "MPs"),
-          ("other:mlas_participated", "426", "persons",
+         [("other:mps_participating", "110", "persons", "MPs"),
+          ("other:mlas_participating", "426", "persons",
            "Members of Legislative Assembly (MLAs)"),
-          ("other:mlcs_and_pri_representatives_participated", "27,949", "persons",
+          ("other:mlcs_and_pri_representatives_participating", "27,949", "persons",
            "Members of Legislative Councils (MLCs) and elected Panchayati Raj "
            "representatives")]),
         ("4,173 schools have conducted sensitization sessions with students and teachers.",
@@ -451,8 +437,9 @@ def build_inventory() -> tuple[list[dict], list[dict]]:
 SCOPE_RULE_E = (
     "Inventory scope of the five further parliamentary answers (Part E; §5.1, §5.3, §7.4, "
     "§13 of 19 November 2026). Same rules as the campaign documents and the parliamentary "
-    "answers: cascade and selection figures of the campaign or of ACF enter (§5.1; rules "
-    "1-2); resources, targets and participation enter only when their own sentence, or "
+    "answers: cascade and selection figures of the campaign or of ACF enter when their own "
+    "sentence names the campaign or ACF (§5.1; rules 1-2; the same-sentence rule applies "
+    "strictly, controller ruling of 19 November 2026); resources, targets and participation enter only when their own sentence, or "
     "the lead-in sentence that a list item completes, names the campaign or active case "
     "finding (rule 3); programme-wide figures, epidemiology, finance and the Ni-kshay "
     "Poshan and Ni-kshay Mitra schemes do not enter (rule 4). State tables of "
@@ -469,6 +456,12 @@ SCOPE_EXCLUSIONS: list[tuple[str, int | str, str, str, str, str]] = [
      "background", "epidemiology (rule 4)"),
     ("Q279", 2, "Rs 1000/-", "answer, Ni-kshay Poshan Yojana", "scheme",
      "benefit norm of the Ni-kshay Poshan Yojana (rule 4)"),
+    ("Q278", 1, "38; 27; 46", "answer (a) to (c), 'This includes 38 tribal districts, "
+     "27 mining districts and 46 aspirational districts.'", "composition",
+     "the sentence names no campaign: 'This' refers back to the preceding sentence, and "
+     "the same-sentence rule applies strictly (controller ruling, 19 November 2026); "
+     "the same composition figures are entered from CTD 100 Days Campaign, the Guidance "
+     "Document and LS Q. 79, whose sentences name the campaign districts"),
     ("Q2051", 1, "826", "answer (a), Drug Resistant TB treatment centres", "resource",
      "programme resource; the sentence does not name the campaign or ACF (rule 3)"),
     ("Q2051", 2, "100", "answer (b), '100 days intensified TB Mukt Bharat Abhiyan'",

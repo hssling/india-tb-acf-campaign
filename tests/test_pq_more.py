@@ -110,3 +110,49 @@ def test_source_choices_part_e_addendum():
         k for k, i in enumerate(ids) if not i.startswith("PQE-"))
     path = ROOT / "data/source_choices.csv"
     assert _read(path) == [{k: str(v) for k, v in r.items()} for r in rows]
+
+
+def test_part_e_pinned_values():
+    """Key values as printed in the answers (read by eye from the documents)."""
+    rows = _own()
+    assert len(rows) == 26
+    ids = [r["fig_id"] for r in rows]
+    assert len(ids) == len(set(ids))
+    by = {(r["source_file"].rsplit("/", 1)[-1], r["quantity"], r["value"]): r
+          for r in rows}
+    sc = by[("AS79_mh2ZZK.docx", "screened", "56300000")]
+    tb = by[("AS79_mh2ZZK.docx", "tb_cases", "159000")]
+    for r in (sc, tb):
+        assert r["window_start"] == "2024-12-07" and r["series_type"] == "cumulative"
+    assert sc["value_printed"] == "5.63 crore" and tb["value_printed"] == "1.59 lakh"
+    assert tb["definition_class"] == "notified"
+    # Q278: no composition rows (same-sentence rule); its 347 and 33 stay
+    q278 = sorted(r["quantity"] for r in rows if r["source_file"].endswith("AU278_alnANG.pdf"))
+    assert q278 == ["districts_selected", "other:states_uts_selected"]
+    # participation quantity names aligned with the existing inventory vocabulary
+    q = {r["quantity"] for r in rows}
+    assert "other:mlas_participating" in q and "other:mps_participating" in q
+    assert not any(x.endswith("_participated") for x in q)
+
+
+def test_q414_pinned_cells():
+    def cell(name, label, column):
+        hits = [r["value"] for r in _read(EXTRACTED / name)
+                if r["label_printed"] == label and r["column"] == column]
+        assert len(hits) == 1
+        return hits[0]
+    assert cell("pq_q414_annexurei_2019.csv", "Andhra Pradesh",
+                "presumptive_tb_tests") == "402272"
+    assert cell("pq_q414_annexurei_2020.csv", "Bihar", "presumptive_tb_tests") == "249311"
+    assert cell("pq_q414_annexureii_2019.csv", "Andhra Pradesh", "tests_done") == "385888"
+    assert cell("pq_q414_annexureii_2019.csv", "West Bengal",
+                "initiated_female") == "942"
+
+
+def test_pqe10_records_the_archive_copy():
+    from src.extract import source_choices as S
+    r = [x for x in S.build() if x["decision_id"] == "PQE-10"][0]
+    assert r["result"].startswith("unavailable") and "404" in r["result"]
+    assert ("http://web.archive.org/web/20250503135936/https://www.mha.gov.in/sites/"
+            "default/files/AdvisoryPR_08012025.pdf") in r["evidence"]
+    assert "not obtained" in r["evidence"] and "2026-11-19" in r["evidence"]

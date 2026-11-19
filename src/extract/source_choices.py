@@ -773,7 +773,10 @@ def pq_more_rows() -> list[dict]:
                      "unavailable: the official URL returns 404 (file removed); an "
                      "Internet Archive copy exists but was not obtained",
                      "§3.3 (a source that cannot be obtained is reported as unavailable)",
-                     "no figure entered from it", d))
+                     "no figure entered from it; Internet Archive copy "
+                     "http://web.archive.org/web/20250503135936/https://www.mha.gov.in/"
+                     "sites/default/files/AdvisoryPR_08012025.pdf, found through the "
+                     "Wayback availability API on 2026-11-19, not obtained", d))
     return rows
 
 
