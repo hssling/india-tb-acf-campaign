@@ -142,8 +142,8 @@
 
 Specification grids (exact):
 - **D1 elasticity:** weights {D, none} × zero {exclude, +0.5} × years {all five, excl. 2022, 2021–2023} × units {all, excl. small UTs} = 24; null 1.
-- **D2 correlation:** measure {pooled EB 2021–23, 2023 yield, 2023 NNS (sign reversed)} × denominator {reconstructed, registered} × weights {none, 2023 screened} × units {all, excl. small UTs} = 24; null 0.
-- **D3 θ:** outcome {public, total} × scale {absolute, log} × weights {none, 1/N} × units {all, excl. small UTs} = 16; null 0.
+- **D2 correlation:** measure {pooled EB 2021–23, 2023 yield, 2023 EB posterior mean (single year)} × denominator {reconstructed, registered} × weights {none, 2023 screened} × units {all, excl. small UTs} = 24; null 0.
+- **D3 θ:** outcome {public, total} × scale {absolute, log} × weights {none, inverse Poisson variance of the outcome (1/N absolute, N log; main)} × units {all, excl. small UTs} = 16; null 0.
 
 - [ ] **Step 1:** Tests:
   - `test_additionality_synthetic` (θ = 1 recovered);

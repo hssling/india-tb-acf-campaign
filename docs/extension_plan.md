@@ -12,7 +12,7 @@
 - the zero rule also applies where unit-years are summed before a logarithm (§3.3);
 - the posterior SD is the plug-in value (§4.2);
 - the main D2 correlation is weighted by 2023 screened (§5.1);
-- the main D3 weights are 1/N (§6);
+- the main D3 weights are the inverse Poisson variance of the outcome (§6, §7.1);
 - the continuity correction adds 0.5 to every diagnosed count (§7.1);
 - the agreement share has the whole grid as its denominator (§8).
 
@@ -20,17 +20,17 @@
 
 ## 1. Questions
 
-- **D1. Where does screening still pay, and why is yield falling?** Robust State yields over time; how quickly extra screening stops finding extra cases; and whether the fall in yield comes from fewer screened people being tested or from fewer tests being positive.
+- **D1. Where does screening still pay, and why is yield falling?** Robust State yields over time; how diagnoses scale with screening volume within States; and whether the fall in yield is accounted for by fewer screened people being tested or by fewer tests being positive.
 - **D2. Was campaign screening aimed where yield was highest?** Alignment between each State's campaign district share and its prior yield, and an illustrative marginal-shift scenario.
-- **D3. Does more ACF add notifications, or shift cases from routine diagnosis?** The association between State ACF diagnoses and State notifications.
+- **D3. Do State notifications move with State ACF diagnoses?** The within-State association between ACF diagnoses and notifications, read against the reference values of full addition and full substitution.
 
-D2 and D3 are State-level (ecological) associations. No result is described in causal terms.
+The elasticity (D1), D2 and D3 are observational State-level associations. No result is described in causal terms.
 
 ## 2. What had been seen before this plan
 
 - **Data.** Every value used below had already been extracted and checked (`data/extracted/`, digests in `data/source_manifest.csv`). The State ACF and notification tables had therefore been read.
 - **v1.0.0 outputs.**
-  - `outputs/q3_yield.csv` and `outputs/q3_yield_summary.csv` give each State's diagnosed ÷ screened (yield per 100,000, and NNS, with Wilson intervals) for data years 2018, 2019, 2021, 2022 and 2023. They also give the GHA 2023 State rows for 2021.
+  - `outputs/q3_yield.csv` and `outputs/q3_yield_summary.csv` give each State's diagnosed ÷ screened (yield per 100,000, and NNS, with Wilson intervals) for data years 2018, 2019, 2021, 2022 and 2023. They also give the GHA 2023 State rows for 2021. The national yield series in `outputs/q3_yield_summary.csv`, whose decline motivates D1, had been seen.
   - Q1 check 1 tested, State by State, that each printed cascade does not grow (pass or fail; no ratio reported).
   - Q4 (`outputs/q4_*.csv`) used the campaign exposure shares under both denominators and State total notifications for 2019 and 2022–2025.
   - `outputs/q2_quality_studies.csv` recomputed the GHA 2023 and PGPH 2025 cascades.
@@ -51,6 +51,7 @@ One row per unit × data year. Values are taken from the `value` column of the e
 | 2023 | ITR 2024 Annexure 6 | ITR 2024 Annexure 1.2 | none |
 
 - **Missing years.** There is no table for 2020.
+- **The screened column.** The printed screened heading differs in every edition (mapped population, 2018; mapped vulnerable population, 2019 and 2021; vulnerable individuals screened for symptoms, 2022; total population screened, 2023). Year effects absorb common shifts; State-specific differences are a stated limitation.
 - **The 2022 testing column.** It is a different definition and is labelled `examined`. Its use is limited as stated in §4.4.
 - **ITR 2023 State rows.** They do not sum to that table's India row. They are used as printed and flagged.
 - **Exposure.** E_s = min(1, c_s / L_s), computed exactly from the counts.
@@ -61,19 +62,21 @@ One row per unit × data year. Values are taken from the `value` column of the e
 
 ### 3.2 Units
 
-- **Coarsened units.** The units are those of §9.4 of the original plan in every year. Merged units are summed: Jammu and Kashmir with Ladakh; Dadra and Nagar Haveli with Daman and Diu. This gives about 33–36 units a year.
+- **Coarsened units.** The units are those of §9.4 of the original plan in every year. Merged units are summed: Jammu and Kashmir with Ladakh; Dadra and Nagar Haveli with Daman and Diu; including any further pair recorded under the original §9.4 in `data/source_choices.csv`. A merged unit-year is NA if any member is NA. This gives 32 units in 2018 and 2019 and 35 in 2021–2023.
 - **Unbalanced panel.** A unit missing in one year keeps its other years.
-- **Small UTs.** For the exclusion axes, these are Andaman and Nicobar Islands; Chandigarh; Dadra and Nagar Haveli and Daman and Diu; Lakshadweep; and Puducherry.
+- **Small UTs.** For the exclusion axes, these are Andaman and Nicobar Islands; Chandigarh; Dadra and Nagar Haveli and Daman and Diu; Lakshadweep; and Puducherry. This list is not the union-territory set of the original sensitivity analysis S5, which also includes Delhi and Jammu and Kashmir.
 - **Unit order.** Wherever an order matters, units are sorted by coarsened canonical name (Python `sorted`).
 
 ### 3.3 Zeros and NA
 
 - **NA.** NA cells are listed with the reason and never imputed. A unit-year with NA in a quantity a model needs is left out of that model.
-- **Zero diagnoses.** These are 2023 Andaman and Nicobar Islands, Goa and Lakshadweep.
+- **Zero diagnoses (as printed).** 2018 Puducherry; 2021 Lakshadweep and Puducherry (and Ladakh, inside Jammu and Kashmir's sum); 2022 Arunachal Pradesh and Lakshadweep; 2023 Andaman and Nicobar Islands, Goa and Lakshadweep.
+- **NA or zero screened.** 2019 Lakshadweep (S = 0; T and D blank); 2022 Puducherry (S = 0; examined and D blank); 2023 Manipur (T = 0; D blank).
+- **Rules for zero diagnoses.**
   - A unit-year with D = 0 is excluded from every log-scale analysis and listed: pooling, shrinkage, ranks, tiers, the elasticity and the decomposition. This includes sums taken before a logarithm (the 2021–2023 pooled yield, the national decomposition).
-  - Analyses on the count or rank scale keep it: the Poisson sensitivity, the D2 2023 yield and NNS measures, the scenario, and D3 on the absolute scale.
+  - Analyses on the count or rank scale keep it: the Poisson sensitivity, the D2 2023 yield measure, the scenario, and D3 on the absolute scale.
   - +0.5 is a specification-curve axis only (§7.1).
-- **Inconsistent rows.** A unit-year with D ≥ S (log-yield variance ≤ 0) is listed and excluded from log-scale analyses.
+- **Inconsistent rows.** A unit-year with S = 0 or D ≥ S (log-yield variance undefined or ≤ 0) is listed and excluded from log-scale analyses.
 
 ## 4. D1: yield, saturation and the cascade
 
@@ -107,7 +110,7 @@ Reported per year: μ, the CI and the PI on the yield scale (100,000 × exp(·))
 - **Rank intervals.**
   - Z = `rng.standard_normal((10000, n))` in one call, and θ = m + sd·Z.
   - The rank of a unit in a draw is 1 + the number of units with a strictly greater draw (rank 1 is the highest yield).
-  - The interval is `numpy.quantile(ranks, [0.025, 0.975], method="inverted_cdf")`.
+  - The interval is `numpy.quantile(ranks, [0.025, 0.975], axis=0, method="inverted_cdf")`. If τ² = 0, every rank is 1 and is reported as such.
   - Ranks are computed per year and for the pooled 2021–2023 posterior.
 - **Tiers.** The tiers compare each State's own posterior interval m_s ± z·sd_s with the pooled mean μ of the same year (or of the 2021–2023 pooling), not with the prediction interval:
   - **above**, if the lower bound is greater than μ;
@@ -117,13 +120,14 @@ Reported per year: μ, the CI and the PI on the yield scale (100,000 × exp(·))
   The output is a tiered map with intervals, not a league table.
 - **Intensity sensitivity.** The 2021–2023 pooling, shrinkage and tiers are repeated within each intensity stratum (§4.5), against that stratum's own μ.
 
-### 4.3 Diminishing returns (elasticity)
+### 4.3 Screening volume and diagnoses (elasticity)
 
 - **Model.** ln D_st = α_s + λ_t + ε ln S_st + e_st. It is fitted by weighted least squares with weights w_st = D_st (main).
   - The design is a column ln S, one dummy per unit, and one dummy per year except the earliest year in the sample.
   - It is solved with `numpy.linalg.lstsq` on √w-scaled X and y.
+  - Units with one row in the estimation sample are listed and dropped before fitting and before resampling; G, n and p count the remaining units and rows.
 - **Main sample.** All five years, all units, and zeros excluded (§3.3).
-- **Interpretation.** ε < 1 means that extra screening finds proportionally fewer cases. The null is 1.
+- **Interpretation.** ε < 1 means that, within States, diagnoses rose less than proportionally with screening volume. The null is 1.
 - **Model interval.** The CR1 cluster-robust covariance by unit:
   - V = c (XᵀWX)⁻¹ [Σ_g X_gᵀW_g r_g r_gᵀW_g X_g] (XᵀWX)⁻¹;
   - c = G/(G − 1) × (n − 1)/(n − p), where G is the number of units, n the number of observations and p the number of columns;
@@ -137,7 +141,7 @@ Reported per year: μ, the CI and the PI on the yield scale (100,000 × exp(·))
 - **Poisson fixed-effects sensitivity.** D_st ~ Poisson(exp(α_s + λ_t + ε ln S_st)), unweighted, with zeros kept.
   - It is fitted by IRLS, starting from the unweighted least-squares fit of ln(D + 0.5) on the same design, until the maximum absolute coefficient change is less than 10⁻¹⁰, with at most 100 iterations.
   - Units with D = 0 in every year are listed and excluded.
-  - Intervals: the CR1 sandwich and the cluster bootstrap above.
+  - Intervals: the CR1 sandwich and the cluster bootstrap above. Its CR1 sandwich uses bread XᵀWX with W = diag(μ̂) and meat Σ_g X_gᵀ(y_g − μ̂_g)(y_g − μ̂_g)ᵀX_g, with c = G/(G − 1) and t_{G−1}. A bootstrap draw that is rank-deficient or does not converge within 100 iterations is degenerate, counted and excluded.
 - **Stratified sensitivity.** The main model is fitted separately in each intensity stratum.
 
 ### 4.4 Cascade decomposition
@@ -157,7 +161,7 @@ Reported per year: μ, the CI and the PI on the yield scale (100,000 × exp(·))
     - testing share = (var(a) + cov(a, b)) / var(y);
     - positivity share = (var(b) + cov(a, b)) / var(y).
   - The two shares sum to 1.
-- **Intervals.** The cluster bootstrap of §4.3 (10,000 draws, units resampled), percentile intervals for every quantity.
+- **Intervals.** The cluster bootstrap of §4.3 (10,000 draws, units resampled), percentile intervals for every quantity. The generator is reset before each quantity's bootstrap (the national change, each year's variance split, each 2022 sensitivity). A draw with var(y) = 0 is degenerate, counted and excluded.
 - **Cross-check.** The national components are set side by side with the PGPH 2025 cascade, descriptively, with no agreement metric.
 
 ### 4.5 Screening intensity strata
@@ -179,15 +183,15 @@ Reported per year: μ, the CI and the PI on the yield scale (100,000 × exp(·))
   - **weighted:** r_w = Σw(x − x̄_w)(y − ȳ_w) / √(Σw(x − x̄_w)² Σw(y − ȳ_w)²), with weights w_s = S_s,2023;
   - **unweighted:** w_s = 1.
 - **Main specification.** Weighted by 2023 screened, reconstructed denominator, all units. Units lacking a value or weight are listed.
-- **Interval.** A bootstrap of units: 10,000 draws, `rng.integers(0, n, size=n)`, with ranks recomputed in each draw. A draw in which either variable is constant is degenerate, counted and excluded. The interval is the percentile interval, as in §4.3.
-- **Permutation band.** Exposure is permuted over units 10,000 times (`rng.permutation(n)`) and ρ is recomputed. The 2.5th and 97.5th percentiles are reported as a null band, together with whether the observed ρ lies outside it. No P value is reported.
+- **Interval.** A bootstrap of units: 10,000 draws, `rng.integers(0, n, size=n)`, with ranks recomputed in each draw. A draw in which either variable is constant is degenerate, counted and excluded. The interval is the percentile interval, as in §4.3. m_s is held fixed in the bootstrap; this is a stated limitation.
+- **Permutation band.** Exposure is permuted over units 10,000 times (`rng.permutation(n)`) and ρ is recomputed. The exposure ranks are permuted; the yield ranks and the weights stay with their units. Percentiles use `numpy.quantile` (linear). The 2.5th and 97.5th percentiles are reported as a null band, together with whether the observed ρ lies outside it. No P value is reported.
 - **Tier shares.** For each pooled 2021–2023 tier, and for "no tier", the report gives:
   - the number of units;
   - the number of phase-1 campaign districts (`campaign_count`);
   - the share of all campaign districts.
 
   These are descriptive counts.
-- **Interpretation.** The published district-selection criteria were burden, vulnerability and mortality. Low alignment is read as selection that followed those criteria rather than ACF yield, not as a targeting failure. No conditioning model is fitted.
+- **Interpretation.** Low alignment is reported as campaign districts not being concentrated in States of higher prior yield. This is consistent with selection on the published criteria (burden, vulnerability, mortality) rather than on yield, which is not tested, and is not read as a targeting failure. No conditioning model is fitted.
 
 ### 5.2 Marginal-shift scenario
 
@@ -199,7 +203,7 @@ Reported per year: μ, the CI and the PI on the yield scale (100,000 × exp(·))
 - **Interval.** The formula is applied to each valid bootstrap draw of ε, and the percentile interval is taken; D_s,2023 is held fixed.
 - **Sensitivity.** Each unit takes the ε of its intensity stratum. Stratum draws are paired by draw index, and a pair with a degenerate draw in either stratum is excluded.
 - **Reported.** ΔD and its interval, ΔD as a percentage of Σ_{A∪B} D_s,2023, and the gaining and losing units. If A or B is empty, the scenario is not computable and is reported as such.
-- **Status.** It is an illustration, not a forecast.
+- **Status.** It is an illustration, not a forecast; it assumes the within-State association ε would hold under reallocation.
 
 ## 6. D3: additionality
 
@@ -207,11 +211,12 @@ Reported per year: μ, the CI and the PI on the yield scale (100,000 × exp(·))
   - N is public-sector notifications (ITR Annexure 1.2);
   - A is ACF diagnosed (§3.1);
   - t ∈ {2019, 2022, 2023}, all units;
-  - the weights are 1/N_st;
-  - the design, model interval and cluster bootstrap are those of §4.3.
+  - the weights are 1/N_st, the inverse Poisson variance of N_st;
+  - the design, model interval and cluster bootstrap are those of §4.3;
+  - units with one row in the estimation sample are listed and dropped before fitting and before resampling; G, n and p count the remaining units and rows.
 
-  θ is additional notified cases per additional ACF diagnosis. θ ≈ 1 is additive and θ ≈ 0 is substitution. The null is 0.
-- **Log scale.** ln N_st = α_s + λ_t + θ_log ln A_st + e_st, with units where A = 0 excluded (§3.3). The null is 0.
+  θ is the within-State difference in public notifications associated with one more ACF diagnosis. If the association were causal, θ = 1 would correspond to full addition and θ = 0 to full substitution; these are reference values only. The null is 0.
+- **Log scale.** ln N_st = α_s + λ_t + θ_log ln A_st + e_st, with weights N_st (the inverse Poisson variance of ln N_st) and unit-years where A = 0 excluded (§3.3). The null is 0.
 - **Secondary outcome.** Total notifications (ITR Annexure 1.2 totals).
 - **Thin data.** Only three years overlap, so θ rests on within-State change across three years. This is reported as a limitation.
 - **Cross-check.** The GHA 2023 State ACF share of public notifications (2021) is set beside the panel, descriptively.
@@ -225,22 +230,23 @@ Each grid is the full crossing below. The first level of each axis is the main s
 | Estimate | Axes | Entries | Null |
 |---|---|---|---|
 | D1 elasticity ε | weights {D, none} × zero {exclude, +0.5} × years {all five, excluding 2022, 2021–2023} × units {all, excluding small UTs} | 24 | 1 |
-| D2 correlation ρ | measure {pooled EB 2021–2023, 2023 yield, 2023 NNS (sign reversed)} × denominator {reconstructed, registered} × weights {none, 2023 screened} × units {all, excluding small UTs} | 24 | 0 |
-| D3 θ | outcome {public, total} × scale {absolute, log} × weights {none, 1/N} × units {all, excluding small UTs} | 16 | 0 |
+| D2 correlation ρ | measure {pooled EB 2021–2023, 2023 yield, 2023 empirical-Bayes posterior mean (§4.2, single year)} × denominator {reconstructed, registered} × weights {none, 2023 screened} × units {all, excluding small UTs} | 24 | 0 |
+| D3 θ | outcome {public, total} × scale {absolute, log} × weights {none, inverse Poisson variance (1/N absolute, N log)} × units {all, excluding small UTs} | 16 | 0 |
 
 - **The +0.5 axis.** 0.5 is added to D in every unit-year, so zeros enter; the weight D becomes D + 0.5.
 - **D2.**
   - The main level of the weights axis is 2023 screened (§5.1).
-  - The 2023 yield is D/S. A zero yield is kept, with its NNS taken as +∞, the lowest rank.
-  - The NNS correlation is multiplied by −1.
+  - The 2023 yield is D/S. A zero yield is kept and takes the lowest rank.
+  - The 2023 empirical-Bayes measure is the 2023 posterior mean of §4.2; zero-diagnosed units are excluded from it (§3.3) and listed.
   - The small-UT axis restricts the correlation sample only. The pooled measure is not recomputed.
-- **D3.** The main level of the weights axis is 1/N, where N is the outcome of that entry.
+- **D3.** The weighted level is the inverse Poisson variance of the outcome: 1/N_st on the absolute scale and N_st on the log scale, where N is that entry's outcome. It is the main level.
+- **Limitation.** The weights D, 1/N and N are functions of the outcome; the unweighted entries and the Poisson model address this.
 
 ### 7.2 Leave one out
 
-These use the main specification, with point estimates only and no bootstrap. The minimum, the maximum and the most influential omission are reported.
+These use the main specification, with point estimates only and no bootstrap. The minimum, the maximum and the most influential omission are reported. The most influential omission is the one with the largest absolute difference from the main estimate (ties: first in sorted order).
 
-- **Leave one State out.** ε, ρ and θ are refitted omitting each unit in turn.
+- **Leave one State out.** ε, ρ and θ are refitted omitting each unit in turn. For ρ, the unit is omitted from the correlation sample only; the pooled measure is not recomputed.
 - **Leave one year out.**
   - ε: each of the five years.
   - θ: each of 2019, 2022 and 2023.
@@ -253,12 +259,13 @@ These use the main specification, with point estimates only and no bootstrap. Th
   - at least 80% of its specification-curve entries lie on the same side of the null as the main estimate.
 
   Otherwise it is "not established", and its interval is stated.
-- **The agreement share.** Its denominator is the whole grid (24, 24, 16). An entry that cannot be computed counts as not agreeing and is listed. The share whose interval also excludes the null is reported beside it.
+- **The agreement share.** Its denominator is the whole grid (24, 24, 16). An entry that cannot be computed counts as not agreeing and is listed. An entry exactly at the null does not agree. The share whose interval also excludes the null is reported beside it.
 - **Wording.**
-  - A supported ε < 1 is described as diminishing returns.
+  - A supported ε < 1 is described as diagnoses rising less than proportionally with screening within States, consistent with diminishing returns.
   - A supported ρ is described as alignment (positive) or misalignment (negative) with prior yield.
   - A supported θ is described as an association, with 1 and 0 as the reference values. No causal wording is used.
 - **Other results.** Pooled yields, tiers, the decomposition and the scenario are reported with their intervals and carry no label. Leave-one-out results and the permutation band are reported beside the headline; they do not change its label.
+- **ITR 2023 sum gap.** The ITR 2023 sum-gap rows (data year 2022) are covered by the 'excluding 2022' level for ε and by leaving out 2022 for θ and ρ (§7.2).
 - **Statistics.** No P values are reported.
 
 ## 9. Seeds and reproducibility
@@ -266,7 +273,7 @@ These use the main specification, with point estimates only and no bootstrap. Th
 - **Software.** Python 3.14, run as `python -I`. numpy 2.3.5 and scipy 1.16.3 are used for the extension only; the v1.0.0 pipeline stays standard-library only and byte-reproducible.
 - **Seed.** `rng = numpy.random.default_rng(20261119)` is reset before each analysis. An analysis is one of the following:
   - one year's rank draws, or the pooled rank draws;
-  - one bootstrap (each main estimate, each stratum, the Poisson model, the decomposition, each specification-curve entry);
+  - one bootstrap (each main estimate, each stratum, the Poisson model, each decomposition quantity, each specification-curve entry);
   - the permutation.
 
   The scenario reuses the elasticity draws.
