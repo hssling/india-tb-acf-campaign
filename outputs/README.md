@@ -11,8 +11,9 @@ are UTF-8 CSV with LF line endings.
   was seen (analysis plan §13, 19 November 2026). Label it post hoc. It applies three corrections:
   - **D1:** a figure's span is [window_start, window_end] where window_end is printed. as_on extends
     the span only where window_end is blank; the registered span paired different calendar years.
-    Where two spans are then equal and both cut-offs are stated, §7.3's later-cut-off direction is
-    read from the two cut-offs.
+    Where two spans are then equal, the row is 3a, as §7.3's tie rule states. The corrected set
+    differs from the registered rules by D1-D3 only. The order of two stated cut-offs is reported
+    in the descriptive `later_cutoff` column, which changes no class.
   - **D2:** a printed sector part is not grouped with totals and enters only Q1 check 3, as a part of
     its total. A sector part is a table cell whose column heading names `public` or `private`, or
     whose table title states a public/private split. The parts and the keywords that matched are in
@@ -44,8 +45,11 @@ q1_checks.csv.
 
 Rows: the sum and percentage results that involve an `other:` figure, computed under the registered
 rules. They include the 2026 campaign document's Annexure IV (difference −21), every stated
-percentage of the inventory, and the stratum percentages of the quality studies. D2 and D3 do not
-apply here.
+percentage of the inventory, and the stratum percentages of the quality studies.
+
+This file uses the registered rules only. D1-D3 are corrections to the §6 checks and the §7
+grouping, and do not apply here. For example, D2 would treat GHA S2's "Public notified" column as a
+sector part and remove the denominator of its ACF-share percentages.
 
 ## q2_not_formed.csv — candidate pairs the §7.1 rules do not group (descriptive)
 
@@ -83,6 +87,7 @@ least one pair of their figures is related under §7.1.
 | quantity, geography, scope | Shared by the group |
 | related_by | `windows overlap` (both stated, spans intersect) and/or `same window label` |
 | periods_intersect | Descriptive, not a §7 rule: `yes`/`no` whether [window_start, window_end] (or [window_start, as_on]) intersect; blank if a start is blank. `no` marks a pair related only through a span that runs on to a late as-on date |
+| later_cutoff | Descriptive, changes no class: `a` or `b`, the entry with the later stated cut-off (as_on); blank if either cut-off is unstated or both are equal |
 | a_*, b_* | Each entry: source, value, value as printed, fig_ids, qualifier, §6.1 interval, definition class, window (start..end; as_on; label; stated/unstated) |
 | same_document | `yes` if both entries come from one document |
 | agree | `yes` if the intervals of a related pair of their figures overlap |

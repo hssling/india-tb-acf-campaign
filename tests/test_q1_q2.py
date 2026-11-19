@@ -271,12 +271,19 @@ def test_d1_span_ends_at_window_end_where_printed():
     mid = fig("d", "screened", "20", source_file="B", window_start="2025-02-01",
               window_end="2025-02-28")
     assert q2.related(since, mid, corrected=True) == ["windows overlap"]
-    # same window, both cut-offs stated: the later cut-off giving the smaller value is 3b
+    # same window, different stated cut-offs: under D1 the spans are equal, so the §7.3 tie
+    # rule gives 3a; the cut-off order is reported only in the descriptive later_cutoff
     q1216 = fig("e", "tb_cases", "100", source_file="A", window_start="2025-01-01",
                 window_end="2025-12-31", as_on="2026-02-06")
     q420 = fig("f", "tb_cases", "110", source_file="B", window_start="2025-01-01",
                window_end="2025-12-31", as_on="2026-01-21")
-    assert q2.classify(q1216, q420, failed={}, corrected=True)["cls"] == "3b"
+    assert q2.classify(q1216, q420, failed={}, corrected=True)["cls"] == "3a"
+    assert q2.classify(q1216, q420, failed={})["cls"] == "3b"     # registered span
+    assert q2.later_cutoff(q1216, q420) == "a" and q2.later_cutoff(q420, q1216) == "b"
+    assert q2.later_cutoff(q1216, dict(q420, as_on="")) == ""
+    for corrected in (False, True):
+        rows, _ = q2.compare([q1216, q420], failed={}, corrected=corrected)
+        assert len(rows) == 1 and rows[0]["later_cutoff"] in ("a", "b")
 
 
 def _itr_rows():

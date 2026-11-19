@@ -40,8 +40,7 @@ Two sets are written (§13, 19 November 2026). The registered set applies the ru
 as registered (outputs/q2_*.csv). The corrected set, a post-hoc deviation made after the
 registered output was seen, is written to outputs/q2_*_corrected.csv: D1, a figure's span
 is [window_start, window_end] where window_end is printed (as_on extends it only where
-window_end is blank); where two spans are then equal and both cut-offs are stated, the
-§7.3 later-cut-off direction is read from the cut-offs; D2, printed sector parts
+window_end is blank; equal spans stay 3a, the §7.3 tie rule); D2, printed sector parts
 (q1_consistency.sector_keyword) are not grouped; D3, class 1 follows the corrected Q1
 checks (check 1 within one printed table or paragraph). `other:` rows of Q1 never feed
 class 1 (§5.1). outputs/q2_summary_registered_vs_corrected.csv sets the counts side by
@@ -143,6 +142,14 @@ def periods_intersect(a, b) -> str:
     return "yes" if pa[0] <= pb[1] and pb[0] <= pa[1] else "no"
 
 
+def later_cutoff(a, b) -> str:
+    """Descriptive only (changes no class): 'a' or 'b', the entry with the later stated
+    cut-off (as_on); blank if either cut-off is unstated or both are the same."""
+    if not (a["as_on"] and b["as_on"]) or a["as_on"] == b["as_on"]:
+        return ""
+    return "a" if a["as_on"] > b["as_on"] else "b"
+
+
 def _window_text(r) -> str:
     return (f"{r['window_start'] or '-'}..{r['window_end'] or '-'}; as_on {r['as_on'] or '-'}; "
             f"label '{r['window_label']}'; {'stated' if stated(r) else 'unstated'}")
@@ -160,16 +167,6 @@ def _window_class(a, b, corrected: bool = False):
     ia, ib = q1.interval(a), q1.interval(b)
     text = f"spans {sa[0]}..{sa[1]} and {sb[0]}..{sb[1]}"
     if sa == sb:
-        if corrected and a["as_on"] and b["as_on"] and a["as_on"] != b["as_on"]:
-            # D1 keeps as_on out of the span, so the §7.3 "later cut-off" is read from
-            # the two stated cut-offs of the same window
-            late, early, which = (ia, ib, "first") if a["as_on"] > b["as_on"] else (
-                ib, ia, "second")
-            text += f"; same window, cut-offs {a['as_on']} and {b['as_on']}"
-            if late[1] < early[0]:
-                return "3b", (text + f": the {which} (later cut-off) gives the smaller value, "
-                              "which the cut-offs do not explain")
-            return "3a", text + f": the {which} (later cut-off) gives the larger value"
         return "3a", text + "; equal spans (§7.3: the row is 3a)"
     if sa[0] <= sb[0] and sb[1] <= sa[1]:
         big, small, which = ia, ib, "first"
@@ -314,6 +311,7 @@ def _entry_text(figs, field):
 
 PAIR_COLUMNS = [
     "group_key", "quantity", "geography", "scope", "related_by", "periods_intersect",
+    "later_cutoff",
     "a_source", "a_value", "a_value_printed", "a_fig_ids", "a_qualifier", "a_interval",
     "a_definition_class", "a_window",
     "b_source", "b_value", "b_value_printed", "b_fig_ids", "b_qualifier", "b_interval",
@@ -364,6 +362,7 @@ def _pair_row(key, q, geo, scope, ea, eb, fig_pairs, failed, cumf, guard, sector
     if part:
         notes.append("a figure is a part (sector column) of a total in its own table "
                      "(check 3, row layout); the §7.1 rules have no sector field")
+    row["later_cutoff"] = later_cutoff(rep[0], rep[1])
     row.update({"analysis": status, "analysis_reason": reason,
                 "pre_identified": pre_identified(rep[0], rep[1]),
                 "sector_part": "yes" if part else "no", "note": "; ".join(notes)})
