@@ -145,8 +145,28 @@ def test_non_integer_value_raises_and_every_member_is_checked():
 
 
 def test_every_q4_pq_source_has_a_data_source():
-    for name in ("pq_q1216", "pq_q261", "pq_q1093"):
+    expect_stated = {"pq_q1216": True, "pq_q261": True, "pq_q1093": True, "pq_q3467": False}
+    for name, stated in expect_stated.items():
         if not (cp.EX / f"{name}.csv").exists():
             pytest.skip("pq file absent")
         rows = cp.load_pq(name)
-        assert rows and all(r["data_source"] for r in rows)
+        assert rows
+        assert all(bool(r["data_source"]) is stated for r in rows), name
+
+
+def test_q3467_refused_as_unstated_source():
+    if not (cp.EX / "pq_q3467.csv").exists():
+        pytest.skip("pq_q3467.csv absent")
+    rows = cp.load_pq("pq_q3467")
+    a = next(r for r in rows if r["column"] == "2023_notified")
+    b = next(r for r in rows if r["column"] == "2024_notified")
+    # the printed headings carry the year ("2023:" / "2024*:"), which would be refused as
+    # different wording first; give both the same heading so the source check is reached
+    b = dict(b, column_heading=a["column_heading"])
+    ok, why = cp.comparable(a, b)
+    assert not ok and "unstated source" in why
+
+
+def test_blank_heading_is_not_period_only():
+    assert not cp._period_only("") and not cp._period_only(None or "")
+    assert cp._period_only("2024 (Jan- Oct)")

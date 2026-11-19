@@ -69,7 +69,7 @@ def _period_only(heading: str) -> bool:
     """True if the heading is only years, months, ranges and punctuation (Q261: '2024
     (Jan- Oct)'): no quantity words such as number, beneficiaries, cases, notified."""
     words = re.findall(r"[a-z]+", _norm(heading))
-    return all(w in _PERIOD_WORDS for w in words)
+    return bool(words) and all(w in _PERIOD_WORDS for w in words)
 
 
 def quantity_wording(row: dict) -> str:
@@ -209,6 +209,9 @@ DATA_SOURCE = {
     "data_raw/pq/AU1216_WFw8li.pdf": "Ni-kshay",
     "data_raw/pq/AS261_lP7nYE.pdf": "Ni-kshay",
     "data_raw/pq/AU1093_dH065I.pdf": "Ni-kshay portal",
+    # data_raw/pq/AU3467_mVGJLD.pdf (RS Q3467) is deliberately absent: the PDF prints no
+    # "Data source:" line (the only mention is in body text), so its source is unstated
+    # and comparable() refuses its rows. The guard is a ratio and never calls comparable().
 }
 
 
