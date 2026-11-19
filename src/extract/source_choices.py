@@ -358,14 +358,7 @@ def outcome_tables() -> list[dict]:
              "Annexure-I, PDF page 3; 'TB patients notified' under '2023' and '2024*'",
              "Guard reference table (§9.5.2) and fallback trend point 2024",
              "extracted: data/extracted/pq_q3467.csv", "§9.5.2; §9.6", ""),
-        _rec("OUT-08", "outcome tables (§9.5)", PQ + "AU1216_WFw8li.pdf; "
-             + PQ + "AU3467_mVGJLD.pdf", "the guard of §9.5.2",
-             "The guard (State ratios of Question 1216 to Question 3467 for 2023 and "
-             "2024, their medians and the decision) is applied to the extracted values "
-             "after this freeze and before any Q4 computation, and added to this file as "
-             "a dated entry", "pending: not computed at extraction",
-             "§9.5.2; §5.4", "Question 1216 passed its own extraction checks, so the "
-                             "guard is not failed by extraction (Q4C rows)"),
+        _out08(),
         _rec("OUT-09", "outcome tables (§9.5)", PQ + "AU3001_ZXEQ3g.pdf", "whole answer",
              "Question 3001 (drug-resistant TB) not used", "not read beyond its digest",
              "§3.1.2; §9.5.5", ""),
@@ -516,9 +509,88 @@ def general() -> list[dict]:
     ]
 
 
+GUARD_DATE = "2026-11-19"
+
+
+def _guard() -> dict[str, str] | None:
+    path = EX / "guard_result.csv"
+    if not path.exists():
+        return None
+    return {r["item"]: r["value"] for r in _read("guard_result.csv")}
+
+
+def _out08() -> dict:
+    g = _guard()
+    src = PQ + "AU1216_WFw8li.pdf; " + PQ + "AU3467_mVGJLD.pdf"
+    if g is None:
+        return _rec("OUT-08", "outcome tables (§9.5)", src, "the guard of §9.5.2",
+                    "The guard (State ratios of Question 1216 to Question 3467 for 2023 "
+                    "and 2024, their medians and the decision) is applied to the "
+                    "extracted values after this freeze and before any Q4 computation, "
+                    "and added to this file as a dated entry",
+                    "pending: not computed at extraction", "§9.5.2; §5.4",
+                    "Question 1216 passed its own extraction checks, so the guard is "
+                    "not failed by extraction (Q4C rows)")
+    return _rec("OUT-08", "outcome tables (§9.5)", src, "the guard of §9.5.2",
+                "The guard applied to the extracted values (dated addendum GRD-01 to "
+                "GRD-06)", f"{g['status']}: median 2023 {g['median ratio 2023']} (n "
+                f"{g['n States 2023']}), median 2024 {g['median ratio 2024']} (n "
+                f"{g['n States 2024']}); primary contrast: {g['primary contrast']}",
+                "§9.5.2; §5.4", "data/extracted/guard_ratios.csv; guard_result.csv",
+                GUARD_DATE)
+
+
+def guard_rows() -> list[dict]:
+    """Dated addendum: the guard of §9.5.2, computed after the freeze of the other
+    choices and before any other Q computation."""
+    g = _guard()
+    if g is None:
+        return []
+    src = PQ + "AU1216_WFw8li.pdf; " + PQ + "AU3467_mVGJLD.pdf"
+    T = "guard (§9.5.2)"
+    ratios = _read("guard_ratios.csv")
+    out_ = [r for r in ratios if r["outside_0_95_1_05"] == "yes"]
+    left = [f"{r['unit']} ({r['year']})" for r in ratios if r["in_guard"] == "no"]
+    return [
+        _rec("GRD-01", T, src, "Question 1216 '2023 (Jan-Dec)', '2024 (Jan-Dec)' "
+             "'Number of TB cases notified' / Question 3467 Annexure-I 'TB patients "
+             "notified' (2023, 2024*), coarsened units (§9.4)",
+             "Per-State ratios Q1216 / Q3467 for 2023 and 2024",
+             f"{len([r for r in ratios if r['in_guard'] == 'yes'])} ratios; States left "
+             f"out (missing in one table): {', '.join(left) or 'none'}",
+             "§9.5.2 (Comparison)", "data/extracted/guard_ratios.csv; computed by "
+             "src/q4_dose_response.py (run_guard)", GUARD_DATE),
+        _rec("GRD-02", T, src, "2023", "Median 2023 ratio within [0.95, 1.05]",
+             f"median {g['median ratio 2023']}; n {g['n States 2023']}",
+             "§9.5.2 (Rule)", "", GUARD_DATE),
+        _rec("GRD-03", T, src, "2024", "Median 2024 ratio not below 0.95 (above 1.05 "
+             "reported descriptively)",
+             f"median {g['median ratio 2024']}; n {g['n States 2024']}",
+             "§9.5.2 (Rule)", "", GUARD_DATE),
+        _rec("GRD-04", T, src, "decision", "Guard decision (a failure of Question "
+             "1216's extraction checks would count as a failed guard)",
+             g["status"], "§9.5.2", g["extraction checks"], GUARD_DATE),
+        _rec("GRD-05", T, src, "consequence", "Mechanical consequence of the guard",
+             f"primary contrast: {g['primary contrast']}; full-year contrast: "
+             f"{g['full-year contrast role']}; trend: {g['trend sources']}",
+             "§9.5.2 (If the guard fails); §9.6 Fallback; §10.5", "", GUARD_DATE),
+        _rec("GRD-06", T, src, "State ratios outside [0.95, 1.05]",
+             "Every State outside [0.95, 1.05] in either year is a Q2 discrepancy "
+             "(§7.4); 2024 rows above 1.05 are labelled late-report-consistent",
+             f"{g['States outside [0.95, 1.05] in 2023']} in 2023, "
+             f"{g['States outside [0.95, 1.05] in 2024']} in 2024 "
+             f"({g['2024 rows labelled late-report-consistent']} labelled "
+             "late-report-consistent)", "§9.5.2 (State discrepancies); §7.4",
+             "; ".join(f"{r['unit']} {r['year']} {r['ratio']}"
+                       + (f" ({r['label']})" if r["label"] else "") for r in out_),
+             GUARD_DATE),
+    ]
+
+
 def build() -> list[dict]:
     rows = (exposure() + lgd() + labels_() + totals() + named() + scope() + quality()
-            + general() + q4() + outcome_tables() + trend() + coarsening() + q3_tables())
+            + general() + q4() + outcome_tables() + trend() + coarsening() + q3_tables()
+            + guard_rows())
     ids = [r["decision_id"] for r in rows]
     dup = sorted({i for i in ids if ids.count(i) > 1})
     if dup:
