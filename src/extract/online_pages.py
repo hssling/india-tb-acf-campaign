@@ -367,6 +367,70 @@ def _build_specs() -> None:
     add("dghsntep", "s1", "tb_cases", "3 lakh", "cases", "diagnosis of an additional ~3 lakh TB cases",
         period="since its inception")
 
+    # ---- highlight bullets (the figure's own prose unit, kept as printed; coordinator ruling)
+    HB = ("highlight bullet, entered as printed (a bullet is the figure's own prose unit)",)
+    add("2085802", "b1", "other:parliamentarians_present", "250", "persons",
+        "Members of Parliament were present at the event", notes=HB)
+    add("2090668", "b1", "screened", "2 crore", "persons", "people screened",
+        period="first 30 days", notes=HB)
+    add("2090668", "b1", "tb_cases", "1.48 lakh", "cases", "new TB cases identified",
+        period="first 30 days", notes=HB)
+    add("2105575", "b1", "tb_cases", "5.1 lakh", "cases", "TB patients notified", notes=HB)
+    add("2105575", "b1", "districts_selected", "455", "districts", "455 campaign districts", notes=HB)
+    add("2105575", "b1", "tb_cases", "3.57 lakh", "cases", "diagnosed over 3.57 lakh TB patients",
+        notes=HB + ("the body sentence prints over 3.5 lakh for the same count",))
+    add("2105575", "b2", "screened", "10 crore", "persons", "vulnerable population screened", notes=HB)
+    add("2105575", "b2", "other:nikshay_shivirs_conducted", "10 lakh", "", "Ni-kshay Shivirs",
+        notes=HB + (NOUNIT.format("camps"),))
+    add("2114554", "b1", "other:nikshay_shivirs_conducted", "13.46 lakh", "",
+        "Nikshay Shivirs, or community screening and awareness camps were organised",
+        notes=HB + (NOUNIT.format("camps"),))
+    add("2114554", "b2", "screened", "12.97 crore", "persons", "people were screened for TB", notes=HB)
+    add("2114554", "b2", "tb_cases", "7.19 lakh", "cases", "TB patients notified", notes=HB)
+    add("2114554", "b3", "other:asymptomatic_tb_cases", "2.85 lakh", "cases", "asymptomatic", notes=HB)
+    add("2244703", "b1", "other:high_risk_villages_wards", "1.58 Lakh", "", "Villages and Urban Wards",
+        notes=HB + (NOUNIT.format("villages and wards"),))
+    add("2244703", "b2", "screened", "20 Crore", "persons", "Screened", notes=HB)
+    add("2244703", "b2", "tb_cases", "32.65 Lakh", "cases", "TB Cases Detected", notes=HB)
+    add("2244703", "b2", "other:asymptomatic_tb_cases", "10.9 Lakh", "cases", "Asymptomatic Patients", notes=HB)
+    for q, p, u, d in (("screened", "28.83 lakh", "persons", "screened 28.83 lakh people"),
+                       ("tested", "21.67 lakh", "tests", "chest X-rays"),
+                       ("tested", "3.65 lakh", "tests", "molecular tests"),
+                       ("tb_cases", "1.75 lakh", "cases", "notified 1.75 lakh TB patients")):
+        add("2279976", "b1", q, p, u, d, geography="Delhi", notes=HB)
+    add("2335615", "b1", "screened", "25 Crore", "persons", "People", notes=HB)
+    add("2335615", "b1", "tested", "11 Crore", "tests", "Chest X-Rays", notes=HB)
+    add("2335615", "b1", "tested", "3 Crore", "tests", "Molecular Tests Conducted", notes=HB)
+    add("2335615", "b2", "tb_cases", "48.64 Lakh", "cases", "TB Cases Detected", notes=HB)
+    add("2335615", "b2", "other:asymptomatic_tb_cases", "14.97 Lakh", "cases", "Asymptomatic Cases", notes=HB)
+    add("2199422", "b1", "other:extra_yield_over_conventional", "12-16%", "percent",
+        "additional case yield", notes=HB + ("printed as a range, value left blank",))
+    add("2199422", "b1", "screened", "1.62 lakh", "persons", "screen over 1.62 lakh individuals",
+        period="since march 2023", notes=HB + ("start stated as March 2023 (no day)",))
+    sd = dict(period="since december 2024",
+              notes=HB + ("start stated as December 2024 (no day)",))
+    add("2275402", "b1", "screened", "28 Crore", "persons", "Screened", **sd)
+    add("2275402", "b1", "other:tpt_individuals_provided", "20 Lakh", "persons",
+        "Given TB Preventive Treatment", **sd)
+    add("2275402", "b1", "other:nikshay_mitras_registered", "5.7 Lakh", "persons", "New Nikshay Mitra", **sd)
+    add("2275402", "b2", "other:xray_screening_fold_increase", "34", "", "X-ray screening has increased 34-fold",
+        notes=HB + ("printed '34-fold'; the number is entered",
+                    "no unit of the §5.2 vocabulary applies (a ratio of counts)"))
+    sp = dict(wstart="2026-03-24", series="cumulative",
+              notes=HB + ("start stated in the bullet ('Since 24th March, 2026')",))
+    add("2275402", "b3", "other:ayushman_arogya_shivirs_held", "1.7 lakh", "", "Ayushman Arogya Shivirs Held",
+        **{**sp, "notes": sp["notes"] + (NOUNIT.format("camps"),)})
+    add("2275402", "b3", "other:high_risk_villages_wards", "1.2 Lakh", "",
+        "High-Risk Villages, Wards and Congregate Settings",
+        **{**sp, "notes": sp["notes"] + (NOUNIT.format("villages and wards"),)})
+    add("2275402", "b4", "other:my_bharat_volunteers_participating", "1.9 Lakh", "persons", "Volunteers", notes=HB)
+    add("2189415", "b1", "other:treatment_success_rate", "90%", "percent", "Treatment success rate", notes=HB)
+    add("2189415", "b2", "tb_cases", "24.5 lakh", "cases", "diagnosis of 24.5 lakh patients", notes=HB)
+    add("2189415", "b2", "other:asymptomatic_tb_cases", "8.61 lakh", "cases", "asymptomatic TB cases", notes=HB)
+    add("2081379", "b1", "districts_selected", "347", "districts", "347 districts", notes=HB)
+    add("2081379", "b1", "other:states_uts_selected", "33", "", "States and UTs",
+        notes=HB + (NOUNIT.format("States/UTs"),))
+
 
 _build_specs()
 
@@ -376,7 +440,7 @@ _build_specs()
 def _sentences() -> dict[tuple[str, str], dict]:
     out = {}
     for r in read_transcribed():
-        if r["kind"] in ("sentence", "cell", "lead-in"):
+        if r["kind"] in ("sentence", "cell", "lead-in", "bullet"):
             out[(r["page_key"], r["locator"].split(";")[0])] = r
     return out
 
@@ -412,13 +476,16 @@ def _row(pages: dict, sents: dict, spec: tuple) -> dict:
             "qualifier read from the printed cell text (§6.1)")
         assert definition in t["row_label"] + " " + t["text"] + " " + t["column_heading"]
         return row
-    para = int(re.search(r"para (\d+)", t["locator"]).group(1))
+    m = re.search(r"(para|bullet) (\d+)", t["locator"])
+    para, kind = int(m.group(2)), m.group(1)
     assert definition in t["text"], (pk, sid, definition)
     key = ""
     if sum(1 for x in SPECS if x[:3] == (pk, sid, q)) > 1:   # same quantity twice in a sentence
         key = ("s-" + "-".join(re.findall(r"[a-z0-9]+", t["text"].lower())[:6]) + "-"
                + invrow.slug(printed))
-    return invrow.row(page=para, page_or_para=f"para {para}; {sid}", sentence=t["text"],
+    return invrow.row(page=para, page_or_para=(f"para {para}; {sid}" if kind == "para"
+                                    else f"bullet {para}; {sid} (highlight bullet)"),
+                      sentence=t["text"],
                       key=key, **common)
 
 
@@ -449,9 +516,9 @@ SCOPE_RULE = (
     "active case finding as their user; (4) programme-wide figures not given as campaign or "
     "ACF figures, epidemiology, finance and the Ni-kshay Poshan and Ni-kshay Mitra schemes "
     "are not entered. The context is the figure's own sentence (a table cell: title | column "
-    "heading | row label); a highlight bullet or heading is not a sentence, so a figure "
-    "printed only there is recorded here and not entered (a figure that the body also prints "
-    "is entered from the body sentence). Cited sources (§5.3) are the pages that an included "
+    "heading | row label). A highlight bullet is the figure's own prose unit, so its figures "
+    "are entered with the bullet text as printed, also where the body repeats them (a "
+    "heading is not a sentence). Cited sources (§5.3) are the pages that an included "
     "page names as the source of a figure, by footnote or reference list; only their own "
     "in-scope figures enter, and their own references are not followed.")
 R_BG = "epidemiology or treatment outcome of the national programme, not an ACF or campaign figure (rule 4)"
@@ -459,8 +526,6 @@ R_PW = "programme-wide figure not given as a campaign or ACF figure (rule 4)"
 R_RES = ("national programme resource; the sentence does not name the campaign or active "
          "case finding (rule 3)")
 R_SCH = "Ni-kshay Poshan Yojana or Ni-kshay Mitra scheme figure, not an ACF or campaign figure (rule 4)"
-R_HEAD = ("printed in a highlight bullet, which is not a sentence (§13); the body prints the "
-          "same figures and they are entered from the body sentence")
 R_NONE = "no figure of a §5.1 quantity on the page that is a campaign or ACF figure"
 
 # (page_key, figures, where, category, reason)
@@ -481,12 +546,7 @@ EXCLUSIONS: list[tuple] = [
     ("2085802", "28% to 22%; 32%", "para 5", "background", R_BG),
     ("2090668", "156", "ESIC hospitals have started screening", "resource", R_RES),
     ("2090668", "17.7%; 53% to 85%; 21.4%; 28 to 22 lakhs", "para 3", "background", R_BG),
-    ("2090668", "2 crore; 1.48 lakh", "headline bullet", "headline bullet", R_HEAD),
-    ("2105575", "5.1 lakh; 455; 3.57 lakh; 10 crore; 10 lakh; over 26 lakh; 36%",
-     "headline bullets", "headline bullet",
-     "printed in highlight bullets, which are not sentences (§13). 3.57 lakh is printed only "
-     "there; the body prints over 3.5 lakh and 455, entered from the body sentence"),
-    ("2105575", "over 26 lakh; over 36%", "'In 2024, India notified over 26 lakh TB patients'",
+    ("2105575", "over 26 lakh; over 36%", "highlight bullet 3 and the body sentence 'In 2024, India notified over 26 lakh TB patients'",
      "programme-wide", "national notifications in 2024, not given as campaign figures (rule 4)"),
     ("2114205", "none", "whole page", "no figure", "the President's message prints no figure"),
     ("2114549", "17.7%; 237; 195; 28; 22; 15 lakh; 2.5 lakh; 83%; 68%; 75%; 80%", "NTEP achievements, "
@@ -497,8 +557,6 @@ EXCLUSIONS: list[tuple] = [
      "scheme", R_SCH),
     ("2114554", "59% to 85%; 32 tests in one go", "treatment coverage; ICMR kits", "background",
      R_BG),
-    ("2114554", "13.46 lakh; 12.97 crore; 7.19 lakh; 2.85 lakh", "headline bullets",
-     "headline bullet", R_HEAD),
     ("2115334", "none", "whole page (Gujarati)", "no figure",
      "no figure: the Prime Minister's message of thanks. The provisional row of §5.3 (PRID 2115334) "
      "is resolved here: an official PIB release dated 26 March 2025, but it reports no figure of a "
@@ -530,10 +588,8 @@ EXCLUSIONS: list[tuple] = [
      "campaign)"),
     ("2244703", "over 3,000; 9,800+; 1.8 lakh", "handheld X-ray units, NAAT laboratories, Ayushman "
      "Arogya Mandirs", "resource", R_RES),
-    ("2244703", "1.58 lakh; 20 crore; 32.65 lakh; 10.9 lakh", "headline bullets", "headline bullet", R_HEAD),
     ("2279976", "30", "'more than 30 region-specific indicators'", "method parameter",
      "a parameter of the vulnerability-mapping method, not a campaign figure"),
-    ("2279976", "28.83 lakh; 21.67 lakh; 3.65 lakh; 1.75 lakh", "headline bullet", "headline bullet", R_HEAD),
     ("2291403", "21%; 12%; 92%; 78%", "para 5", "background", R_BG),
     ("2291403", "more than 9,000; nearly 3,000", "molecular machines, AI X-ray units", "resource", R_RES),
     ("2291403", "over 5 lakh Ni-kshay Mitras; Rs 1,000", "patient-centric initiatives", "scheme", R_SCH),
@@ -557,8 +613,6 @@ EXCLUSIONS: list[tuple] = [
     ("2335615", "38%; 35%; 94%; 96%; 28 to 18 per lakh", "headline and body", "background", R_BG),
     ("2335615", "five NCC cadets; five MY Bharat volunteers", "JOSH Teams", "other campaign",
      "JOSH awareness initiative, not the campaign or ACF (judgement)"),
-    ("2335615", "25 crore; 11 crore; 3 crore; 48.64 lakh; 14.97 lakh", "headline bullets",
-     "headline bullet", R_HEAD),
     ("1990674", "5,91,491; 47,189; 12,774; 18,24,582", "Viksit Bharat Sankalp Yatra health camps",
      "other campaign",
      "TB screening at the health camps of the multi-disease Viksit Bharat Sankalp Yatra, which is "

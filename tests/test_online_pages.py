@@ -54,11 +54,11 @@ def test_every_figure_text_has_locator_and_a_page():
             continue
         n += 1
         assert r["page_key"] in keys and r["text"].strip(), r
-        assert r["kind"] in ("sentence", "cell", "lead-in")
+        assert r["kind"] in ("sentence", "cell", "lead-in", "bullet")
         if r["kind"] == "cell":
             assert r["column_heading"].strip() and r["row_label"].strip(), r
         else:
-            assert re.search(r"para \d+", r["locator"]), r
+            assert re.search(r"(para|bullet) \d+", r["locator"]), r
     assert n > 80
 
 
@@ -101,7 +101,7 @@ def test_prose_contexts_are_full_sentences_and_match_the_transcription():
     from src import inventory_rules as R
     tr = {}
     for t in _read(TRANSCRIBED):
-        if t["kind"] == "sentence":
+        if t["kind"] in ("sentence", "bullet"):
             tr[(t["page_key"], t["locator"].split(";")[0])] = t["text"]
     texts = set(tr.values())
     for r in _own():
@@ -110,7 +110,8 @@ def test_prose_contexts_are_full_sentences_and_match_the_transcription():
             assert ctx.endswith("| TB Screening"), r["fig_id"]
             continue
         assert ctx in texts, r["fig_id"]
-        assert ctx.rstrip().endswith((".", "?", "!", ".)", "..")), r["fig_id"]
+        if "(highlight bullet)" not in r["page_or_para"]:     # a bullet is kept as printed
+            assert ctx.rstrip().endswith((".", "?", "!", ".)", "..")), r["fig_id"]
         assert " | " not in ctx and " … " not in ctx
         R.find_figure(ctx, r["value_printed"])
         assert R.scope(ctx)[0] == r["scope"], r["fig_id"]
@@ -118,6 +119,22 @@ def test_prose_contexts_are_full_sentences_and_match_the_transcription():
             assert r["definition_verbatim"] in ctx, r["fig_id"]
             assert R.definition_class(r["quantity"], r["definition_verbatim"])[0] \
                 == r["definition_class"], r["fig_id"]
+
+
+def test_highlight_bullet_figures_enter_as_printed():
+    bullets = {(t["page_key"], t["locator"].split(";")[0]): t["text"]
+               for t in _read(TRANSCRIBED) if t["kind"] == "bullet"}
+    assert len(bullets) >= 20
+    pages = {p["page_key"]: p["url"] for p in _pages()}
+    rows = [r for r in _own() if "(highlight bullet)" in r["page_or_para"]]
+    assert len(rows) == 39
+    for r in rows:
+        assert r["context_verbatim"] in bullets.values(), r["fig_id"]
+    r = [x for x in rows if x["value_printed"] == "3.57 lakh"]
+    assert len(r) == 1 and r[0]["source_file"] == pages["2105575"]
+    assert r[0]["context_verbatim"].startswith("Since the launch of 100-day campaign")
+    dec = [d for d in _read(SCOPE) if d["source_file"] in W.OWN_FILES]
+    assert not [d for d in dec if d["category"] == "headline bullet"]
 
 
 def test_no_duplicate_fig_ids():
