@@ -130,3 +130,44 @@ interval (§8.2; C1-C3 in percent; C4 as the reciprocals of the Wilson bounds of
 whether the published value lies within its own rounding of the recomputation, the reason (or why
 it is not recomputable), and the setting. Differences that remain are differences of setting and
 denominator, not errors (§7.5, §12).
+
+## Q3: yield, NNS and ACF share (analysis plan §8)
+
+Written by `python -I src/q3_yield.py`. Wilson intervals, z = `statistics.NormalDist().inv_cdf(0.975)`.
+
+### q3_yield.csv
+
+One row per State x data year x source table x indicator, for every table that gives the figures
+(§8.4 first paragraph), plus not-available rows. Columns: state, year, indicator, source_id,
+source_table, pdf_page, printed_page, numerator, denominator, value, lower, upper, unit, status,
+reason, note.
+
+- Indicators: `yield_diagnosed_per_100000` (100,000 x diagnosed / screened; the tables print
+  "diagnosed", so the name says so), `nns` (screened / diagnosed; interval = 1/upper, 1/lower of
+  the Wilson bounds of diagnosed/screened), `acf_share_pct` (ACF-diagnosed / public notified, in
+  percent).
+- Status: `computed`; `not_computable` (zero diagnosed: NNS has no value and its upper bound is
+  `unbounded`; the yield of 0 is computed with its Wilson interval); `not_available` (listed with
+  the reason, never imputed: no row printed, value printed as NA or #DIV/0!, or a year without a
+  table).
+- Tables: ITR2019-A1.7 (data year 2018), ITR2020-A6 (2019), ITR2022-A6 (2021), ITR2023-A6 (2022),
+  ITR2024-A6 (2023); GHA2023-S1 (2021, first ACF cycle only) beside ITR2022-A6; GHA2023-S2 (ACF
+  share, 2021). Data years 2020 and 2024 have no table (one `(all States)` row each).
+- India rows are the printed national rows (note: "India row as printed"). The ITR2023 annexure's
+  State rows do not sum to its India row (checks TOT-012 to TOT-014); each row is computed as
+  printed and the note is carried on every ITR2023 row.
+- ACF share: the India TB Report ACF annexures print no notification count, and §8.1 requires one
+  published table to give numerator and denominator, so no ACF annexure is combined with a
+  notification annexure. The only table that prints both is GHA S2 (2021); its denominator is
+  public-sector notifications only. Its India value (2.9%) is that table's, not a national share
+  of all notifications.
+
+### q3_yield_summary.csv
+
+One row per State, year and indicator: the single value by the §8.4 precedence (India TB Report
+edition for the year, level 1; the quality study is none of the five levels). Columns add
+chosen_source, precedence_level and sources_computed. The choices are recorded in
+data/source_choices.csv (Q3T-2018 to Q3T-2023, Q3T-2021-GHA, and the addenda Q3T-SHARE-2021 and
+Q3T-NOTAB). The 2021 GHA yield is reported in q3_yield.csv only: it covers the first ACF cycle,
+the ITR2022 table the year.
+
