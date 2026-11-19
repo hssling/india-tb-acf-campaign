@@ -309,3 +309,64 @@ named mutations: 24 of 24 caught
 ```
 
 The number-token sweeps were not rerun for this change.
+
+### Extension paper, manuscript/ext (20 November 2026)
+
+The harness now takes the folder's profile (`check_manuscript_numbers.profile_for`) and runs
+that profile's set: `MUTATION_SETS["v1"]` (the 24 mutations above, unchanged, run with
+`--manuscript-dir manuscript/v1_audit`) or `MUTATION_SETS["ext"]` (below, the default
+`manuscript/ext`). The ext submission set is 01 title page, 02 anonymised manuscript, 03 to 06
+Figures 1 to 4, 07 supplementary material (Tables S1 to S8), 08 cover letter, 09 RECORD
+checklist and 10 declaration of interests; it has no data files, because check_docx_tie
+requires each table of tables.md to equal its CSV row for row. Anchors are in the private
+`manuscript/ext/section_phrases.json`; a label or caveat anchor is an [old, new] pair. Run with
+`python -I verification/mutate_manuscript.py --sweep` against the working tree that became the
+commit adding this section.
+
+| # | Kind | Mutation | Caught by |
+|---|------|----------|-----------|
+| 1a | number, docx only | 02 Results: the pooled 2021-2023 mean yield, last digit changed | check_docx_tie |
+| 1b | number, docx only | 01 title page: abstract word count increased by 1 | check_docx_tie |
+| 2a | number, Markdown only | Results: the scenario's added diagnoses increased by 1 | check_manuscript_numbers and check_docx_tie |
+| 2b | number, Markdown only | Abstract: the count of robustly above States increased by 1 | check_manuscript_numbers and check_docx_tie |
+| 2c | number, Markdown only | Box 1: a count of printed totals increased by 1 | check_manuscript_numbers and check_docx_tie |
+| 3a | author name, blinded docx | 02 Discussion: the author's name inserted | check_docx_tie |
+| 3b | author name, blinded docx | 02 document properties: dc:creator set to the name | check_docx_tie (BLINDING) |
+| 3c | author e-mail, blinded docx | 07 note under Table S2: the e-mail inserted | check_docx_tie |
+| 3d | repository URL, blinded docx | 02 Methods: the blinding placeholder replaced by the URL | check_docx_tie |
+| 3e | author name, blinded docx | 07 document properties: dc:creator set to the name | check_docx_tie (BLINDING) |
+| 4a | reference number, Markdown | Methods: a citation number increased by 1 | check_manuscript_numbers and check_docx_tie |
+| 4b | reference number, docx only | 02 Methods: a superscript citation increased by 1 | check_docx_tie |
+| 4c | reference number, docx only | 02 References: entries 2 and 3 renumbered 3 and 2 | check_docx_tie |
+| 5a | table cell, docx only | 02 Table 1: a sample size increased by 1 | check_docx_tie |
+| 5b | table cell, docx only | 07 Table S2: a posterior yield, last digit changed | check_docx_tie |
+| 5c | table cell, Markdown only | tables.md Table 1: a sample size increased by 1 | check_docx_tie |
+| 6a | sign, Markdown | Results: the sign of the unweighted ρ reversed | check_manuscript_numbers and check_docx_tie |
+| 6b | sign, docx only | 02 Results: the sign of the main θ reversed | check_docx_tie |
+| 6c | sign, docx only | 07 Table S3: the sign of a decomposition interval limit reversed | check_docx_tie |
+| 7a | internal identifier, Markdown | Methods: "(RS Q1216)" inserted | check_manuscript_numbers and check_docx_tie |
+| 7b | internal identifier, docx only | 02 Discussion: "(Task 7)" inserted | check_docx_tie |
+| 7c | internal identifier, docx only | 07 note under Table S2: "ITR2024" inserted | check_docx_tie |
+| 8a | label, Markdown | Abstract: the elasticity's label "supported" to "not established" | check_manuscript_numbers and check_docx_tie |
+| 8b | label, Markdown | Results: the correlation's label "not established" to "supported" | check_manuscript_numbers and check_docx_tie |
+| 8c | label, docx only | 02 Discussion: the number of estimates meeting the criterion changed | check_docx_tie |
+| 8d | label, docx only | 02 Table 1: the elasticity's label "Supported" to "Not established" | check_docx_tie |
+| 9a | caveat, Markdown | Results: "(post hoc)" removed from the robust-tier scenario | check_manuscript_numbers and check_docx_tie |
+| 9b | caveat, Markdown | Results: "an illustration, not a forecast" removed | check_manuscript_numbers and check_docx_tie |
+| 9c | caveat, Markdown | Abstract: "post hoc" removed from the between-year analysis | check_manuscript_numbers and check_docx_tie |
+| 9d | caveat, Markdown | Results: "this was not tested ..." removed | check_manuscript_numbers and check_docx_tie |
+| 9e | caveat, Markdown | Figure 3 legend: "not a forecast" removed | check_manuscript_numbers and check_docx_tie |
+| 9f | caveat, docx only | 02 Discussion: "it is not a forecast" removed | check_docx_tie |
+| 9g | caveat, docx only | 07 Table S2 title: "(post hoc)" removed | check_docx_tie |
+| 10a | AMA italics, docx only | 02 References: italics removed from the first journal title | check_docx_tie (ITALICS) |
+
+```
+named mutations [ext]: 34 of 34 caught
+sweep, manuscript_src.md number tokens (check_manuscript_numbers): caught 368 of 368
+sweep, 02_manuscript_anonymised.docx number tokens (check_docx_tie): caught 760 of 760
+```
+
+The same day, `python -I verification/mutate_manuscript.py --manuscript-dir manuscript/v1_audit`
+gave `named mutations [v1]: 24 of 24 caught`, on the existing v1 set and on a copy rebuilt with
+the revised builder. The harness now copies the folder under its own name, so a folder without a
+"profile" key (v1_audit) keeps its profile in the copy.

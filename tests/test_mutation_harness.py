@@ -105,10 +105,48 @@ def test_sweep_md_with_a_blind_check():
 
 
 def test_named_mutations_cover_the_required_kinds():
-    kinds = " ".join(k for _, k, _, _ in mm.MUTATIONS)
-    for k in ("number, docx only", "number, markdown only", "author name", "reference number",
-              "table cell", "gamma sign", "internal identifier"):
-        assert k in kinds, k
+    for prof, extra in (("v1", ("gamma sign", "supplementary data")),
+                        ("ext", ("sign, markdown", "sign, docx only", "label, markdown", "label, docx only",
+                                 "caveat, markdown", "caveat, docx only"))):
+        muts = mm.MUTATION_SETS[prof]
+        kinds = " ".join(k for _, k, _, _ in muts)
+        for k in ("number, docx only", "number, markdown only", "author name", "reference number",
+                  "table cell", "internal identifier", "AMA italics") + extra:
+            assert k in kinds, (prof, k)
+        assert len({m[0] for m in muts}) == len(muts), prof  # ids are unique
+    assert len(mm.MUTATION_SETS["ext"]) >= 20 and len(mm.MUTATION_SETS["v1"]) == 24
+
+
+def test_ext_mutations_edit_the_ext_supplement():
+    assert mm.SUP_07 == "submission/07_supplementary_material.docx"
+    assert mm.SUP_05 == "submission/05_supplementary_material.docx"
+
+
+def test_swap_takes_an_old_new_pair(tmp_path):
+    import json
+    d = tmp_path / "manuscript"
+    d.mkdir()
+    (d / "a.md").write_text("label supported.\n", encoding="utf-8")
+    (d / "section_phrases.json").write_text(json.dumps(
+        {"sections": {"A": ["x"]}, "mutation_anchors": {"8a": ["supported.", "not established."], "8b": "one"}}),
+        encoding="utf-8")
+    mm.swap(mm.edit_text, "a.md", "8a")(d)
+    assert (d / "a.md").read_text(encoding="utf-8") == "label not established.\n"
+    with pytest.raises(mm.NotApplied):
+        mm.swap(mm.edit_text, "a.md", "8b")(d)  # not a pair
+
+
+def test_copy_keeps_the_folder_name_and_skips_exhibit_images(tmp_path):
+    src = tmp_path / "v1_audit"
+    (src / "exhibits").mkdir(parents=True)
+    (src / "submission" / "_render").mkdir(parents=True)
+    for rel in ("exhibits/figure1.tif", "exhibits/figure1.pdf", "exhibits/tables.md",
+                "submission/03_figure1.tif", "submission/03_figure1.pdf", "submission/_render/x.pdf"):
+        (src / rel).write_bytes(b"x")
+    dst = mm.copy_manuscript(src, tmp_path / "copy")
+    assert dst.name == "v1_audit"  # the profile of a folder without a "profile" key is its name
+    got = sorted(str(p.relative_to(dst)).replace("\\", "/") for p in dst.rglob("*") if p.is_file())
+    assert got == ["exhibits/tables.md", "submission/03_figure1.pdf", "submission/03_figure1.tif"]
 
 
 def test_skips_without_manuscript(tmp_path, capsys):
@@ -135,5 +173,6 @@ def test_anchors_are_read_from_the_private_phrases_file(tmp_path):
 def test_mutation_harness_holds_no_manuscript_text():
     from pathlib import Path
     src = (Path(mm.__file__)).read_text(encoding="utf-8")
-    for s in ("In conclusion", "79 of 84", "national row by", "February 2026 date"):
+    for s in ("In conclusion", "79 of 84", "national row by", "February 2026 date", "pooled mean of",
+              "Kranzer", "not a forecast:", "elasticity holds", "robust tiers only"):
         assert s not in src, s

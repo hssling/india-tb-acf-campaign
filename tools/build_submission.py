@@ -10,25 +10,34 @@ from the repository root.
 Needs pandoc on PATH, python-docx, Pillow and PyMuPDF (fitz); Microsoft Word (through
 PowerShell COM) for the word counts unless --no-word. Sources (in the folder, git-ignored):
 manuscript_src.md (blinded), first_page_src.md, cover_letter.md, record_checklist.md and
-exhibits/ (tables.md, figure1.pdf, figure2.pdf). Nothing is written outside the folder.
+exhibits/ (tables.md, figure1.pdf ... figureN.pdf). Nothing is written outside the folder.
+The folder's profile (verification/check_manuscript_numbers.profile_for: the "profile" key of
+its section_phrases.json) selects the submission set (LAYOUTS).
 
 Output (docs/journal_rules.md; Elsevier generic style): A4, 2.5 cm margins, Times New Roman
 12 pt, double spacing, page numbers at the foot; continuous line numbers in the anonymised
 manuscript. Tables: no vertical rules, only the top, header and bottom rules; footnote marks
 as superscript lowercase letters; 10 pt single-spaced cells (9 pt in the landscape supplement).
 
-  01_title_page.docx              title page (not blinded); --doi fills the Zenodo DOI
-  02_manuscript_anonymised.docx   blinded text, References, Tables 1-3, figure legends
+Profile "ext" (manuscript/ext, the extension paper; 4 figures + Table 1 = 5 display items):
+  01_title_page.docx              title page (not blinded); --doi fills the Zenodo DOI, otherwise
+                                  the placeholder is highlighted
+  02_manuscript_anonymised.docx   blinded text, Box 1, References, Table 1, figure legends
   03_figure1.tif / 03_figure1.pdf Figure 1: TIFF (LZW, TIFF_DPI) and the vector PDF
-  04_figure2.tif / 04_figure2.pdf Figure 2
-  05_supplementary_material.docx  Tables S1 to S4 and the column dictionary of the data (blinded)
-  09_supplementary_data_S1a_registered.csv, 10_supplementary_data_S1b_corrected.csv
-                                  Supplementary data S1a and S1b: every Q2 entry pair (copied from
-                                  <folder>/exhibits/, written there by exhibits/make_tables.py)
-  11_supplementary_data_S1.xlsx   both, one sheet each (only if openpyxl is installed)
-  06_cover_letter.docx
-  07_RECORD_checklist.docx
-  08_declaration_of_interests.docx
+  04_figure2 ... 06_figure4       Figures 2 to 4, likewise
+  07_supplementary_material.docx  Tables S1 to S8, landscape (blinded). Every table is complete
+                                  here (each equals its CSV row for row, checked by
+                                  check_docx_tie), so there are no separate data files
+  08_cover_letter.docx
+  09_RECORD_checklist.docx
+  10_declaration_of_interests.docx
+
+Profile "v1" (manuscript/v1_audit, the audit-framed v1.0.0 manuscript):
+  01, 02 (Tables 1-3), 03-04 Figures 1-2, 05_supplementary_material.docx (Tables S1 to S4 and
+  the column dictionary of the data), 06 cover letter, 07 RECORD checklist, 08 declaration of
+  interests, 09_supplementary_data_S1a_registered.csv and 10_supplementary_data_S1b_corrected.csv
+  (every Q2 entry pair, copied from <folder>/exhibits/, written there by exhibits/make_tables.py)
+  and 11_supplementary_data_S1.xlsx (both, one sheet each; only if openpyxl is installed).
 
 Word's own counts of the abstract and the main text of 02 go to
 <folder>/word_counts_word.json (tools/word_count_word.ps1); the title page must quote them
@@ -48,6 +57,7 @@ import sys
 import tempfile
 import zipfile
 from pathlib import Path
+from typing import NamedTuple
 
 from docx import Document
 from docx.enum.style import WD_STYLE_TYPE
@@ -59,16 +69,43 @@ from docx.shared import Cm, Pt
 from docx.text.run import Run
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from verification.check_manuscript_numbers import profile_for  # noqa: E402
+
 DEFAULT_MS_DIR = "manuscript/ext"  # the extension paper; v1.0.0 (audit framing) is manuscript/v1_audit
 MS = ROOT / DEFAULT_MS_DIR
 EX = MS / "exhibits"
 OUT = MS / "submission"
 
 
+class Layout(NamedTuple):
+    """The file names of one submission set (the same as verification/check_docx_tie.LAYOUTS)."""
+    figures: tuple[str, ...]   # the file-number prefix of Figure 1, 2, ...
+    supplement: str
+    cover: str
+    record: str
+    declaration: str
+    data: bool                 # v1: supplementary data S1a and S1b (CSV) and the XLSX
+
+
+LAYOUTS: dict[str, Layout] = {
+    "v1": Layout(("03", "04"), "05_supplementary_material.docx", "06_cover_letter.docx",
+                 "07_RECORD_checklist.docx", "08_declaration_of_interests.docx", True),
+    "ext": Layout(("03", "04", "05", "06"), "07_supplementary_material.docx", "08_cover_letter.docx",
+                  "09_RECORD_checklist.docx", "10_declaration_of_interests.docx", False),
+}
+LAY = LAYOUTS["ext"]
+
+
 def configure(ms_dir: Path) -> None:
-    """Point the build at a manuscript folder: its sources, exhibits/ and submission/."""
-    global MS, EX, OUT
+    """Point the build at a manuscript folder: its sources, exhibits/, submission/ and its set."""
+    global MS, EX, OUT, LAY
     MS, EX, OUT = ms_dir, ms_dir / "exhibits", ms_dir / "submission"
+    LAY = LAYOUTS[profile_for(ms_dir)]
+
+
 FONT = "Times New Roman"
 DOI_PLACEHOLDER = "10.5281/zenodo.XXXXXXX"
 DOI_RE = re.compile(r"^10\.5281/zenodo\.\d+$")
@@ -355,20 +392,46 @@ def reorder(parent, order: list[str]) -> None:
         parent.append(e)
 
 
-def col_widths(t, total: int, size: float) -> list[int]:
-    """Column widths (twips). Each column is at least as wide as its longest word, so that a
-    number such as 205,331,541 never breaks; the rest of the width goes to the columns whose
-    typical (90th centile) cell would otherwise wrap."""
+def col_texts(t) -> list[list[str]]:
+    """The cell texts of each column (a merged spanning cell is left out: it spans the table)."""
+    cols: list[list[str]] = [[] for _ in t.columns]
+    for tr in t._tbl.findall(qn("w:tr")):
+        tcs = tr.findall(qn("w:tc"))
+        if len(tcs) != len(cols):
+            continue
+        for j, tc in enumerate(tcs):
+            cols[j].append("".join(x.text or "" for x in tc.iter(qn("w:t"))).replace(INDENT, " "))
+    return cols
+
+
+def col_mins(t, size: float) -> list[float]:
+    """Each column's minimum width (twips): its longest word, the cell margins and a little slack."""
     char = size * 20 * 0.5          # twips per character: half an em
     pad = 2 * 108 + 20              # the cell margins and a little slack
-    mins, wants = [], []
-    for j in range(len(t.columns)):
-        texts = [row.cells[j].text.replace(INDENT, " ") for row in t.rows if j < len(row.cells)]
-        longest_word = max((len(w) for s in texts for w in s.split()), default=3)
+    return [(max((len(w) for s in texts for w in s.split()), default=3) + 1) * char + pad
+            for texts in col_texts(t)]
+
+
+def fit_size(t, total: int, size: float, floor: float = 7.0) -> float:
+    """`size`, or the largest smaller size (in half points, down to `floor`) at which every
+    column's longest word fits, so that no number or word breaks inside a cell."""
+    while sum(col_mins(t, size)) >= total and size - 0.5 >= floor:
+        size -= 0.5
+    return size
+
+
+def col_widths(t, total: int, size: float) -> list[int]:
+    """Column widths (twips). Each column is at least as wide as its longest word, so that a
+    number such as 205,331,541 never breaks (fit_size chooses a size at which this is
+    possible); the rest of the width goes to the columns whose typical (90th centile) cell
+    would otherwise wrap."""
+    char = size * 20 * 0.5          # twips per character: half an em
+    pad = 2 * 108 + 20              # the cell margins and a little slack
+    mins, wants = col_mins(t, size), []
+    for j, texts in enumerate(col_texts(t)):
         lengths = sorted(len(s.strip()) for s in texts[1:]) or [3]
         typical = lengths[int(0.9 * (len(lengths) - 1))]  # 90th centile of the body cells
-        mins.append((longest_word + 1) * char + pad)
-        wants.append(max(min(typical, 150) * char + pad, mins[-1]))
+        wants.append(max(min(typical, 150) * char + pad, mins[j]))
     if sum(mins) >= total:
         raw = [total * m / sum(mins) for m in mins]
     elif sum(wants) <= total:
@@ -397,14 +460,24 @@ def is_bold_run(r) -> bool:
     return b is not None and b.get(qn("w:val")) not in ("0", "false")
 
 
-def spanning_rows(tbl) -> list[int]:
-    """Rows after the header whose first cell is wholly bold and whose other cells are empty
-    (tables.md writes '| **Label** | | ... |'): each becomes one cell spanning the table, and
-    the row after it heads the block below."""
+def cell_texts(tr) -> list[str]:
+    return ["".join(x.text or "" for x in tc.iter(qn("w:t"))) for tc in tr.findall(qn("w:tc"))]
+
+
+def is_bold_row(tr) -> bool:
+    """Every non-empty run of the row is bold (a heading row of a block, '| **Years** | ...')."""
+    runs = [r for r in tr.iter(qn("w:r")) if "".join(x.text or "" for x in r.iter(qn("w:t"))).strip()]
+    return bool(runs) and all(map(is_bold_run, runs))
+
+
+def spanning_rows(tbl, first: int = 1) -> list[int]:
+    """Rows from `first` on (after the header by default) whose first cell is wholly bold and
+    whose other cells are empty (tables.md writes '| **Label** | | ... |'): each becomes one cell
+    spanning the table, and the row after it heads the block below."""
     out = []
     for i, tr in enumerate(tbl.findall(qn("w:tr"))):
         tcs = tr.findall(qn("w:tc"))
-        if i == 0 or len(tcs) < 2:
+        if i < first or len(tcs) < 2:
             continue
         texts = ["".join(x.text or "" for x in tc.iter(qn("w:t"))) for tc in tcs]
         runs = [r for r in tcs[0].iter(qn("w:r")) if "".join(x.text or "" for x in r.iter(qn("w:t"))).strip()]
@@ -429,7 +502,7 @@ def merge_spanning_rows(tbl, total: int) -> None:
     heading row that follows it."""
     rows = tbl.findall(qn("w:tr"))
     ncols = len(tbl.tblGrid.findall(qn("w:gridCol")))
-    for i in spanning_rows(tbl):
+    for i in spanning_rows(tbl, first=0):
         tcs = rows[i].findall(qn("w:tc"))
         for tc in tcs[1:]:
             rows[i].remove(tc)
@@ -447,11 +520,60 @@ def merge_spanning_rows(tbl, total: int) -> None:
                 set_cell_border(tc, "bottom", "single")
 
 
+GAP = ('<w:p xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:pPr>'
+       '<w:suppressLineNumbers/><w:spacing w:before="0" w:after="0" w:line="20" w:lineRule="exact"/>'
+       '<w:rPr><w:sz w:val="2"/>'
+       '</w:rPr></w:pPr></w:p>')
+
+
+def split_blocks(doc) -> int:
+    """A table with spanning rows (a block label, '| **Label** | | ... |', with its own heading
+    row below) is split before each spanning row into separate Word tables, kept apart by an
+    empty 1-pt paragraph (not line-numbered). Each block then repeats its own label and column headings on a new
+    page, not the first block's headings, and gets column widths of its own. The rows, and their
+    order, are unchanged. Returns the number of blocks made."""
+    from docx.oxml import parse_xml
+    n = 0
+    for t in list(doc.tables):
+        tbl = t._tbl
+        idx = spanning_rows(tbl)
+        if not idx:
+            continue
+        rows = tbl.findall(qn("w:tr"))
+        anchor = tbl
+        for a, b in zip(idx, idx[1:] + [len(rows)]):
+            new = OxmlElement("w:tbl")
+            new.append(copy.deepcopy(tbl.tblPr))
+            new.append(copy.deepcopy(tbl.tblGrid))
+            for tr in rows[a:b]:
+                new.append(tr)  # moved, not copied
+            gap = parse_xml(GAP)
+            anchor.addnext(gap)
+            gap.addnext(new)
+            anchor = new
+            n += 1
+    return n
+
+
+def followed_by_block(tbl) -> bool:
+    """The table is followed (after the gap paragraph) by a block split from it."""
+    gap = tbl.getnext()
+    nxt = gap.getnext() if gap is not None and gap.tag == qn("w:p") and not "".join(
+        x.text or "" for x in gap.iter(qn("w:t"))) else None
+    return nxt is not None and nxt.tag == qn("w:tbl") and 0 in spanning_rows(nxt, first=0)
+
+
 def format_table(t, total: int, size: float) -> None:
     """Top, header and bottom rules only (no vertical rules), and a rule above a spanning row
-    and below the heading row under it; fixed widths over the text block; the header row
-    repeated on each page; single-spaced cells at `size` pt."""
+    and below the heading row under it; fixed widths over the text block; the header row (for
+    a block, its label and heading rows) repeated on each page; single-spaced cells at `size`
+    pt. A table followed by its next block has no bottom rule: the block's top rule is it."""
     tbl = t._tbl
+    rows0 = tbl.findall(qn("w:tr"))
+    heads = 1  # header rows: the column headings, or a block's label and its heading row
+    if 0 in spanning_rows(tbl, first=0):
+        heads = 2 if len(rows0) > 1 and is_bold_row(rows0[1]) else 1
+    closed = not followed_by_block(tbl)
     pr = tbl.tblPr
     for tag in ("tblW", "tblInd", "tblLayout", "jc", "tblBorders"):
         for e in pr.findall(qn(f"w:{tag}")):
@@ -479,7 +601,7 @@ def format_table(t, total: int, size: float) -> None:
             for e in trPr.findall(qn(tag)):
                 trPr.remove(e)
         trPr.append(OxmlElement("w:cantSplit"))
-        if i == 0:
+        if i < heads:
             trPr.append(OxmlElement("w:tblHeader"))
         for tc, w in zip(tr.findall(qn("w:tc")), widths):
             tcPr = tc.get_or_add_tcPr()
@@ -493,7 +615,7 @@ def format_table(t, total: int, size: float) -> None:
             tb = OxmlElement("w:tcBorders")
             tb.append(border("top", "single") if i == 0 else border("top", "nil"))
             tb.append(border("left", "nil"))
-            tb.append(border("bottom", "single", 6) if i == 0 or i == len(rows) - 1
+            tb.append(border("bottom", "single", 6) if i == heads - 1 or (i == len(rows) - 1 and closed)
                       else border("bottom", "nil"))
             tb.append(border("right", "nil"))
             tcPr.append(tb)
@@ -506,7 +628,7 @@ def format_table(t, total: int, size: float) -> None:
                 pf.line_spacing = 1.0
                 pf.space_before = Pt(1)
                 pf.space_after = Pt(1)
-                pf.keep_with_next = False
+                pf.keep_with_next = i < heads  # header rows stay with the first body row
                 p.alignment = WD_ALIGN_PARAGRAPH.LEFT
                 lead = len(p.text) - len(p.text.lstrip(INDENT))
                 if lead and p.runs:  # a sub-row: the no-break spaces become an indent
@@ -514,8 +636,26 @@ def format_table(t, total: int, size: float) -> None:
                     pf.left_indent = Pt(size * lead / 2)
                 for r in p.runs:
                     set_font(r, size)
-                    if i == 0:
+                    if i < heads:
                         r.font.bold = True
+
+
+def move_page_breaks(doc) -> None:
+    """Each paragraph that holds only a page break (PAGEBREAK) is removed and the paragraph after
+    it starts a new page instead (page break before). A break paragraph that falls at the top of
+    a page would otherwise leave an empty page, and with line numbers a numbered empty line."""
+    body = doc.element.body
+    for p in list(body.iterchildren(qn("w:p"))):
+        brs = list(p.iter(qn("w:br")))
+        if not brs or any(b.get(qn("w:type")) != "page" for b in brs) or "".join(
+                x.text or "" for x in p.iter(qn("w:t"))).strip():
+            continue
+        nxt = p.getnext()
+        if nxt is None or nxt.tag != qn("w:p"):
+            continue
+        from docx.text.paragraph import Paragraph
+        Paragraph(nxt, doc._body).paragraph_format.page_break_before = True
+        body.remove(p)
 
 
 def highlight(doc, pattern: re.Pattern) -> None:
@@ -561,12 +701,14 @@ def postprocess(path: Path, *, landscape: bool = False, line_numbers: bool = Fal
                 table_pt: float = 10, placeholder: bool = False) -> None:
     doc = Document(str(path))
     page_setup(doc, landscape=landscape, line_numbers=line_numbers)
+    move_page_breaks(doc)
+    split_blocks(doc)
     total = (16838 if landscape else 11906) - 2 * 1417
     for t in doc.tables:
-        # a wide table on a portrait page (Table 2: seven columns) one point smaller, so that it
-        # keeps to one page
+        # a wide table on a portrait page (seven or more columns) one point smaller, so that it
+        # keeps to one page; smaller still if a column's longest word would not fit
         wide = not landscape and len(t.columns) >= 7
-        format_table(t, total, table_pt - 1 if wide else table_pt)
+        format_table(t, total, fit_size(t, total, table_pt - 1 if wide else table_pt))
     if placeholder:
         highlight(doc, re.compile("(" + re.escape(DOI_PLACEHOLDER) + ")"))
     cp = doc.core_properties
@@ -586,7 +728,7 @@ def figures() -> list[str]:
     from PIL import Image
     Image.MAX_IMAGE_PIXELS = None
     lines = []
-    for i, prefix in ((1, "03"), (2, "04")):
+    for i, prefix in enumerate(LAY.figures, 1):
         pdf = EX / f"figure{i}.pdf"
         shutil.copyfile(pdf, OUT / f"{prefix}_figure{i}.pdf")
         page = fitz.open(str(pdf))[0]
@@ -657,7 +799,8 @@ def word_counts(docx: Path) -> dict:
     w = json.loads(out.read_text(encoding="utf-8-sig"))
     w["counted_by"] = ("Microsoft Word (ComputeStatistics) on 02_manuscript_anonymised.docx: "
                        "abstract = Abstract heading to Keywords; main text = Introduction to "
-                       "Discussion, headings excluded")
+                       "Discussion" + (" plus the text box (Box 1)" if "Box" in w.get("sections", {}) else "")
+                       + ", headings excluded")
     w["source_md5"] = hashlib.md5(read("manuscript_src.md").encode("utf-8")).hexdigest()
     out.write_text(json.dumps(w, indent=1) + "\n", encoding="utf-8", newline="\n")
     return w
@@ -677,6 +820,8 @@ def main(argv: list[str] | None = None) -> int:
     if not MS.is_dir():
         raise SystemExit(f"{a.manuscript_dir} not present (it is private)")
     OUT.mkdir(exist_ok=True)
+    print(f"profile {profile_for(MS)}: {len(LAY.figures)} figures, supplement {LAY.supplement}, "
+          f"{'supplementary data files' if LAY.data else 'no data files'}")
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)
         ref = tmp / "reference.docx"
@@ -684,10 +829,10 @@ def main(argv: list[str] | None = None) -> int:
         jobs = [
             ("01_title_page.docx", title_page_md(a.doi), dict(placeholder=not a.doi)),
             ("02_manuscript_anonymised.docx", manuscript_md(), dict(line_numbers=True)),
-            ("05_supplementary_material.docx", supplement_md(), dict(landscape=True, table_pt=9)),
-            ("06_cover_letter.docx", cover_letter_md(), {}),
-            ("07_RECORD_checklist.docx", read("record_checklist.md"), {}),
-            ("08_declaration_of_interests.docx", declaration_md(a.doi), {}),
+            (LAY.supplement, supplement_md(), dict(landscape=True, table_pt=9)),
+            (LAY.cover, cover_letter_md(), {}),
+            (LAY.record, read("record_checklist.md"), {}),
+            (LAY.declaration, declaration_md(a.doi), {}),
         ]
         for name, md, kw in jobs:
             out = OUT / name
@@ -696,8 +841,15 @@ def main(argv: list[str] | None = None) -> int:
             print("built", name)
     for ln in figures():
         print(ln)
-    for ln in supplementary_data():
-        print(ln)
+    if LAY.data:
+        for ln in supplementary_data():
+            print(ln)
+    made = {n for n, _, _ in jobs} | {f"{p}_figure{i}.{x}" for i, p in enumerate(LAY.figures, 1)
+                                      for x in ("tif", "pdf")}
+    made |= ({dst for _, dst, _ in DATA} | {XLSX}) if LAY.data else set()
+    for f in sorted(OUT.iterdir()):
+        if f.is_file() and f.name not in made:
+            print(f"note: {f.name} is not part of this set (left from an earlier build?); remove it")
     if not a.no_word:
         w = word_counts(OUT / "02_manuscript_anonymised.docx")
         print(f"Word counts: abstract {w['abstract']}, main text {w['main_text']} "

@@ -1,4 +1,4 @@
-# Adapted from hssling/india-state-tb-score (MIT), tests/test_docx_tie.py, commit 05bcaa7; modified: fixtures for the unit-level tie (paragraphs, list items, table rows, superscripts), blinding in document properties, identifiers, word counts and a complete fixture manuscript folder
+# Adapted from hssling/india-state-tb-score (MIT), tests/test_docx_tie.py, commit 05bcaa7; modified: fixtures for the unit-level tie (paragraphs, list items, table rows, superscripts), blinding in document properties, identifiers, word counts and a complete fixture manuscript folder for each submission set (v1, ext)
 """Fixture tests of verification/check_docx_tie.py. The .docx files are built with python-docx
 from synthetic text; the private manuscript is never read."""
 import hashlib
@@ -127,29 +127,117 @@ SOURCES = {
 }
 
 
-@pytest.fixture()
-def ms_dir(tmp_path):
+TABLE_CSVS = {"table1.csv": "Year,Yieldᵃ\n2023,17.3\n", "tables1.csv": "A,B\n1,2\n"}
+
+
+def make_ms(tmp_path, profile):
+    """A complete fixture folder of the given profile, its submission set built from the units."""
     ms = tmp_path / "manuscript"
     (ms / "exhibits").mkdir(parents=True)
     (ms / "submission").mkdir()
     for name, text in SOURCES.items():
         (ms / name).write_text(text, encoding="utf-8")
-    for name in tie.SPEC:
+    (ms / cmn.PHRASES).write_text(json.dumps({"profile": profile, "sections": {"Abstract": ["x"]}}),
+                                  encoding="utf-8")
+    for name, text in TABLE_CSVS.items():
+        (ms / "exhibits" / name).write_text(text, encoding="utf-8", newline="\n")
+    lay = tie.LAYOUTS[profile]
+    for name in lay.spec:
         want, _ = tie.expected(ms, name)
         docx_from_units(want, ms / "submission" / name)
-    for name in tie.FIGURES:
+    for name in lay.figures:
         (ms / "submission" / name).write_bytes(b"figure")
-    mt = tie.make_tables()
-    for name, output, _ in tie.DATA:
-        (ms / "submission" / name).write_bytes(mt.supplementary_data_bytes(output))
+    if lay.data:
+        mt = tie.make_tables()
+        for name, output, _ in lay.data:
+            (ms / "submission" / name).write_bytes(mt.supplementary_data_bytes(output))
     md5 = hashlib.md5(SOURCES["manuscript_src.md"].encode("utf-8")).hexdigest()
     (ms / "word_counts_word.json").write_text(json.dumps(
         {"abstract": 210, "main_text": 1234, "source_md5": md5}), encoding="utf-8")
     return ms
 
 
+@pytest.fixture(params=["v1", "ext"])
+def ms_dir(tmp_path, request):
+    return make_ms(tmp_path, request.param)
+
+
+@pytest.fixture()
+def v1_dir(tmp_path):
+    return make_ms(tmp_path, "v1")
+
+
+@pytest.fixture()
+def ext_dir(tmp_path):
+    return make_ms(tmp_path, "ext")
+
+
 def test_fixture_folder_ties(ms_dir):
     assert tie.problems(ms_dir, ROOT) == []
+
+
+def test_layouts():
+    v1, ext = tie.LAYOUTS["v1"], tie.LAYOUTS["ext"]
+    assert v1.files() == ["01_title_page.docx", "02_manuscript_anonymised.docx", "03_figure1.pdf",
+                          "03_figure1.tif", "04_figure2.pdf", "04_figure2.tif",
+                          "05_supplementary_material.docx", "06_cover_letter.docx",
+                          "07_RECORD_checklist.docx", "08_declaration_of_interests.docx",
+                          "09_supplementary_data_S1a_registered.csv",
+                          "10_supplementary_data_S1b_corrected.csv", "11_supplementary_data_S1.xlsx"]
+    assert ext.files() == ["01_title_page.docx", "02_manuscript_anonymised.docx", "03_figure1.pdf",
+                           "03_figure1.tif", "04_figure2.pdf", "04_figure2.tif", "05_figure3.pdf",
+                           "05_figure3.tif", "06_figure4.pdf", "06_figure4.tif",
+                           "07_supplementary_material.docx", "08_cover_letter.docx",
+                           "09_RECORD_checklist.docx", "10_declaration_of_interests.docx"]
+    assert ext.blinded == ("02_manuscript_anonymised.docx", "07_supplementary_material.docx")
+    assert not ext.data and ext.xlsx is None and ext.complete_tables and not v1.complete_tables
+
+
+def test_layout_follows_the_profile(tmp_path):
+    assert tie.layout(tmp_path / "v1_audit") is tie.LAYOUTS["v1"]  # no phrases file: by the name
+    assert tie.layout(tmp_path / "ext") is tie.LAYOUTS["ext"]
+    d = tmp_path / "other"
+    d.mkdir()
+    (d / cmn.PHRASES).write_text(json.dumps({"profile": "v1", "sections": {"A": ["x"]}}), encoding="utf-8")
+    assert tie.layout(d) is tie.LAYOUTS["v1"]
+
+
+def test_builder_layouts_agree_with_the_tie():
+    bs = pytest.importorskip("tools.build_submission")
+    for prof, lay in tie.LAYOUTS.items():
+        b = bs.LAYOUTS[prof]
+        assert tie.figure_files(list(b.figures)) == lay.figures
+        assert {b.supplement, b.cover, b.record, b.declaration} | {
+            "01_title_page.docx", "02_manuscript_anonymised.docx"} == set(lay.spec)
+        assert b.supplement == lay.supplement and b.data == bool(lay.data)
+        if b.data:
+            assert [dst for _, dst, _ in bs.DATA] == [n for n, _, _ in lay.data] and bs.XLSX == lay.xlsx
+
+
+def test_extra_file_is_a_problem(ms_dir):
+    (ms_dir / "submission" / "05_supplementary_material_old.docx").write_bytes(b"x")
+    (ms_dir / "submission" / "_render").mkdir()  # a folder (the render output) is not a file of the set
+    assert tie.problems(ms_dir, ROOT) == [
+        f"EXTRA: 05_supplementary_material_old.docx is not part of the {cmn.profile_for(ms_dir)} submission set"]
+
+
+def test_ext_tables_must_be_complete_as_their_csv(ext_dir):
+    ex = ext_dir / "exhibits"
+    (ex / "tables1.csv").write_text("A,B\n1,2\n3,4\n", encoding="utf-8")  # a row the table lacks
+    found = tie.problems(ext_dir, ROOT)
+    assert any(p.startswith("TABLES: tables1.csv (3 rows) differs from Table S1") for p in found)
+    (ex / "tables1.csv").unlink()
+    assert "TABLES: Table S1 has no tables1.csv in exhibits/" in tie.problems(ext_dir, ROOT)
+
+
+def test_complete_tables_normalise_like_the_tie(tmp_path):
+    ex = tmp_path / "exhibits"
+    ex.mkdir()
+    (ex / "tables.md").write_text("## Table S2. T\n\n| **A** | B |\n|---|---|\n| **Block** |  |\n"
+                                  "|   sub ᵇ | 1,234 |\n\nNote.\n", encoding="utf-8")
+    (ex / "tables2.csv").write_text("A,B\nBlock,\n  sub ᵇ,\"1,234\"\n", encoding="utf-8")
+    assert tie.complete_table_problems(tmp_path) == []
+    assert tie.table_csv_name("", "1") == "table1.csv" and tie.table_csv_name("S", "8") == "tables8.csv"
 
 
 def test_doi_placeholder_is_a_note_not_a_problem(ms_dir):
@@ -162,15 +250,17 @@ def test_doi_placeholder_is_a_note_not_a_problem(ms_dir):
 
 
 def test_spec_parts(ms_dir):
-    want, builder = tie.expected(ms_dir, "05_supplementary_material.docx")
+    lay = tie.layout(ms_dir)
+    want, builder = tie.expected(ms_dir, lay.supplement)
     assert want[:3] == ["Supplementary material", "A study title", "Table S1. More"]
     assert builder == {"Supplementary material"}
     want, _ = tie.expected(ms_dir, "02_manuscript_anonymised.docx")
     assert want.index("Table 1. Yield") < want.index("Figure legends")
     assert "Year | Yield^a^" in want and "^a^ A note." in want
-    want, _ = tie.expected(ms_dir, "06_cover_letter.docx")
+    cover, decl = [n for n in lay.spec if "cover_letter" in n or "declaration" in n]
+    want, _ = tie.expected(ms_dir, cover)
     assert want[0] == "Dear Editors,"  # the '# Cover letter' heading is not part of the letter
-    want, _ = tie.expected(ms_dir, "08_declaration_of_interests.docx")
+    want, _ = tie.expected(ms_dir, decl)
     assert want == ["Declaration of interests", "Title: A study title", "Author: An Author",
                     "Declarations of interest: none."]
 
@@ -196,6 +286,19 @@ def test_markdown_change_and_word_counts(ms_dir):
     assert any("missing" in p for p in tie.problems(ms_dir, ROOT))
 
 
+def test_title_page_may_say_what_the_main_text_counts(ext_dir):
+    """The extension paper counts its text box in the main text and says so on the title page."""
+    tp = SOURCES["first_page_src.md"].replace(
+        "(Introduction to Discussion)", "(Introduction to Discussion, with the text box, Box 1, counted in the main text)")
+    (ext_dir / "first_page_src.md").write_text(tp, encoding="utf-8")
+    want, _ = tie.expected(ext_dir, "01_title_page.docx")
+    docx_from_units(want, ext_dir / "submission" / "01_title_page.docx")
+    assert tie.problems(ext_dir, ROOT) == []
+    assert tie.word_count_problems(ext_dir, ["main text (Introduction to Discussion, with Box 1) 1,234 words; "
+                                             "abstract 2100 words"]) == [
+        "WORDS: the title page does not quote Word's count 'abstract 210 words'"]
+
+
 def test_title_page_must_quote_word_counts(ms_dir):
     w = json.loads((ms_dir / "word_counts_word.json").read_text(encoding="utf-8"))
     w["main_text"] = 1235
@@ -211,9 +314,24 @@ def test_missing_file_is_a_problem(ms_dir):
     assert "MISSING: 03_figure1.tif" in tie.problems(ms_dir, ROOT)
 
 
-def test_data_files_tie_to_outputs(ms_dir):
+def test_ext_needs_all_four_figures(ext_dir):
+    (ext_dir / "submission" / "06_figure4.pdf").unlink()
+    assert "MISSING: 06_figure4.pdf" in tie.problems(ext_dir, ROOT)
+
+
+def test_ext_blinding_covers_the_supplement(ext_dir):
+    name = cmn.author_markers(ROOT)[0]
+    sup = ext_dir / "submission" / "07_supplementary_material.docx"
+    want, _ = tie.expected(ext_dir, sup.name)
+    docx_from_units(want + [f"Prepared by {name}"], sup)
+    found = tie.problems(ext_dir, ROOT)
+    assert any(p.startswith("BLINDING in 07") for p in found) and any(p.startswith("TIE 07") for p in found)
+
+
+def test_data_files_tie_to_outputs(v1_dir):
+    ms_dir = v1_dir
     sub = ms_dir / "submission"
-    name = tie.DATA[1][0]
+    name = tie.LAYOUTS["v1"].data[1][0]
     lines = (sub / name).read_text(encoding="utf-8").split(chr(10))
     (sub / name).write_text(chr(10).join(lines[:-2] + lines[-1:]), encoding="utf-8", newline="")
     found = tie.problems(ms_dir, ROOT)
@@ -221,31 +339,34 @@ def test_data_files_tie_to_outputs(ms_dir):
     assert any("SHA-256" in p for p in found)
 
 
-def test_data_cell_edit_is_caught(ms_dir):
+def test_data_cell_edit_is_caught(v1_dir):
+    ms_dir = v1_dir
     sub = ms_dir / "submission"
-    name = tie.DATA[0][0]
+    name = tie.LAYOUTS["v1"].data[0][0]
     text = (sub / name).read_text(encoding="utf-8")
     (sub / name).write_text(text.replace(",347,exact,", ",348,exact,", 1), encoding="utf-8", newline="")
     found = tie.problems(ms_dir, ROOT)
     assert any("verbatim column" in p for p in found) and any("SHA-256" in p for p in found)
 
 
-def test_xlsx_must_match_the_csv(ms_dir):
+def test_xlsx_must_match_the_csv(v1_dir):
+    ms_dir = v1_dir
+    lay = tie.LAYOUTS["v1"]
     openpyxl = pytest.importorskip("openpyxl")
     import csv
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
-    for name, _, sheet in tie.DATA:
+    for name, _, sheet in lay.data:
         ws = wb.create_sheet(sheet)
         with open(ms_dir / "submission" / name, newline="", encoding="utf-8") as f:
             for r in csv.reader(f):
                 ws.append(r)
-    xl = ms_dir / "submission" / tie.XLSX
+    xl = ms_dir / "submission" / lay.xlsx
     wb.save(xl)
     assert tie.problems(ms_dir, ROOT) == []
-    wb[tie.DATA[0][2]]["K2"] = "999"
+    wb[lay.data[0][2]]["K2"] = "999"
     wb.save(xl)
-    assert any(p.startswith(f"DATA {tie.XLSX}") for p in tie.problems(ms_dir, ROOT))
+    assert any(p.startswith(f"DATA {lay.xlsx}") for p in tie.problems(ms_dir, ROOT))
 
 
 def test_journal_italics(tmp_path):

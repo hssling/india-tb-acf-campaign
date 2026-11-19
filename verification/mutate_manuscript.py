@@ -1,10 +1,11 @@
-# Adapted from hssling/india-state-tb-score (MIT), verification/mutate_manuscript.py, commit 05bcaa7; modified: named mutations of the Markdown sources and of the submission .docx files, each applied to a temporary copy of manuscript/ and run through check_manuscript_numbers and check_docx_tie; the number-token sweep kept as --sweep and extended to the anonymised .docx
+# Adapted from hssling/india-state-tb-score (MIT), verification/mutate_manuscript.py, commit 05bcaa7; modified: named mutations of the Markdown sources and of the submission .docx files, each applied to a temporary copy of manuscript/ and run through check_manuscript_numbers and check_docx_tie; one set of mutations per manuscript profile (v1, ext); the number-token sweep kept as --sweep and extended to the anonymised .docx
 """Mutation test of the manuscript checks (check_manuscript_numbers and check_docx_tie).
 
 Run as: python -I verification/mutate_manuscript.py [--manuscript-dir DIR] [--sweep]
 
 The manuscript folder DIR (default manuscript/ext; manuscript/v1_audit for v1.0.0; git-ignored)
-is copied to a temporary folder for every mutation; the real files are never written. Each named mutation (MUTATIONS) changes one thing in the copy, and both
+is copied to a temporary folder for every mutation; the real files are never written. Each named
+mutation (MUTATION_SETS[profile], the profile of the folder) changes one thing in the copy, and both
 checks are run on it: check_manuscript_numbers.problems (on the copied Markdown, against the
 committed outputs) and check_docx_tie.problems (on the copied Markdown and .docx files). A
 mutation is caught if either check reports at least one problem. The unmutated copy must
@@ -12,9 +13,11 @@ pass both, or nothing is run.
 
 The kinds required by the brief: a number changed in the .docx only, a number changed in
 the Markdown only, the author's name inserted into a blinded file (text and document
-properties), a reference number swapped, a table cell edited, a gamma sign flipped, and an
-internal identifier inserted; also the supplementary data files (a CSV cell, a CSV row, an XLSX
-cell) and the italics of a journal title. The manuscript text a mutation edits (its anchor) quotes
+properties), a reference number swapped, a table cell edited, a sign flipped (v1: gamma), and an
+internal identifier inserted; also, for v1, the supplementary data files (a CSV cell, a CSV row,
+an XLSX cell), for ext, a pre-specified label changed (supported / not established) and a caveat
+removed (post hoc, not a forecast, not tested), and the italics of a journal title. The
+manuscript text a mutation edits (its anchor) quotes
 the manuscript, so it is not kept here: it is read from "mutation_anchors" in the private
 <folder>/section_phrases.json. A mutation whose anchor is missing or not found counts as NOT
 APPLIED and fails the run, so an anchor that drifts cannot pass silently.
@@ -49,11 +52,13 @@ from verification import check_manuscript_numbers as cmn  # noqa: E402
 DOC = "word/document.xml"
 CORE = "docProps/core.xml"
 MS_02 = "submission/02_manuscript_anonymised.docx"
-SUP_05 = "submission/05_supplementary_material.docx"
 TITLE_01 = "submission/01_title_page.docx"
-DATA_09 = "submission/09_supplementary_data_S1a_registered.csv"
-DATA_10 = "submission/10_supplementary_data_S1b_corrected.csv"
-XLSX_11 = "submission/11_supplementary_data_S1.xlsx"
+_V1, _EXT = tie.LAYOUTS["v1"], tie.LAYOUTS["ext"]
+SUP_05 = "submission/" + _V1.supplement                   # v1: 05_supplementary_material.docx
+DATA_09 = "submission/" + _V1.data[0][0]                  # v1: supplementary data S1a (CSV)
+DATA_10 = "submission/" + _V1.data[1][0]                  # v1: supplementary data S1b (CSV)
+XLSX_11 = "submission/" + _V1.xlsx                        # v1: both, one sheet each
+SUP_07 = "submission/" + _EXT.supplement                  # ext: 07_supplementary_material.docx
 
 
 class NotApplied(Exception):
@@ -205,6 +210,16 @@ def insert(edit: Callable[[Path, str, str], None], rel: str, mid: str, extra: Ca
     return fn
 
 
+def swap(edit: Callable[[Path, str, str], None], rel: str, mid: str) -> Callable[[Path], None]:
+    """The anchor is a pair [old, new] (a label or a caveat as written, and its mutated form)."""
+    def fn(d: Path) -> None:
+        a = anchor(d, mid)
+        if not (isinstance(a, list) and len(a) == 2):
+            raise NotApplied(f"anchor of {mid} must be a pair [old, new]")
+        edit(d / rel, a[0], a[1])
+    return fn
+
+
 def renumber_pair(rel: str, mid: str) -> Callable[[Path], None]:
     """Swap the leading numbers of two reference-list anchors (entries 2 and 3 become 3 and 2)."""
     def fn(d: Path) -> None:
@@ -221,7 +236,7 @@ def renumber_pair(rel: str, mid: str) -> Callable[[Path], None]:
 # The named mutations: (id, kind, what is changed, function of the copied manuscript dir)
 # --------------------------------------------------------------------------------------
 Mutation = tuple[str, str, str, Callable[[Path], None]]
-MUTATIONS: list[Mutation] = [
+MUTATIONS_V1: list[Mutation] = [
     ("1a", "number, docx only", "02 Results: the inventory figure count increased by 1",
      change(edit_docx, MS_02, "1a", bumped)),
     ("1b", "number, docx only", "01 title page: abstract word count increased by 1",
@@ -273,13 +288,97 @@ MUTATIONS: list[Mutation] = [
      lambda d: drop_italic(d / MS_02)),
 ]
 
+# The extension paper (manuscript/ext): 07 is the supplementary material and there are no data
+# files; labels and caveats are mutated as well as numbers.
+MUTATIONS_EXT: list[Mutation] = [
+    ("1a", "number, docx only", "02 Results: the pooled mean yield of 2021-2023 changed in its last digit",
+     change(edit_docx, MS_02, "1a", bumped)),
+    ("1b", "number, docx only", "01 title page: abstract word count increased by 1",
+     change(edit_docx, TITLE_01, "1b", bumped)),
+    ("2a", "number, markdown only", "manuscript_src.md Results: the scenario's added diagnoses increased by 1",
+     change(edit_text, cmn.MS_NAME, "2a", bumped)),
+    ("2b", "number, markdown only", "manuscript_src.md Abstract: the count of robustly above States increased by 1",
+     change(edit_text, cmn.MS_NAME, "2b", bumped)),
+    ("2c", "number, markdown only", "manuscript_src.md Box 1: a count of printed totals increased by 1",
+     change(edit_text, cmn.MS_NAME, "2c", bumped)),
+    ("3a", "author name, blinded docx", "02 Discussion text: the author's name inserted",
+     insert(edit_docx, MS_02, "3a", lambda d: f" ({author_name()})")),
+    ("3b", "author name, blinded docx", "02 document properties: author (dc:creator) set to the name",
+     lambda d: set_creator(d / MS_02, author_name())),
+    ("3c", "author e-mail, blinded docx", "07 note under Table S2: the author's e-mail inserted",
+     insert(edit_docx, SUP_07, "3c", lambda d: marker(lambda m: "@" in m, d) + " ", before=True)),
+    ("3d", "repository URL, blinded docx", "02 Methods: the blinding placeholder replaced by the URL",
+     lambda d: edit_docx(d / MS_02, "[repository link removed for blinded review]",
+                         marker(lambda m: m.startswith("http"), d))),
+    ("3e", "author name, blinded docx", "07 document properties: author (dc:creator) set to the name",
+     lambda d: set_creator(d / SUP_07, author_name())),
+    ("4a", "reference number, markdown", "manuscript_src.md Methods: a citation number increased by 1",
+     change(edit_text, cmn.MS_NAME, "4a", bumped)),
+    ("4b", "reference number, docx only", "02 Methods: a superscript citation number increased by 1",
+     lambda d: swap_superscript(d / MS_02, anchor(d, "4b"), bumped(anchor(d, "4b")))),
+    ("4c", "reference number, docx only", "02 References: entries 2 and 3 renumbered 3 and 2",
+     renumber_pair(MS_02, "4c")),
+    ("5a", "table cell, docx only", "02 Table 1: a sample size increased by 1",
+     change(edit_docx, MS_02, "5a", bumped)),
+    ("5b", "table cell, docx only", "07 Table S2: a posterior yield changed in its last digit",
+     change(edit_docx, SUP_07, "5b", bumped)),
+    ("5c", "table cell, markdown only", "tables.md Table 1: a sample size increased by 1",
+     change(edit_text, "exhibits/tables.md", "5c", bumped)),
+    ("6a", "sign, markdown", "manuscript_src.md Results: the sign of the unweighted rho reversed",
+     change(edit_text, cmn.MS_NAME, "6a", flipped)),
+    ("6b", "sign, docx only", "02 Results: the sign of the main theta reversed",
+     change(edit_docx, MS_02, "6b", flipped)),
+    ("6c", "sign, docx only", "07 Table S3: the sign of an interval limit of the decomposition reversed",
+     change(edit_docx, SUP_07, "6c", flipped)),
+    ("7a", "internal identifier, markdown", "manuscript_src.md Methods: '(RS Q1216)' inserted",
+     insert(edit_text, cmn.MS_NAME, "7a", lambda d: " (RS Q1216)")),
+    ("7b", "internal identifier, docx only", "02 Discussion: '(Task 7)' inserted",
+     insert(edit_docx, MS_02, "7b", lambda d: " (Task 7)")),
+    ("7c", "internal identifier, docx only", "07 note under Table S2: 'ITR2024' inserted",
+     insert(edit_docx, SUP_07, "7c", lambda d: "ITR2024 ", before=True)),
+    ("8a", "label, markdown", "manuscript_src.md Abstract: the elasticity's label 'supported' -> 'not established'",
+     swap(edit_text, cmn.MS_NAME, "8a")),
+    ("8b", "label, markdown", "manuscript_src.md Results: the correlation's label 'not established' -> 'supported'",
+     swap(edit_text, cmn.MS_NAME, "8b")),
+    ("8c", "label, docx only", "02 Discussion: the number of estimates meeting the criterion changed",
+     swap(edit_docx, MS_02, "8c")),
+    ("8d", "label, docx only", "02 Table 1: the elasticity's label 'Supported' -> 'Not established'",
+     swap(edit_docx, MS_02, "8d")),
+    ("9a", "caveat, markdown", "manuscript_src.md Results: '(post hoc)' removed from the robust-tier scenario",
+     swap(edit_text, cmn.MS_NAME, "9a")),
+    ("9b", "caveat, markdown", "manuscript_src.md Results: 'an illustration, not a forecast' removed",
+     swap(edit_text, cmn.MS_NAME, "9b")),
+    ("9c", "caveat, markdown", "manuscript_src.md Abstract: 'post hoc' removed from the between-year analysis",
+     swap(edit_text, cmn.MS_NAME, "9c")),
+    ("9d", "caveat, markdown", "manuscript_src.md Results: 'this was not tested ...' removed",
+     swap(edit_text, cmn.MS_NAME, "9d")),
+    ("9e", "caveat, markdown", "manuscript_src.md Figure 3 legend: 'not a forecast' removed",
+     swap(edit_text, cmn.MS_NAME, "9e")),
+    ("9f", "caveat, docx only", "02 Discussion: 'it is not a forecast' removed",
+     swap(edit_docx, MS_02, "9f")),
+    ("9g", "caveat, docx only", "07 Table S2 title: '(post hoc)' removed",
+     swap(edit_docx, SUP_07, "9g")),
+    ("10a", "AMA italics, docx only", "02 References: italics removed from the first journal title",
+     lambda d: drop_italic(d / MS_02)),
+]
+
+MUTATION_SETS: dict[str, list[Mutation]] = {"v1": MUTATIONS_V1, "ext": MUTATIONS_EXT}
+
 
 # --------------------------------------------------------------------------------------
 # Running the checks on a copy
 # --------------------------------------------------------------------------------------
 def copy_manuscript(src: Path, dst_root: Path) -> Path:
-    dst = dst_root / "manuscript"
-    shutil.copytree(src, dst, ignore=shutil.ignore_patterns("_render", "__pycache__", "*.png"))
+    """A copy of the folder under the same name (a folder without a "profile" key is told by its
+    name, v1_audit), without the render output and the exhibit images the checks do not read."""
+    dst = dst_root / src.name
+
+    def ignore(d: str, names: list[str]) -> set[str]:
+        out = {n for n in names if n in ("_render", "__pycache__") or n.endswith(".png")}
+        if Path(d).name == "exhibits":
+            out |= {n for n in names if n.endswith((".tif", ".pdf"))}
+        return out
+    shutil.copytree(src, dst, ignore=ignore)
     return dst
 
 
@@ -298,9 +397,12 @@ def tie_problems(ms_dir: Path) -> list[str]:
     return tie.problems(ms_dir, ROOT)
 
 
-def run_named(src: Path, mutations: list[Mutation] = MUTATIONS,
+def run_named(src: Path, mutations: list[Mutation] | None = None,
               checks: dict[str, Callable[[Path], list[str]]] | None = None) -> list[dict]:
-    """Apply each mutation to a fresh copy of `src`; return one result row per mutation."""
+    """Apply each mutation (default: the set of the folder's profile) to a fresh copy of `src`;
+    return one result row per mutation."""
+    if mutations is None:
+        mutations = MUTATION_SETS[cmn.profile_for(src)]
     checks = checks or {"check_manuscript_numbers": cmn_problems, "check_docx_tie": tie_problems}
     rows = []
     with tempfile.TemporaryDirectory() as td:
@@ -413,7 +515,7 @@ def main(argv: list[str] | None = None, root: Path = ROOT) -> int:
         bad += res in ("NOT APPLIED", "NOT CAUGHT")
         first = r["first"].replace("|", "/")[:110]
         print(f"| {r['id']} | {r['kind']} | {r['what']} | {res} | {first} |")
-    print(f"named mutations: {len(rows) - bad} of {len(rows)} caught")
+    print(f"named mutations [{cmn.profile_for(ms)}]: {len(rows) - bad} of {len(rows)} caught")
     if "--sweep" in argv:
         text = (ms / cmn.MS_NAME).read_text(encoding="utf-8")
         gold = json.loads((ms / cmn.SKELETON).read_text(encoding="utf-8"))["sections"]

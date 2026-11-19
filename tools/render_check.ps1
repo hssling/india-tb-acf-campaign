@@ -1,17 +1,17 @@
-# Adapted from hssling/india-state-tb-score (MIT), manuscript/render_check.ps1, commit 05bcaa7; modified: the Public Health submission file names; the folder is an argument
+# Adapted from hssling/india-state-tb-score (MIT), manuscript/render_check.ps1, commit 05bcaa7; modified: every .docx of the submission folder (either set's file names); the folder is an argument
 # Export the submission .docx files to PDF through Word (own instance) and report page and table counts.
-# Usage: powershell -NoProfile -File render_check.ps1 [<submission dir>]   (default: manuscript\submission)
+# Usage: powershell -NoProfile -File render_check.ps1 [<submission dir>]   (default: manuscript\ext\submission)
 # PDFs go to <submission dir>\_render, one line per file, then the pages each table spans.
-param([string]$Sub = (Join-Path (Split-Path $PSScriptRoot -Parent) "manuscript\submission"))
+param([string]$Sub = (Join-Path (Split-Path $PSScriptRoot -Parent) "manuscript\ext\submission"))
 $rd = Join-Path $Sub "_render"
 New-Item -ItemType Directory -Force $rd | Out-Null
 $word = New-Object -ComObject Word.Application
 $word.Visible = $false
 $word.DisplayAlerts = 0
 try {
-  foreach ($n in "01_title_page", "02_manuscript_anonymised", "05_supplementary_material",
-                 "06_cover_letter", "07_RECORD_checklist", "08_declaration_of_interests") {
-    $d = $word.Documents.Open("$Sub\$n.docx", $false, $true)
+  foreach ($f in (Get-ChildItem -Path $Sub -Filter "*.docx" | Sort-Object Name)) {
+    $n = $f.BaseName
+    $d = $word.Documents.Open($f.FullName, $false, $true)
     $d.Repaginate()
     $d.ExportAsFixedFormat("$rd\$n.pdf", 17)
     "$n pages=$($d.ComputeStatistics(2)) tables=$($d.Tables.Count)"

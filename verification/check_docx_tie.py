@@ -7,32 +7,48 @@ The manuscript folder is DIR (default manuscript/ext, the extension paper; the a
 v1.0.0 manuscript with --manuscript-dir manuscript/v1_audit; a relative DIR is taken from the
 repository root). The .docx files in <folder>/submission/ (built by tools/build_submission.py)
 are what the journal receives; the Markdown files in <folder>/ are what
-check_manuscript_numbers.py verifies. This check reads the .docx files with zipfile and ElementTree only and requires:
+check_manuscript_numbers.py verifies. The folder's profile (check_manuscript_numbers.profile_for)
+selects its submission set (LAYOUTS):
+
+  v1   01 title page, 02 anonymised manuscript, 03-04 Figures 1-2 (TIFF and PDF),
+       05 supplementary material (Tables S1-S4), 06 cover letter, 07 RECORD checklist,
+       08 declaration of interests, 09-10 supplementary data S1a and S1b (CSV), 11 both (XLSX)
+  ext  01 title page, 02 anonymised manuscript, 03-06 Figures 1-4 (TIFF and PDF),
+       07 supplementary material (Tables S1-S8), 08 cover letter, 09 RECORD checklist,
+       10 declaration of interests; no data files: every supplementary table is complete in 07
+       (check 5)
+
+This check reads the .docx files with zipfile and ElementTree only and requires:
 
 1. Text tie. Each file's units (paragraphs outside tables, and table rows as their cells
-   joined by " | ") equal, in order, the units of its Markdown source(s) (SPEC): headings,
-   paragraphs (lines joined), list items (bullet marker dropped; a numbered item such as a
-   reference keeps its number as text), table rows (separator rows dropped). Both sides are
-   normalised the same way: emphasis markers and escapes removed, a superscript written
-   ^...^ (a superscript run in Word; ^1^ or a modifier letter such as ᵃ in Markdown),
+   joined by " | ") equal, in order, the units of its Markdown source(s) (the layout's spec):
+   headings, paragraphs (lines joined), list items (bullet marker dropped; a numbered item
+   such as a reference keeps its number as text), table rows (separator rows dropped). Both
+   sides are normalised the same way: emphasis markers and escapes removed, a superscript
+   written ^...^ (a superscript run in Word; ^1^ or a modifier letter such as ᵃ in Markdown),
    no-break spaces and runs of whitespace collapsed, and the Zenodo DOI (placeholder
    XXXXXXX or the number filled in at release) read as one token. Only the few lines the
-   build adds (BUILDER) may be extra. A changed number, sign, table cell, reference number,
-   superscript or inserted word in either the .docx or the Markdown is a difference.
+   build adds (builder parts) may be extra. A changed number, sign, table cell, reference
+   number, superscript or inserted word in either the .docx or the Markdown is a difference.
+   Every file of the set is present, and no other file is in submission/.
 2. Blinding. No author marker (check_manuscript_numbers.author_markers: name, ORCID,
    institution, repository; plus the title page's e-mail, telephone and postcode) occurs
-   anywhere in 02 or 05 (every XML part, document properties included) or in the
-   figure files.
+   anywhere in 02 or the supplementary material (every XML part, document properties
+   included) or in the figure and data files.
 3. Internal identifiers (check_manuscript_numbers.BANNED) do not occur in 02 (before the
-   References) or 05.
+   References) or the supplementary material.
 4. Word's counts. <folder>/word_counts_word.json (Word's ComputeStatistics on 02, written by
    the build) belongs to the current manuscript_src.md, is within the limits (abstract 250,
-   main text 3,000), and the title page quotes it.
-5. Supplementary data S1a and S1b (09 and 10, CSV): one row per row of their Q2 output, the
+   main text 3,000), and the title page quotes it ("main text (Introduction to Discussion...)
+   N words; abstract N words").
+5. v1, supplementary data S1a and S1b (09 and 10, CSV): one row per row of their Q2 output, the
    verbatim columns equal to the output row by row, and the SHA-256 of each file equal to that
    of the file regenerated from outputs/ by exhibits/make_tables.py now; the XLSX (11, if
-   present and openpyxl is installed) holds the CSV text cell for cell. The data files are
-   checked for blinding too.
+   present and openpyxl is installed) holds the CSV text cell for cell.
+   ext, complete tables: every table of exhibits/tables.md has its CSV (table1.csv,
+   tables1.csv ... tables8.csv, written by exhibits/make_ext_tables.py from the outputs) and
+   the CSV's rows equal the Markdown table's rows cell for cell, so the supplementary material
+   (tied to tables.md by check 1) holds every row and no separate data file is needed.
 6. AMA: in 02, the journal title of each article reference (and nothing else in the list) is
    in italics.
 
@@ -50,6 +66,7 @@ import re
 import sys
 import zipfile
 from pathlib import Path
+from typing import NamedTuple
 from xml.etree import ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -62,34 +79,85 @@ W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
 SUP = {"ᵃ": "a", "ᵇ": "b", "ᶜ": "c", "ᵈ": "d", "ᵉ": "e", "ᶠ": "f"}
 DOI = re.compile(r"10\.5281/zenodo\.(?:\d+|X{3,})")
 LIMITS = {"abstract": 250, "main_text": 3000}
-BLINDED = ("02_manuscript_anonymised.docx", "05_supplementary_material.docx")
-FIGURES = ("03_figure1.tif", "03_figure1.pdf", "04_figure2.tif", "04_figure2.pdf")
+def make_spec(supplement: str, cover: str, record: str, declaration: str) -> dict[str, list[tuple]]:
+    """The text files of a submission set and their sources. Each file: a list of parts, in
+    order. ("md", file, start, end) takes the units of the Markdown file from the line that
+    starts with `start` up to the line that starts with `end` (None: the start or the end of the
+    file); ("builder", text) is a line the build adds; ("first", file, prefix) is the one unit of
+    the file starting with `prefix`."""
+    return {
+        "01_title_page.docx": [("md", "first_page_src.md", None, None)],
+        "02_manuscript_anonymised.docx": [
+            ("md", "manuscript_src.md", None, "## Figure legends"),
+            ("md", "exhibits/tables.md", "## Table 1.", "## Table S1."),
+            ("md", "manuscript_src.md", "## Figure legends", None),
+        ],
+        supplement: [
+            ("builder", "Supplementary material"),
+            ("first", "manuscript_src.md", "# "),
+            ("md", "exhibits/tables.md", "## Table S1.", None),
+        ],
+        cover: [("md", "cover_letter.md", "# Cover letter", None, "drop-first")],
+        record: [("md", "record_checklist.md", None, None)],
+        declaration: [
+            ("builder", "Declaration of interests"),
+            ("first", "first_page_src.md", "**Title:**"),
+            ("first", "first_page_src.md", "**Author:**"),
+            ("first", "first_page_src.md", "**Declarations of interest:**"),
+        ],
+    }
 
-# Each file: a list of parts, in order. ("md", file, start, end) takes the units of the
-# Markdown file from the line that starts with `start` up to the line that starts with `end`
-# (None: the start or the end of the file); ("builder", text) is a line the build adds;
-# ("first", file, prefix) is the one unit of the file starting with `prefix`.
-SPEC: dict[str, list[tuple]] = {
-    "01_title_page.docx": [("md", "first_page_src.md", None, None)],
-    "02_manuscript_anonymised.docx": [
-        ("md", "manuscript_src.md", None, "## Figure legends"),
-        ("md", "exhibits/tables.md", "## Table 1.", "## Table S1."),
-        ("md", "manuscript_src.md", "## Figure legends", None),
-    ],
-    "05_supplementary_material.docx": [
-        ("builder", "Supplementary material"),
-        ("first", "manuscript_src.md", "# "),
-        ("md", "exhibits/tables.md", "## Table S1.", None),
-    ],
-    "06_cover_letter.docx": [("md", "cover_letter.md", "# Cover letter", None, "drop-first")],
-    "07_RECORD_checklist.docx": [("md", "record_checklist.md", None, None)],
-    "08_declaration_of_interests.docx": [
-        ("builder", "Declaration of interests"),
-        ("first", "first_page_src.md", "**Title:**"),
-        ("first", "first_page_src.md", "**Author:**"),
-        ("first", "first_page_src.md", "**Declarations of interest:**"),
-    ],
+
+def figure_files(prefixes: list[str]) -> tuple[str, ...]:
+    """Figure k (from 1) as <prefix>_figure<k>.tif and .pdf."""
+    return tuple(f"{p}_figure{k}.{ext}" for k, p in enumerate(prefixes, 1) for ext in ("tif", "pdf"))
+
+
+class Layout(NamedTuple):
+    """One submission set: its text files and their sources (spec), the blinded files, the figure
+    files, the data files (file name, the output it copies, its XLSX sheet), the XLSX, and
+    whether each table of tables.md must be complete as its CSV (the set has no data files)."""
+    spec: dict[str, list[tuple]]
+    blinded: tuple[str, ...]
+    figures: tuple[str, ...]
+    data: list[tuple[str, str, str]]
+    xlsx: str | None
+    complete_tables: bool
+
+    def files(self) -> list[str]:
+        """Every file of the set, in file-number order."""
+        names = list(self.spec) + list(self.figures) + [n for n, _, _ in self.data]
+        return sorted(names + ([self.xlsx] if self.xlsx else []))
+
+    @property
+    def supplement(self) -> str:
+        return self.blinded[1]
+
+
+LAYOUTS: dict[str, Layout] = {
+    "v1": Layout(
+        make_spec("05_supplementary_material.docx", "06_cover_letter.docx", "07_RECORD_checklist.docx",
+                  "08_declaration_of_interests.docx"),
+        ("02_manuscript_anonymised.docx", "05_supplementary_material.docx"),
+        figure_files(["03", "04"]),
+        [("09_supplementary_data_S1a_registered.csv", "outputs/q2_discrepancies.csv", "S1a registered"),
+         ("10_supplementary_data_S1b_corrected.csv", "outputs/q2_discrepancies_corrected.csv", "S1b corrected")],
+        "11_supplementary_data_S1.xlsx",
+        False),
+    "ext": Layout(
+        make_spec("07_supplementary_material.docx", "08_cover_letter.docx", "09_RECORD_checklist.docx",
+                  "10_declaration_of_interests.docx"),
+        ("02_manuscript_anonymised.docx", "07_supplementary_material.docx"),
+        figure_files(["03", "04", "05", "06"]),
+        [],
+        None,
+        True),
 }
+
+
+def layout(ms_dir: Path) -> Layout:
+    """The submission set of a manuscript folder, by its profile."""
+    return LAYOUTS[cmn.profile_for(ms_dir)]
 
 
 # --------------------------------------------------------------------------------------
@@ -207,13 +275,13 @@ def docx_all_text(path: Path) -> str:
 
 
 # --------------------------------------------------------------------------------------
-# Expected units from the SPEC
+# Expected units from the layout's spec
 # --------------------------------------------------------------------------------------
 def expected(ms_dir: Path, name: str) -> tuple[list[str], set[str]]:
-    """(expected units, builder lines) of one submission file."""
+    """(expected units, builder lines) of one submission file of the folder's set."""
     out: list[str] = []
     builder: set[str] = set()
-    for part in SPEC[name]:
+    for part in layout(ms_dir).spec[name]:
         if part[0] == "builder":
             out.append(norm(part[1]))
             builder.add(norm(part[1]))
@@ -286,13 +354,8 @@ def identifier_problems(name: str, units: list[str]) -> list[str]:
 
 
 # --------------------------------------------------------------------------------------
-# Supplementary data S1a and S1b: confirmed against outputs/
+# v1: supplementary data S1a and S1b, confirmed against outputs/
 # --------------------------------------------------------------------------------------
-DATA = [("09_supplementary_data_S1a_registered.csv", "outputs/q2_discrepancies.csv", "S1a registered"),
-        ("10_supplementary_data_S1b_corrected.csv", "outputs/q2_discrepancies_corrected.csv", "S1b corrected")]
-XLSX = "11_supplementary_data_S1.xlsx"
-
-
 def make_tables():
     """exhibits/make_tables.py, which writes the data files from outputs/."""
     ex = str(ROOT / "exhibits")
@@ -302,14 +365,17 @@ def make_tables():
     return mt
 
 
-def data_problems(sub: Path, root: Path = ROOT) -> list[str]:
-    """Each data CSV has one row per row of its output, its verbatim columns equal the output's
-    row by row, and its SHA-256 equals that of the file regenerated from outputs/ now; the
-    XLSX (if present) holds the CSV text cell for cell."""
+def data_problems(sub: Path, root: Path = ROOT, lay: Layout = LAYOUTS["v1"]) -> list[str]:
+    """Each data CSV of the set has one row per row of its output, its verbatim columns equal
+    the output's row by row, and its SHA-256 equals that of the file regenerated from outputs/
+    now; the XLSX (if present) holds the CSV text cell for cell. Nothing for a set without data
+    files."""
+    if not lay.data:
+        return []
     mt = make_tables()
     out: list[str] = []
     csv_rows: dict[str, list[list[str]]] = {}
-    for name, output, sheet in DATA:
+    for name, output, sheet in lay.data:
         path = sub / name
         if not path.exists():
             out.append(f"MISSING: {name}")
@@ -333,8 +399,8 @@ def data_problems(sub: Path, root: Path = ROOT) -> list[str]:
         want = hashlib.sha256(mt.supplementary_data_bytes(output)).hexdigest()
         if hashlib.sha256(raw).hexdigest() != want:
             out.append(f"DATA {name}: SHA-256 differs from the file regenerated from {output}")
-    xl = sub / XLSX
-    if xl.exists():
+    xl = sub / lay.xlsx if lay.xlsx else None
+    if xl is not None and xl.exists():
         try:
             from openpyxl import load_workbook
         except ImportError:
@@ -342,14 +408,54 @@ def data_problems(sub: Path, root: Path = ROOT) -> list[str]:
         wb = load_workbook(xl, read_only=True)
         for sheet, rows in csv_rows.items():
             if sheet not in wb.sheetnames:
-                out.append(f"DATA {XLSX}: no sheet {sheet!r}")
+                out.append(f"DATA {lay.xlsx}: no sheet {sheet!r}")
                 continue
             got = [["" if v is None else str(v) for v in r] for r in wb[sheet].iter_rows(values_only=True)]
             got = [r + [""] * (len(rows[0]) - len(r)) for r in got]
             if got != rows:
                 k = next((i for i, (a, b) in enumerate(zip(got, rows)) if a != b), min(len(got), len(rows)))
-                out.append(f"DATA {XLSX} sheet {sheet!r}: differs from the CSV at row {k + 1}")
+                out.append(f"DATA {lay.xlsx} sheet {sheet!r}: differs from the CSV at row {k + 1}")
         wb.close()
+    return out
+
+
+# --------------------------------------------------------------------------------------
+# ext: every table of tables.md is complete (its CSV, row for row), so no data file is needed
+# --------------------------------------------------------------------------------------
+TABLE_HEAD = re.compile(r"(?m)^## Table (S?)(\d+)\. ")
+
+
+def table_csv_name(supp: str, k: str) -> str:
+    """exhibits/make_ext_tables.py writes Table 1 as table1.csv and Table Sk as tablesk.csv."""
+    return f"table{supp.lower()}{k}.csv"
+
+
+def complete_table_problems(ms_dir: Path) -> list[str]:
+    """Each '## Table ...' section of exhibits/tables.md has its CSV in exhibits/, and the CSV's
+    rows (header included) equal the section's Markdown table rows, normalised as in the tie.
+    The supplementary material is tied to tables.md, so it then holds every row of each table."""
+    ex = ms_dir / "exhibits"
+    text = (ex / "tables.md").read_text(encoding="utf-8")
+    heads = list(TABLE_HEAD.finditer(text))
+    if not heads:
+        return ["TABLES: exhibits/tables.md has no '## Table' section"]
+    out = []
+    for i, m in enumerate(heads):
+        label = f"Table {m.group(1)}{m.group(2)}"
+        body = text[m.end():heads[i + 1].start() if i + 1 < len(heads) else len(text)]
+        md_rows = md_units("\n".join(ln for ln in body.splitlines() if ln.strip().startswith("|")))
+        name = table_csv_name(m.group(1), m.group(2))
+        path = ex / name
+        if not path.exists():
+            out.append(f"TABLES: {label} has no {name} in exhibits/")
+            continue
+        with open(path, newline="", encoding="utf-8") as f:
+            csv_rows = [row_unit(norm(c) for c in r) for r in csv.reader(f)]
+        if csv_rows != md_rows:
+            k = next((j for j, (a, b) in enumerate(zip(csv_rows, md_rows)) if a != b),
+                     min(len(csv_rows), len(md_rows)))
+            out.append(f"TABLES: {name} ({len(csv_rows)} rows) differs from {label} in tables.md "
+                       f"({len(md_rows)} rows) at row {k + 1}")
     return out
 
 
@@ -399,6 +505,8 @@ def italics_problems(path: Path, ms_text: str) -> list[str]:
 
 
 def word_count_problems(ms_dir: Path, title_units: list[str]) -> list[str]:
+    """Word's counts are current and within the limits, and the title page quotes them: "main
+    text (Introduction to Discussion[, what else is counted]) N words" and "abstract N words"."""
     p = ms_dir / "word_counts_word.json"
     if not p.exists():
         return ["WORDS: word_counts_word.json missing (build with Word: "
@@ -412,9 +520,10 @@ def word_count_problems(ms_dir: Path, title_units: list[str]) -> list[str]:
         if w[k] > lim:
             out.append(f"WORDS: Word counts {w[k]} words in the {k}, over the limit of {lim}")
     flat = " ".join(title_units)
-    for want in (f"main text (Introduction to Discussion) {w['main_text']:,} words",
-                 f"abstract {w['abstract']} words"):
-        if want not in flat:
+    for want, pat in ((f"main text (Introduction to Discussion...) {w['main_text']:,} words",
+                       r"main text \(Introduction to Discussion[^)]*\) " + re.escape(f"{w['main_text']:,}") + r" words\b"),
+                      (f"abstract {w['abstract']} words", r"\babstract " + re.escape(str(w["abstract"])) + r" words\b")):
+        if not re.search(pat, flat):
             out.append(f"WORDS: the title page does not quote Word's count {want!r}")
     return out
 
@@ -425,10 +534,14 @@ def word_count_problems(ms_dir: Path, title_units: list[str]) -> list[str]:
 def problems(ms_dir: Path | None = None, root: Path = ROOT) -> list[str]:
     ms_dir = ms_dir or root / cmn.DEFAULT_MS_DIR
     sub = ms_dir / "submission"
+    lay = layout(ms_dir)
     out: list[str] = []
     marks = markers(ms_dir, root)
     units_of: dict[str, list[str]] = {}
-    for name in SPEC:
+    known = set(lay.files())
+    out += [f"EXTRA: {p.name} is not part of the {cmn.profile_for(ms_dir)} submission set"
+            for p in sorted(sub.iterdir()) if p.is_file() and p.name not in known]
+    for name in lay.spec:
         path = sub / name
         if not path.exists():
             out.append(f"MISSING: {name}")
@@ -437,10 +550,10 @@ def problems(ms_dir: Path | None = None, root: Path = ROOT) -> list[str]:
         units_of[name] = got
         want, builder = expected(ms_dir, name)
         out += compare(name, got, want)
-        if name in BLINDED:
+        if name in lay.blinded:
             out += blinding_problems(name, docx_all_text(path), marks)
             out += identifier_problems(name, got)
-    for name in FIGURES:
+    for name in lay.figures:
         path = sub / name
         if not path.exists():
             out.append(f"MISSING: {name}")
@@ -449,8 +562,10 @@ def problems(ms_dir: Path | None = None, root: Path = ROOT) -> list[str]:
     if "02_manuscript_anonymised.docx" in units_of:
         out += italics_problems(sub / "02_manuscript_anonymised.docx",
                                 (ms_dir / "manuscript_src.md").read_text(encoding="utf-8"))
-    out += data_problems(sub, root)
-    for name in [n for n, _, _ in DATA] + [XLSX]:
+    out += data_problems(sub, root, lay)
+    if lay.complete_tables:
+        out += complete_table_problems(ms_dir)
+    for name in [n for n, _, _ in lay.data] + ([lay.xlsx] if lay.xlsx else []):
         path = sub / name
         if path.exists():
             hay = docx_all_text(path) if name.endswith(".xlsx") else path.read_text(encoding="utf-8")
@@ -485,11 +600,16 @@ def main(root: Path = ROOT, argv: list[str] | None = None) -> int:
         print(ln)
     for ln in notes(ms_dir):
         print(ln)
-    n_units = sum(len(docx_units(ms_dir / "submission" / n)) for n in SPEC
+    lay = layout(ms_dir)
+    n_units = sum(len(docx_units(ms_dir / "submission" / n)) for n in lay.spec
                   if (ms_dir / "submission" / n).exists())
-    print(f"docx tie: {len(SPEC)} files, {n_units} paragraphs and table rows tied to the Markdown; "
-          f"blinding of 02, 05, the figures and the data; supplementary data S1a and S1b against "
-          f"outputs/; journal titles in italics; {len(found)} problem(s)")
+    blinded = ", ".join(n[:2] for n in lay.blinded)
+    data = ("supplementary data S1a and S1b against outputs/" if lay.data else
+            "every table of tables.md complete as its CSV (no data files)")
+    print(f"docx tie [{cmn.profile_for(ms_dir)}]: {len(lay.files())} files; {len(lay.spec)} .docx, "
+          f"{n_units} paragraphs and table rows tied to the Markdown; blinding of {blinded}, the "
+          f"figures{' and the data' if lay.data else ''}; {data}; journal titles in italics; "
+          f"{len(found)} problem(s)")
     return 1 if found else 0
 
 

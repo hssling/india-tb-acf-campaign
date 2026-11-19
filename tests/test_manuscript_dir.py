@@ -128,6 +128,18 @@ def test_build_submission_paths_follow_the_folder(tmp_path):
     assert bs.DEFAULT_MS_DIR == "manuscript/ext" and bs.MS == ROOT / "manuscript" / "ext"
 
 
+def test_build_submission_set_follows_the_profile(tmp_path):
+    bs = pytest.importorskip("tools.build_submission")
+    try:
+        bs.configure(tmp_path / "v1_audit")
+        assert bs.LAY is bs.LAYOUTS["v1"] and bs.LAY.figures == ("03", "04") and bs.LAY.data
+        bs.configure(tmp_path / "ext")
+        assert bs.LAY is bs.LAYOUTS["ext"] and bs.LAY.figures == ("03", "04", "05", "06")
+        assert bs.LAY.supplement == "07_supplementary_material.docx" and not bs.LAY.data
+    finally:
+        bs.configure(ROOT / bs.DEFAULT_MS_DIR)
+
+
 # ------------------------------------------------------------------ check_all and the v1 builders
 
 def test_check_all_runs_the_manuscript_steps_on_ext():
