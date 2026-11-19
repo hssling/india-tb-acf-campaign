@@ -771,6 +771,7 @@ def catalogue_ext(root: Path) -> dict[str, tuple[str, str]]:
     put("sc.share", f"{100 * float(r['share']):g}%", f + ", share")
     put("sc.gainers", count(r["n_gainers"]), f + ", n_gainers")
     put("sc.losers", count(r["n_losers"]), f + ", n_losers")
+    put("sc.n_states", count(int(r["n_gainers"]) + int(r["n_losers"])), f + ", n_gainers + n_losers")
     put("sc.r_gain", pct(r["r_gain"]), f + ", r_gain")
     put("sc.delta", count(round(float(r["delta"]))), f + ", delta")
     put("sc.ci", rng(count(round(float(r["ci_lo"]))), count(round(float(r["ci_hi"])))), f + ", ci_lo/hi")
@@ -817,6 +818,11 @@ def catalogue_ext(root: Path) -> dict[str, tuple[str, str]]:
     n3 = sum(int(summary_metric(root, f"Q1 check 3 total equals the sum of its parts: {k}", "registered"))
              for k in ("pass", "fail", "n/a"))
     put("box.totals_n", count(n3), s + "Q1 check 3 pass+fail+n/a (registered)")
+    put("box.cascade_reg_pass", count(summary_metric(root, "Q1 check 1 cascade does not grow: pass", "registered")),
+        s + "Q1 check 1 pass (registered)")
+    put("box.cascade_reg_n", count(sum(int(summary_metric(root, f"Q1 check 1 cascade does not grow: {k}", "registered"))
+                                   for k in ("pass", "fail", "n/a"))),
+        s + "Q1 check 1 pass+fail+n/a (registered)")
     put("box.cascade_pass", count(summary_metric(root, "Q1 check 1 cascade does not grow: pass", "corrected")),
         s + "Q1 check 1 pass (corrected)")
     for st in ("corrected", "registered"):

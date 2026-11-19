@@ -469,7 +469,8 @@ def supp_targeting(tr: Trace, fn: Notes):
                          ("Illustrative reallocation of screening from below-tier to above-tier States", hC, rC),
                          ("The reallocation by State", hD, rD)])
     notes = ["Observational State-level associations. Campaign districts were not concentrated in States of higher "
-             "prior yield; this is consistent with selection on the published criteria (burden, vulnerability, mortality) "
+             "prior yield; this is consistent with selection on the published criteria (TB death rate, presumptive TB "
+             "examination rate, incidence and prevalence, with districts added by States for local vulnerability) "
              "rather than on yield, which is not tested, and it is not read as a targeting failure."]
     return header, rows, notes + fn.lettered()
 

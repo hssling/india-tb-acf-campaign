@@ -143,6 +143,8 @@ def test_catalogue_matches_the_printed_exhibits():
     assert cat["hl.grids"] == "24 entries for ε and ρ, 16 for θ"
     assert cat["box.cor.c4"] == "103" and cat["box.cor.pairs"] == "722"
     assert cat["box.reg.c4"] == "348" and cat["box.reg.pairs"] == "1,405"
+    assert cat["box.cascade_reg_pass"] == "805" and cat["box.cascade_reg_n"] == "810"
+    assert cat["box.cascade_pass"] == "776" and cat["sc.n_states"] == "29"
     assert cat["date.registration_ext"] == "19 November 2026" and cat["reg_ext.time"] == "16:21 UTC"
 
 
