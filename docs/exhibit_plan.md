@@ -14,6 +14,16 @@ Built by `exhibits/make_tables.py` and `exhibits/make_figures.py` from `outputs/
 
 The Q4 estimates themselves (gamma1 with intervals) go in the text and Table S1; the figure carries no numbers.
 
+## Figure 1 selection rule
+
+- Population: national (India) claims of people screened and of TB cases (diagnosed or notified), from `data/figures_inventory.csv`, dated on or after 7 December 2024.
+- Linkage to the campaign: at least one of three tests: a stated window start of 7 December 2024; scope phase 1 or expanded campaign; a window label among "100-day campaign", "campaign to date", "since december 2024", "first 30 days".
+- Claim date: `pub_date`, else `window_end`, else `as_on`.
+- De-duplication: a claim repeated with the same document, quantity, value, qualifier, definition class and date is plotted once.
+- Excluded: interval claims that start after 7 December 2024 (for example 24 March to 4 July 2026) and claims not tied to the campaign by the three tests.
+- Marker: shape by the definition printed with the figure (notified, diagnosed, not stated); hollow when the qualifier is not exact.
+- Figure 2, panel A: the y-axis is clipped to -0.15 to 0.35; the one unit above the edge is marked with an arrow and named in the figure notes; the fit is on all units.
+
 ## Supplement
 
 | Item | Content |

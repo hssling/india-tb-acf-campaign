@@ -49,7 +49,13 @@ def f_dec(d: int):
     return fmt
 
 
-FORMATTERS = {"int": f_int, "dec0": f_dec(0), "dec1": f_dec(1), "dec2": f_dec(2), "dec3": f_dec(3), "raw": lambda s: s}
+def f_printed(raw: str) -> str:
+    """A figure as printed: a plain number (digits, spaces or commas) gets thousands separators; else as is."""
+    t = raw.replace(" ", "").replace(",", "")
+    return f"{int(t):,}" if t.isdigit() else raw
+
+
+FORMATTERS = {"printed": f_printed, "int": f_int, "dec0": f_dec(0), "dec1": f_dec(1), "dec2": f_dec(2), "dec3": f_dec(3), "raw": lambda s: s}
 
 
 class Trace:
@@ -159,7 +165,7 @@ def table2(tr: Trace):
             out.append(tr.value(Q2S, s, i, "corrected", "int"))
         return [out[0], out[2], out[1], out[3]]  # reg all, reg pre, corr all, corr pre
 
-    rows.append(["Entry pairs compared"] + cells("Q2 entry pairs (all)", "Q2 entry pairs (pre-specified)"))
+    rows.append(["Entry pairs comparedᵃ"] + cells("Q2 entry pairs (all)", "Q2 entry pairs (pre-specified)"))
     rows.append(["Agree"] + cells("Q2 all: agree", "Q2 pre-specified: agree"))
     lab = {r["class"]: r["class_label"] for r in read("outputs/q2_discrepancies_corrected.csv") if r["class"]}
     for k in CLASS_KEYS:
@@ -177,8 +183,10 @@ def table2(tr: Trace):
     for i, r in enumerate(d):
         if r["class"] in ("1", "2"):
             rowsB.append([r["class"], f"{r['quantity']}, {r['geography']}, {r['scope']}",
-                          tr.value(f, d, i, "a_value_printed", "raw"), tr.value(f, d, i, "b_value_printed", "raw"),
+                          tr.value(f, d, i, "a_value_printed", "printed"), tr.value(f, d, i, "b_value_printed", "printed"),
                           r["evidence"].split(" (source:")[0].split(" | ")[0][:160].replace("|", ";")])
+    notesA.append(f"{SUP[1]} Both class 1 rows pair national India TB Report 2024 screened figures (20.5 crore; 205,331,541) with the PGPH 2025 total (581,633) for 30 sampled districts, January–September 2023. The class reflects a failed sum check within the PGPH total (parts 579,073; difference −2,560), not a difference in national totals; the scope difference is not tested in this class.")
+    rowsB = [[(c + SUP[1] if j == 0 and r[0] == "1" else c) for j, c in enumerate(r)] for r in rowsB]
     return header, rows, notesA, headerB, rowsB
 
 
@@ -192,7 +200,7 @@ Q3 = "outputs/q3_yield.csv"
 def table3(tr: Trace):
     s = read(Q3S)
     full = read(Q3)
-    header = ["Data year", "Source table", "Screened (n)", "Diagnosed (n)", "Yield per 100,000 screened (95% CI)", "Number needed to screen (95% CI)"]
+    header = ["Data year", "Source table", "Screened (n)", "Diagnosed (n)", "Yield per 100,000 screened (95% CI)" + SUP[2], "Number needed to screen (95% CI)" + SUP[2]]
     years = sorted({r["year"] for r in full})
     rows, notes = [], []
     for y in years:
@@ -202,7 +210,8 @@ def table3(tr: Trace):
             rows.append([y, "No table published", "", "", "", ""])
             continue
         iy, inn = i_y[0], i_n[0]
-        rows.append([y, s[iy]["chosen_source"], tr.value(Q3S, s, iy, "denominator", "int"),
+        mark = SUP[0] if y == "2022" else (SUP[1] if y == "2021" else "")
+        rows.append([y, s[iy]["chosen_source"] + mark, tr.value(Q3S, s, iy, "denominator", "int"),
                      tr.value(Q3S, s, iy, "numerator", "int"),
                      tr.interval(Q3S, s, iy, "value", "lower", "upper", "dec1"),
                      tr.interval(Q3S, s, inn, "value", "lower", "upper", "dec1")])
@@ -232,7 +241,7 @@ def supp_q4(tr: Trace):
             e = tr.interval(Q4, s, i, "exp_0_1_gamma1", "exp_0_1_gamma1_model_lo", "exp_0_1_gamma1_model_hi", "dec3")
             rows.append([r["analysis"], r["denominator_set"], r["status"], tr.value(Q4, s, i, "n", "int"), g, bs, e, r["label"]])
         else:
-            rows.append([r["analysis"], r["denominator_set"], r["status"][:120], r["n"], "", "", "", ""])
+            rows.append([r["analysis"], r["denominator_set"], r["status"], r["n"], "", "", "", ""])
     return header, rows, ["Denominator R is the registered district count; D is the count reconstructed from official notices (deviation, analysis plan section 13). No P values are reported."]
 
 
@@ -265,7 +274,7 @@ def supp_q2_full(tr: Trace, f: str):
     for i, r in enumerate(d):
         if r["class"]:
             rows.append([r["quantity"], r["geography"], r["scope"], r["class"], r["analysis"],
-                         tr.value(f, d, i, "a_value_printed", "raw"), tr.value(f, d, i, "b_value_printed", "raw"),
+                         tr.value(f, d, i, "a_value_printed", "printed"), tr.value(f, d, i, "b_value_printed", "printed"),
                          Path(r["a_source"]).name, Path(r["b_source"]).name])
     return header, rows, []
 
