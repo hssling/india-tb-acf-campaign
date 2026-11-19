@@ -1,0 +1,52 @@
+denominator_set,omitted_unit,n,gamma1,change_from_full,status
+R,Andaman and Nicobar Islands,15,0.054930,0.000100,fitted
+R,Bihar,15,0.054617,-0.000213,fitted
+R,Chandigarh,15,0.063313,0.008483,fitted
+R,Dadra and Nagar Haveli and Daman and Diu,15,0.054569,-0.000261,fitted
+R,Himachal Pradesh,15,0.059440,0.004610,fitted
+R,Jharkhand,15,0.061800,0.006970,fitted
+R,Kerala,15,0.070337,0.015507,fitted
+R,Lakshadweep,15,0.054898,0.000068,fitted
+R,Manipur,15,0.054631,-0.000199,fitted
+R,Meghalaya,15,0.054191,-0.000639,fitted
+R,Mizoram,15,0.054633,-0.000197,fitted
+R,Puducherry,15,0.056036,0.001206,fitted
+R,Sikkim,15,0.054884,0.000054,fitted
+R,Tripura,15,0.055346,0.000516,fitted
+R,Uttar Pradesh,15,0.033056,-0.021775,fitted
+R,West Bengal,15,-0.015111,-0.069942,fitted
+D,Andaman and Nicobar Islands,34,0.042251,0.000035,fitted
+D,Andhra Pradesh,34,0.042170,-0.000046,fitted
+D,Arunachal Pradesh,34,0.041851,-0.000366,fitted
+D,Assam,34,0.042092,-0.000125,fitted
+D,Bihar,34,0.042653,0.000436,fitted
+D,Chandigarh,34,0.043479,0.001262,fitted
+D,Chhattisgarh,34,0.041426,-0.000791,fitted
+D,Dadra and Nagar Haveli and Daman and Diu,34,0.042385,0.000168,fitted
+D,Delhi,34,0.018548,-0.023668,fitted
+D,Goa,34,0.042584,0.000367,fitted
+D,Gujarat,34,0.042253,0.000036,fitted
+D,Haryana,34,0.042204,-0.000013,fitted
+D,Himachal Pradesh,34,0.042710,0.000493,fitted
+D,Jammu and Kashmir (incl. Ladakh),34,0.042197,-0.000019,fitted
+D,Jharkhand,34,0.045774,0.003557,fitted
+D,Karnataka,34,0.045315,0.003099,fitted
+D,Kerala,34,0.043894,0.001678,fitted
+D,Lakshadweep,34,0.042240,0.000024,fitted
+D,Madhya Pradesh,34,0.041821,-0.000395,fitted
+D,Maharashtra,34,0.073261,0.031045,fitted
+D,Manipur,34,0.042257,0.000041,fitted
+D,Meghalaya,34,0.042246,0.000030,fitted
+D,Mizoram,34,0.042270,0.000054,fitted
+D,Nagaland,34,0.042546,0.000329,fitted
+D,Odisha,34,0.043694,0.001477,fitted
+D,Puducherry,34,0.042294,0.000077,fitted
+D,Punjab,34,0.038223,-0.003994,fitted
+D,Rajasthan,34,0.035846,-0.006370,fitted
+D,Sikkim,34,0.042185,-0.000031,fitted
+D,Tamil Nadu,34,0.039496,-0.002721,fitted
+D,Telangana,34,0.045579,0.003362,fitted
+D,Tripura,34,0.042261,0.000044,fitted
+D,Uttar Pradesh,34,0.039857,-0.002359,fitted
+D,Uttarakhand,34,0.043133,0.000916,fitted
+D,West Bengal,34,0.035247,-0.006970,fitted

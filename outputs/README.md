@@ -171,3 +171,98 @@ data/source_choices.csv (Q3T-2018 to Q3T-2023, Q3T-2021-GHA, and the addenda Q3T
 Q3T-NOTAB). The 2021 GHA yield is reported in q3_yield.csv only: it covers the first ACF cycle,
 the ITR2022 table the year.
 
+## Q4: dose-response (analysis plan §9-§10)
+
+Written by `python -I src/q4_dose_response.py --q4`. The guard (§9.5.2) passed (data/source_choices.csv
+OUT-08, GRD-01 to GRD-06), so the full-year contrast (RS Q1216, 2025 against 2024) is primary and the
+trend uses the primary sources: 2019 ITR2020, 2022 ITR2023, 2023 and 2024 RS Q1216.
+
+**Two denominators.** Every analysis is run under both district denominators:
+
+- `R` (registered): `data/extracted/exposure_share.csv`, the LGD count under §9.3 as written. 16 units
+  are computable.
+- `D` (deviation): `data/extracted/exposure_share_reconstructed.csv`, the count reconstructed from
+  official notices (§13, 19 November 2026). 35 units are computable. The paper presents this as the
+  main Q4 analysis and labels it a deviation.
+
+No State is flagged under E5 in either set. The capped States are Chandigarh and Kerala under `R`, and
+Chandigarh, Delhi, Goa, Karnataka and Kerala under `D`.
+
+**Method.**
+
+- **Excess change.** x = ln(b/a) − β. β is the OLS slope of ln N on calendar year over the trend points.
+- **Model.** WLS of x on the exposure share E, with weights w = 1/(1/a + 1/b).
+- **Model interval.** γ1 ± t × SE(γ1), with s² = Σ w r²/(n − 2). t is the 0.975 quantile of Student's t
+  with n − 2 degrees of freedom, computed by numerical inversion.
+- **γ0 interval.** γ0 carries a model interval using SE(γ0) = √(s² (1/Σw + Ē_w²/Σw(E − Ē_w)²)), so that
+  every estimate has an interval (§12).
+- **Bootstrap.** 10,000 draws. The States are sorted by coarsened name, and the generator is
+  `random.Random(20261118)`, reset before each analysis. The interval is the first and last cut of
+  `statistics.quantiles(draws, n=40, method="inclusive")`.
+- **No P values.**
+
+### q4_summary.csv
+
+One row per analysis × denominator set (`R`, `D`).
+
+**Analyses:**
+
+- `primary`;
+- `S1 unweighted`;
+- `S2 leave one out`: the min, max and most influential omission; per-omission values are in
+  `q4_s2_leave_one_out.csv`;
+- `S3 trend 2022-2024`;
+- `S4 trend 2019, 2022, 2023`;
+- `S5 States only`;
+- `S6a flagged excluded`: reported as empty, because no State is flagged;
+- `S6b capped excluded`;
+- `S7 population share`: not run, with the reason;
+- `S8 January-October`;
+- `S8(a) x0.98` and `S8(a) x0.95`: 2025 January–October counts scaled, weights fixed. `gamma1_invariant`
+  confirms that γ1 equals the S8 γ1;
+- `S8(b) with ln r`;
+- `S8(b) without ln r (same States)`;
+- `placebo`.
+
+**Columns:**
+
+| Column | Content |
+|---|---|
+| status | `fitted`, or why there is no fit (descriptive only, §10.7; not run; not computable; empty) |
+| n | States in the fit (for S2, n − 1 per refit) |
+| units_excluded_by_rule | The units S5, S6a/S6b or S8(b) leave out |
+| gamma0, gamma0_model_lo/hi | Intercept, with its model interval |
+| gamma1, se_gamma1, t_df, t_0975, gamma1_model_lo/hi | γ1, its SE, the t quantile and the model 95% interval |
+| gamma1_boot_lo/hi, boot_draws_valid, boot_draws_degenerate | The bootstrap 95% interval and its draw counts |
+| exp_gamma1, exp_0_1_gamma1 (and _model_lo/hi) | exp(γ1) and exp(0.1 γ1), with the model interval transformed |
+| gamma2_ln_r, gamma2_model_lo/hi | S8(b) only |
+| loo_* | S2 only |
+| exposure_sd, exposure_min, exposure_max, exposure_mean_weighted, exposure_mean_unweighted | The spread of exposure in the fitted sample (sample SD) |
+| label | The §10.8 rule. For γ1: positive or negative only if both intervals lie wholly on one side of 0, otherwise no clear association. For the placebo: whether its model interval excludes 0 |
+| label_note | On the primary row: the placebo consequence of §10.8, if its model interval excludes 0 |
+| note | Trend sources, scaling factor, placebo sources |
+
+S8(b) is not computable under either denominator. The 2023 count in LS Q261 equals the India TB Report
+2024 count in every State, so r = 1 and ln r = 0 everywhere, and ln r is collinear with the intercept
+(§10.5). The `without ln r` row is therefore the S8 fit.
+
+### q4_states.csv
+
+One row per denominator set × contrast × unit. The contrasts are `full-year 2025 vs 2024`,
+`January-October 2025 vs 2024` and `placebo 2023 vs 2022`.
+
+| Column | Content |
+|---|---|
+| a, b | The two window counts (placebo: N2022 and N2023) |
+| y, y_poisson_lo/hi | y = ln(b/a), with its Poisson 95% interval y ± z√(1/a + 1/b) (§10.7) |
+| trend_points_used, n2019, n2022, n2023, n2024 | The trend points (placebo: 2019 and 2022, two-point benchmark) |
+| beta, x, E, w | The trend slope, the excess change, the exposure share and the weight |
+| capped, flagged_e5, union_territory | Exposure flags and the S5 set |
+| q261_2023, itr2024_2023, ln_r | The S8(b) lag proxy (January–October rows) |
+| computable, reason | Whether the unit enters the fit, and if not, why (§10.4) |
+
+### q4_s2_leave_one_out.csv
+
+One row per denominator set × omitted unit, giving n, γ1, the change from the full-sample γ1, and the
+status.
+

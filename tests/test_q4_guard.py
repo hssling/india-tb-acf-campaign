@@ -77,3 +77,33 @@ def test_q4_module_imports_without_pdf_libraries():
                        cwd=Path(__file__).resolve().parents[1],
                        capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
+
+
+def test_guard_boundary_values():
+    # a 2023 median of 1.06 fails
+    assert q4.guard(*_tables(1.06, 1.00), True, True)[0] == "fail"
+    # 0.95 and 1.05 pass (the 2023 bounds are closed; 2024 at 0.95 is not below 0.95)
+    assert q4.guard(*_tables(0.95, 1.00), True, True)[0] == "pass"
+    assert q4.guard(*_tables(1.05, 1.00), True, True)[0] == "pass"
+    assert q4.guard(*_tables(1.00, 0.95), True, True)[0] == "pass"
+    # 0.949 fails, in either year
+    assert q4.guard(*_tables(0.949, 1.00), True, True)[0] == "fail"
+    assert q4.guard(*_tables(1.00, 0.949), True, True)[0] == "fail"
+
+
+def test_guard_runs_with_exactly_ten_states():
+    assert q4.guard(*_tables(1.00, 1.00, n=10), True, True)[0] == "pass"
+    assert q4.guard(*_tables(1.00, 1.00, n=9), True, True)[0] == "not_run"
+
+
+def test_guard_zero_q3467_count_has_its_own_note():
+    q1216, q3467 = _tables(1.00, 1.00)
+    q3467[2023]["State 00"] = 0
+    del q3467[2024]["State 01"]
+    rows = {(r["year"], r["unit"]): r for r in q4.guard_rows(q1216, q3467)}
+    zero = rows[(2023, "State 00")]
+    assert zero["in_guard"] == "no" and zero["ratio"] == ""
+    assert zero["note"] == q4.ZERO_NOTE and "missing" not in zero["note"]
+    assert rows[(2024, "State 01")]["note"] == q4.MISSING_NOTE
+    assert rows[(2023, "State 01")]["note"] == ""
+    assert rows[(2023, "State 01")]["in_guard"] == "yes"
