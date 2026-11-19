@@ -287,3 +287,5 @@ These use the main specification, with point estimates only and no bootstrap. Th
 The registration point (commit and UTC time of the public push) is recorded in `docs/registration_event_ext.json`. The text above this section is frozen at that commit. Later changes are logged below as dated entries, appended only. Anything exploratory is labelled as such in code and output.
 
 **19 November 2026.** None.
+
+**Registration point.** Registered by the public push of commit 6a98549 on 19 November 2026 at 16:21:19 UTC (GitHub API); no extension estimate, module or output existed at that commit.

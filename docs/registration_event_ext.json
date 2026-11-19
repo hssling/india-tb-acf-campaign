@@ -1,0 +1,9 @@
+{
+  "repository": "https://github.com/hssling/india-tb-acf-campaign",
+  "registered_document": "docs/extension_plan.md",
+  "registered_commit": "6a98549f8e51a11d5f48a60626993d4e9242d329",
+  "pushed_at": "2026-11-19T16:21:19Z",
+  "source_of_timestamp": "GitHub REST API, GET /repos/hssling/india-tb-acf-campaign (pushed_at)",
+  "extension_estimates_computed_before": false,
+  "note": "No src/ext/ module or outputs/ext/ file existed at the registration commit."
+}
