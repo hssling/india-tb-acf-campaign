@@ -822,3 +822,5 @@ Deviations from this plan are logged here, each with its date. Anything explorat
 **19 November 2026 (after registration; clarification of the guard-order entry above, added at commit 11cfbe4).** The guard result was recorded as a dated addendum (OUT-08, GRD-01..06) after source-choice freeze commit dbb71b3, whereas §9.5.2 had placed it before the freeze. No other Q computation existed at either commit.
 
 **19 November 2026 (after registration; factual).** Part D (19 November 2026): include = yes web pages were read online and entered in the inventory after the source-choice freeze commit and before any Q1–Q3 computation; they are recorded as a dated addendum to data/source_choices.csv.
+
+**19 November 2026 (after registration; factual).** Part E (19 November 2026): five further include = yes parliamentary answers supplied by the author (RS Q278, Q279, Q2051 of 2025; RS Q414 of 2024; LS Q79 of 2025) were entered in the inventory as a dated addendum after the source-choice freeze and before any Q1–Q3 computation; the MHA prison advisory of 8 January 2025 could not be obtained (official URL removed).

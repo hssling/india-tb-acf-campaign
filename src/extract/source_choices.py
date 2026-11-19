@@ -147,11 +147,19 @@ def _slug(s: str) -> str:
 
 # ================================================================== labels
 
-def labels_() -> list[dict]:
+def _part_e_files() -> frozenset[str]:
+    """Source files of the Part E addendum (PQE-*); kept out of the frozen sections."""
+    from src.extract import pq_more as E
+    return E.OWN_FILES | {"data_raw/pq/ (Part E)"}
+
+
+def _label_resolutions(include) -> dict[tuple[str, str], tuple[str, str, str]]:
     seen: dict[tuple[str, str], tuple[str, str, str]] = {}
     for name in sorted(p.name for p in EX.glob("*.csv")):
         rows = _read(name)
         if not rows or "label_rule_step" not in rows[0]:
+            continue
+        if not include(rows[0].get("source_file", "")):
             continue
         lab_col = next(c for c in ("label_printed", "lgd_label", "named_list_labels",
                                    "label") if c in rows[0])
@@ -166,10 +174,18 @@ def labels_() -> list[dict]:
                                  or f"see data/extracted/{name}"))
     with open(ROOT / "data/figures_inventory.csv", newline="", encoding="utf-8") as f:
         for r in csv.DictReader(f):
+            if not include(r["source_file"]):
+                continue
             for m in re.finditer(r"label printed as '([^']*)'; label rule step (\d): "
                                  r"([^;]*)", r["note"]):
                 seen.setdefault((r["source_file"], m.group(1)),
                                 (m.group(2), r["geography"], m.group(3)))
+    return seen
+
+
+def labels_() -> list[dict]:
+    pe = _part_e_files()
+    seen = _label_resolutions(lambda f: f not in pe)
     out = []
     for k, ((src, lab), (step, canon, ev)) in enumerate(sorted(seen.items()), start=1):
         out.append(_rec(f"LAB-{k:02d}", "label rule", src, f"label printed '{lab}'",
@@ -183,7 +199,9 @@ def labels_() -> list[dict]:
 
 def totals() -> list[dict]:
     out = []
-    rows = sorted(_read("table_total_checks.csv"),
+    pe = _part_e_files()
+    rows = sorted((c for c in _read("table_total_checks.csv")
+                   if c["source_file"] not in pe),
                   key=lambda c: (c["source_file"], c["page"], c["table"]))
     for k, c in enumerate(rows, start=1):
         res = {"yes": "pass", "no": "fail", "n/a": "not applied"}[c["pass"]]
@@ -233,8 +251,10 @@ def named() -> list[dict]:
 def scope() -> list[dict]:
     from src.extract import online_pages as W   # Part D rows are a later addendum (WEB-*)
     out = []
+    pe = _part_e_files()
     rows = sorted((r for r in _read("inventory_scope_decisions.csv")
-                   if r["source_file"] not in W.OWN_FILES),
+                   if r["source_file"] not in W.OWN_FILES
+                   and r["source_file"] not in pe),
                   key=lambda r: (r["source_file"], r["kind"] != "rule", r["doc"],
                                  int(r["page"]) if r["page"].isdigit() else 0,
                                  r["where"], r["figures"]))
@@ -678,10 +698,89 @@ def online_rows() -> list[dict]:
     return rows
 
 
+PQE_DATE = "2026-11-19"
+PQE_T = "parliamentary answers, Part E (§5.3)"
+
+
+def pq_more_rows() -> list[dict]:
+    """Dated addendum (Part E): five further include = yes parliamentary answers supplied
+    by the author, entered after the source-choice freeze and the Part D addendum,
+    before any Q1-Q3 computation; and the MHA prison advisory, not obtained."""
+    from src.extract import pq_more as E
+    d = PQE_DATE
+    inv = [r for r in csv.DictReader(open(ROOT / "data/figures_inventory.csv",
+                                          newline="", encoding="utf-8"))
+           if r["source_file"] in E.OWN_FILES]
+    n = {k: sum(1 for r in inv if r["source_file"] == f)
+         for k, (f, _, _) in E.ANSWERS.items()}
+    src = "src/extract/pq_more.py"
+    rows = [_rec("PQE-01", PQE_T, "; ".join(f for f, _, _ in E.ANSWERS.values()),
+                 "the five answers",
+                 "Five further include = yes parliamentary answers supplied by the author "
+                 "(SHA-256 verified against data/source_manifest.csv) were read and entered "
+                 "in the inventory after the source-choice freeze (dbb71b3), the guard "
+                 "addendum (11cfbe4) and the Part D addendum, before any Q1-Q3 "
+                 "computation; no frozen row is changed",
+                 f"{len(inv)} inventory rows", "§5.3; §5.4; §13 (Part E, 19 November "
+                 "2026)", "figures_inventory.csv; inventory_scope_decisions.csv; "
+                 "pq_more_inventory_provenance.csv", d)]
+    roles = {
+        "Q278": "Q1-Q2 inventory (campaign selection figures); not a Q4 source (§9.5); no "
+                "State ACF table, so no Q3 table",
+        "Q279": "Q1-Q2 inventory (campaign selection figures); not a Q4 source; no Q3 "
+                "table",
+        "Q2051": "Q1-Q2 inventory (campaign selection figures); not a Q4 source; no Q3 "
+                 "table",
+        "LSQ79": "Q1-Q2 inventory (campaign selection, cascade to 7 Feb 2025 and "
+                 "participation figures); a Word file read with zipfile and xml.etree "
+                 "(§11); not a Q4 source; no Q3 table",
+        "Q414": "data/extracted only: State tables of presumptive TB tests, notifications, "
+                "treatment initiation and deaths (Annexure-I) and drug-resistant TB tests, "
+                "diagnosis and treatment (Annexure-II), 2019-2023; programme-wide, not ACF "
+                "or campaign figures and not named in §7.4 (§5.1; SRC-04), so no inventory "
+                "row; no ACF numerator, so no Q3 table (§8.1); not a Q4 source (§9.5)",
+    }
+    for k, key in enumerate(("Q278", "Q279", "Q2051", "LSQ79", "Q414"), start=2):
+        f, q, date = E.ANSWERS[key]
+        rows.append(_rec(f"PQE-{k:02d}", PQE_T, f, q, f"{q}, answered {date}: role",
+                         f"{n[key]} inventory rows; " + roles[key],
+                         "§5.1; §5.3; §8.1; §9.5" + ("; SRC-04" if key == "Q414" else ""),
+                         src, d))
+    checks = [c for c in _read("table_total_checks.csv") if c["source_file"] == E.Q414_FILE]
+    tables = sorted({c["table"].split(":")[0] for c in checks})
+    rows.append(_rec("PQE-07", PQE_T, E.Q414_FILE, "Annexures I and II, PDF pages 2-12",
+                     "Printed-total checks of the ten Q414 State tables (one per column)",
+                     f"{len(checks)} checks, all 'not applied': no table prints a Total or "
+                     "India row (text layer and page image)", "§6.2 check 3",
+                     "; ".join(tables) + "; data/extracted/pq_q414_annexurei_<year>.csv, "
+                     "pq_q414_annexureii_<year>.csv; table_total_checks.csv", d))
+    labs = _label_resolutions(lambda f: f in E.OWN_FILES)
+    rows.append(_rec("PQE-08", PQE_T, E.Q414_FILE, "State labels of the Q414 tables",
+                     "Label rule (§9.2) applied to every printed label",
+                     "; ".join(f"'{lab}' step {st} -> {c}" for (_, lab), (st, c, _)
+                               in sorted(labs.items())) or "every label mapped at step 1",
+                     "§9.2 label rule; §11", "", d))
+    rows.append(_rec("PQE-09", PQE_T, E.Q414_FILE, "unit coarsening",
+                     "Units of the Q414 tables coarsened (§9.4)",
+                     "Jammu and Kashmir with Ladakh, and Dadra and Nagar Haveli with Daman "
+                     "and Diu, as before; no other pair found", "§9.4",
+                     "coarse_unit column of the extracted CSVs", d))
+    rows.append(_rec("PQE-10", PQE_T,
+                     "https://www.mha.gov.in/sites/default/files/AdvisoryPR_08012025.pdf",
+                     "MHA advisory to prisons, '100-Day Intensified Campaign on TB "
+                     "Elimination' (8 January 2025), include = yes in data/search_log.csv",
+                     "MHA prison advisory of 8 January 2025",
+                     "unavailable: the official URL returns 404 (file removed); an "
+                     "Internet Archive copy exists but was not obtained",
+                     "§3.3 (a source that cannot be obtained is reported as unavailable)",
+                     "no figure entered from it", d))
+    return rows
+
+
 def build() -> list[dict]:
     rows = (exposure() + lgd() + labels_() + totals() + named() + scope() + quality()
             + general() + q4() + outcome_tables() + trend() + coarsening() + q3_tables()
-            + guard_rows() + online_rows())
+            + guard_rows() + online_rows() + pq_more_rows())
     ids = [r["decision_id"] for r in rows]
     dup = sorted({i for i in ids if ids.count(i) > 1})
     if dup:
