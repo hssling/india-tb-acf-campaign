@@ -4,6 +4,63 @@ Written by `python -I src/q1_consistency.py` (Q1) and `python -I src/q2_reconcil
 re-runs the Q1 checks in memory for class 1). Rules: analysis plan §6 (Q1) and §7 (Q2). All files
 are UTF-8 CSV with LF line endings.
 
+## Two sets: registered and corrected
+
+- **Registered** (files without a suffix): the rules as registered. Report these as registered.
+- **Corrected** (files ending `_corrected`): a post-hoc deviation, made after the registered output
+  was seen (analysis plan §13, 19 November 2026). Label it post hoc. It applies three corrections:
+  - **D1:** a figure's span is [window_start, window_end] where window_end is printed. as_on extends
+    the span only where window_end is blank; the registered span paired different calendar years.
+    Where two spans are then equal and both cut-offs are stated, §7.3's later-cut-off direction is
+    read from the two cut-offs.
+  - **D2:** a printed sector part is not grouped with totals and enters only Q1 check 3, as a part of
+    its total. A sector part is a table cell whose column heading names `public` or `private`, or
+    whose table title states a public/private split. The parts and the keywords that matched are in
+    `q2_sector_parts_corrected.csv`.
+  - **D3:** Q1 check 1 compares only figures from one printed cascade, meaning the same table
+    (table_id) or the same paragraph (page_or_para). Q2 class 1 follows the corrected check 1.
+- **Both sets:** `other:` figures stay out of the §6 checks (§5.1). Every Q1 row with an `other:`
+  input goes to `q1_other_descriptive.csv` instead, and never feeds Q2 class 1. So does a stratum
+  percentage, which is a derived quantity.
+- **Side by side:** `q2_summary_registered_vs_corrected.csv` (columns metric, registered, corrected)
+  gives the Q1 counts by check, the Q2 counts by class (all, pre-specified, exploratory), the groups
+  formed, and the sector parts left out.
+
+Corrected files have the same columns as their registered counterparts:
+
+- `q1_checks_corrected.csv`
+- `q2_discrepancies_corrected.csv`
+- `q2_groups_corrected.csv`
+- `q2_different_scope_corrected.csv`
+- `q2_pre_identified_corrected.csv`
+
+In `q2_discrepancies_corrected.csv`, `sector_part` is always `no`, because sector parts are not
+grouped.
+
+## q1_other_descriptive.csv — `other:` figures, outside the §6 checks (§5.1); descriptive
+
+Columns: `label` (always "outside the §6 checks (§5.1); descriptive"), then the columns of
+q1_checks.csv.
+
+Rows: the sum and percentage results that involve an `other:` figure, computed under the registered
+rules. They include the 2026 campaign document's Annexure IV (difference −21), every stated
+percentage of the inventory, and the stratum percentages of the quality studies. D2 and D3 do not
+apply here.
+
+## q2_not_formed.csv — candidate pairs the §7.1 rules do not group (descriptive)
+
+Columns:
+
+| Column | Content |
+|---|---|
+| candidate | The candidate pair |
+| a_fig_id, a_value_printed, b_fig_id, b_value_printed | The two figures |
+| formed_registered, formed_corrected | `yes` or `no`: whether each set groups the pair |
+| reason | Computed from the inventory fields |
+
+The last row records that 9.02 crore / 3.01 lakh was not found in any include = yes official
+source.
+
 ## q1_checks.csv — §6.2 checks, one row per check instance
 
 | Column | Content |
@@ -12,8 +69,8 @@ are UTF-8 CSV with LF line endings.
 | inputs | `source: <source_file>`, then the cell, table, column or sentence, and the figures (fig_id, value as printed, qualifier). Stratified quality-study cells not in the inventory are named `QS:<study> <locator>` |
 | expected | The condition tested, with the recomputed interval where there is one |
 | observed | The §6.1 intervals of the inputs; for check 3 the sum of parts, the printed total and their difference |
-| pass | `yes`, `no`, or `n/a` (not run; the note says why: a step with several definition classes, a percentage whose numerator or denominator is not printed with it, or no input for check 4) |
-| note | Flags: a failure involving an unspecified class; an `other:` quantity; a stratified table |
+| pass | `yes`, `no`, or `n/a` (not run; the note says why: a step with several definition classes, a percentage whose numerator or denominator is not printed with it, no stated percentage left once `other:` figures are kept out, or no input for check 4) |
+| note | Flags: a failure involving an unspecified class; a stratified table |
 
 ## q2_discrepancies.csv — §7.1 reporting unit: one row per unordered pair of entries in a group
 

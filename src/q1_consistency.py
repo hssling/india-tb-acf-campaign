@@ -43,10 +43,18 @@ The two quality studies' stratified tables (data/extracted/quality_studies.csv; 
 are not inventory figures) are checked by the same rules 1-3 (PGPH Tables 2-3, GHA
 Table 2); a stratum total that is also an inventory figure carries its fig_id.
 
-`other:` quantities (§5.1) are kept out of the checks, with two exceptions noted on each
-row: a stated percentage (check 2) is a derived `other:` quantity whose numerator and
-denominator are named quantities, and count tables of `other:` quantities are summed
-under check 3 (for example the high-risk villages of the 2026 campaign document).
+`other:` figures are outside the §6 checks (§5.1): every row with an `other:` input (or a
+derived stratum percentage) is written to outputs/q1_other_descriptive.csv, labelled
+"outside the §6 checks (§5.1); descriptive", and never feeds Q2 class 1.
+
+Two sets are written (§13, 19 November 2026):
+- registered (outputs/q1_checks.csv): the rules as registered;
+- corrected (outputs/q1_checks_corrected.csv), a post-hoc deviation made after the
+  registered output was seen: D2, a printed sector part (a table cell whose column
+  heading names 'public' or 'private', or whose table title states a public/private
+  split) enters only check 3, as a part of its total; D3, check 1 compares only figures
+  from one printed cascade, the same table (table_id) or the same paragraph
+  (page_or_para). (D1, the span rule, is a Q2 correction.)
 
 Run: python -I src/q1_consistency.py
 Standard library only (§11).
@@ -72,6 +80,9 @@ ROOT = Path(__file__).resolve().parents[1]
 INVENTORY = ROOT / "data/figures_inventory.csv"
 QUALITY = ROOT / "data/extracted/quality_studies.csv"
 OUT = ROOT / "outputs/q1_checks.csv"
+OUT_CORRECTED = ROOT / "outputs/q1_checks_corrected.csv"
+OUT_OTHER = ROOT / "outputs/q1_other_descriptive.csv"
+OTHER_LABEL = "outside the §6 checks (§5.1); descriptive"
 COLUMNS = ["check", "inputs", "expected", "observed", "pass", "note"]
 
 INF = math.inf
@@ -198,10 +209,38 @@ def sum_of_parts_ok(parts, total) -> bool:
     return overlap(parts_interval(parts), total)
 
 
-def _row(check, source, inputs, expected, observed, passed, note, figs):
+def _row(check, source, inputs, expected, observed, passed, note, figs, other=False):
+    """One output row. `other`: an input is an `other:` figure (or a derived stratum
+    percentage); such rows are kept out of the §6 checks (§5.1) and written to
+    q1_other_descriptive.csv."""
     return {"check": check, "inputs": f"source: {source}; {inputs}", "expected": expected,
             "observed": observed, "pass": passed, "note": note, "_figs": list(figs),
-            "_source": source}
+            "_source": source, "_other": other}
+
+
+# ------------------------------------------------- corrected set: sector parts (D2)
+
+_SECTOR = re.compile(r"\b(public|private)\b", re.I)
+
+
+def sector_keyword(row: dict) -> str:
+    """D2 (corrected set, §13, 19 November 2026): the keyword ('public' or 'private')
+    that makes a table cell a printed sector part: its column heading names a sector, or
+    its table title states a public/private split (both words). '' otherwise; prose
+    figures are never sector parts."""
+    if not row.get("table_id"):
+        return ""
+    seg = row["context_verbatim"].split(" | ")
+    if len(seg) < 2:
+        return ""
+    m = _SECTOR.search(seg[-2])
+    if m:
+        return m.group(1).lower()
+    title = " | ".join(seg[:-2])
+    words = {w.lower() for w in _SECTOR.findall(title)}
+    if words == {"public", "private"}:
+        return "public/private"
+    return ""
 
 
 def _desc(r) -> str:
@@ -270,20 +309,29 @@ def _cascade_cells(cells, source_of, label_of):
     return out
 
 
-def cascade_checks(rows) -> list[dict]:
+def cascade_checks(rows, one_cascade: bool = False, exclude=frozenset()) -> list[dict]:
+    """Check 1. `one_cascade` (D3, corrected set): the cell also requires one printed
+    cascade, the same table (table_id) or, for prose, the same paragraph (page_or_para).
+    `exclude`: fig_ids left out (D2 sector parts in the corrected set)."""
     cells = defaultdict(list)
     for r in rows:
+        if r["fig_id"] in exclude:
+            continue
         s = step_of(r)
         iv = interval(r)
         if s is None or iv is None:
             continue
         key = (r["source_file"], r["window_start"], r["window_end"], r["as_on"],
                r["window_label"], r["geography"], r["scope"])
+        if one_cascade:
+            key += ((f"table {r['table_id']}" if r["table_id"]
+                     else f"paragraph {r.get('page_or_para', '')}"),)
         cells[key].append(dict(r, _step=s, _iv=iv))
 
     def label(k):
         return (f"cell: geography {k[5]}, scope {k[6]}, window {k[1] or '-'}..{k[2] or '-'}, "
-                f"as_on {k[3] or '-'}, label '{k[4]}'")
+                f"as_on {k[3] or '-'}, label '{k[4]}'"
+                + (f", printed cascade: {k[7]}" if len(k) > 7 else ""))
     return _cascade_cells(cells, lambda k: k[0], label)
 
 
@@ -334,9 +382,10 @@ def _pick(cands, spec):
     return hits[0], "ok"
 
 
-def percentage_checks(rows, run_elsewhere=frozenset()) -> list[dict]:
+def percentage_checks(rows, run_elsewhere=frozenset(), exclude=frozenset()) -> list[dict]:
     """Check 2 on inventory rows. `run_elsewhere`: percentages whose check is made on the
     stratified quality-study table instead (left out of the not-run summary)."""
+    rows = [r for r in rows if r["fig_id"] not in exclude]
     pool = defaultdict(list)
     for r in rows:
         pool[_scope_key(r)].append(dict(r, _iv=interval(r)))
@@ -353,27 +402,29 @@ def percentage_checks(rows, run_elsewhere=frozenset()) -> list[dict]:
         d, sd = _pick([c for c in cands if n is None or c["fig_id"] != n["fig_id"]], den_spec)
         where = "same table" if r["table_id"] else "same sentence"
         if n is None or d is None:
+            oth = r["quantity"].startswith("other:")
             if "ambiguous" in sn or "ambiguous" in sd:
                 out.append(_row(CHECK2, r["source_file"], f"percentage {_desc(r)}", "", "", "n/a",
                                 f"not run: numerator {sn}; denominator {sd} ({where})",
-                                [r["fig_id"]]))
+                                [r["fig_id"]], other=oth))
             elif r["fig_id"] not in run_elsewhere:
-                absent[r["source_file"]].append(r["fig_id"])
+                absent[(r["source_file"], oth)].append(r["fig_id"])
             continue
         rec = recompute(n["_iv"], d["_iv"])
         ok = overlap(p, rec)
         note = "" if not r["quantity"].startswith("other:") else (
             "a stated percentage (an other: quantity) of named numerator and denominator")
+        oth = any(x["quantity"].startswith("other:") for x in (r, n, d))
         out.append(_row(CHECK2, r["source_file"],
                         f"percentage {_desc(r)}; numerator {_desc(n)}; denominator {_desc(d)} "
                         f"({where})",
                         f"p overlaps 100 n/d = {fmt_iv(rec)}",
                         f"p {fmt_iv(p)}; 100 n/d {fmt_iv(rec)}", "yes" if ok else "no", note,
-                        [r["fig_id"], n["fig_id"], d["fig_id"]]))
-    for src, figs in sorted(absent.items()):
+                        [r["fig_id"], n["fig_id"], d["fig_id"]], other=oth))
+    for (src, oth), figs in sorted(absent.items()):
         out.append(_row(CHECK2, src, f"{len(figs)} percentage(s): " + ", ".join(figs), "", "",
                         "n/a", "not run: numerator or denominator not printed in the same "
-                        "table or sentence", figs))
+                        "table or sentence", figs, other=oth))
     return out
 
 
@@ -387,7 +438,7 @@ def _segments(r):
     return r["context_verbatim"].split(" | ")
 
 
-def _sum_row(source, inputs, total, parts, note):
+def _sum_row(source, inputs, total, parts, note, other=False):
     ivs = [p["_iv"] for p in parts]
     piv = parts_interval(ivs)
     ok = overlap(piv, total["_iv"])
@@ -399,7 +450,7 @@ def _sum_row(source, inputs, total, parts, note):
                 f"[sum lo - 1, sum hi + 1] = {fmt_iv(piv)} overlaps total {fmt_iv(total['_iv'])}",
                 f"sum of parts {fmt(s)}; printed total {fmt(Fraction(str(total['value'])))}; "
                 f"difference {fmt(diff)}", "yes" if ok else "no", note,
-                [total["fig_id"]] + [p["fig_id"] for p in parts])
+                [total["fig_id"]] + [p["fig_id"] for p in parts], other=other)
 
 
 def sum_checks(rows) -> list[dict]:
@@ -427,14 +478,15 @@ def sum_checks(rows) -> list[dict]:
         parts = [r for r in rs if r["geography"] != "India"]
         if not totals or len(parts) < 2:
             continue
-        note = ("other: quantity (§5.1 keeps other: figures out of §6; summed here as a "
-                "printed table total)") if key[2].startswith("other:") else ""
+        oth = key[2].startswith("other:")
+        note = "other: quantity: outside the §6 checks (§5.1); descriptive" if oth else ""
         if len(totals) > 1:
             out.append(_row(CHECK3, key[0], f"table {key[1]}; column '{key[4]}'", "", "", "n/a",
-                            "not run: more than one total row", [t["fig_id"] for t in totals]))
+                            "not run: more than one total row", [t["fig_id"] for t in totals],
+                            other=oth))
             continue
         out.append(_sum_row(key[0], f"table {key[1]}; column '{key[4]}'; State/UT rows "
-                            "against the India row", totals[0], parts, note))
+                            "against the India row", totals[0], parts, note, other=oth))
     # (b) row totals: "<heading>: <part>" against "<heading>: Total"
     rows_ = defaultdict(list)
     for r in usable:
@@ -450,9 +502,10 @@ def sum_checks(rows) -> list[dict]:
         parts = [r for r in rs if r["_part"].lower() != "total"]
         if len(totals) != 1 or len(parts) < 2:
             continue
+        oth = key[2].startswith("other:")
         out.append(_sum_row(key[0], f"table {key[1]}; row '{key[4]}'; columns '{key[5]}: "
                             + "/".join(p["_part"] for p in parts) + "' against "
-                            f"'{key[5]}: Total'", totals[0], parts, ""))
+                            f"'{key[5]}: Total'", totals[0], parts, "", other=oth))
     return out
 
 
@@ -468,11 +521,11 @@ def sector_parts(results) -> set[str]:
 
 # ----------------------------------------------------------------- check 4
 
-def cumulative_checks(rows) -> list[dict]:
+def cumulative_checks(rows, exclude=frozenset()) -> list[dict]:
     series = defaultdict(list)
     for r in rows:
         if (r["series_type"] != "cumulative" or not r["as_on"] or not r["window_start"]
-                or r["quantity"].startswith("other:")):
+                or r["quantity"].startswith("other:") or r["fig_id"] in exclude):
             continue
         iv = interval(r)
         if iv is None:
@@ -595,8 +648,9 @@ def strata_checks(quality, inventory, checked=frozenset()) -> list[dict]:
                             f"numerator {d(n)}; denominator {d(dd)}",
                             f"p overlaps 100 n/d = {fmt_iv(rec)}",
                             f"p {fmt_iv(f['_iv'])}; 100 n/d {fmt_iv(rec)}",
-                            "yes" if ok else "no", note,
-                            [f["fig_id"], n["fig_id"], dd["fig_id"]]))
+                            "yes" if ok else "no", note + "; a derived percentage (an other: "
+                            "quantity in the inventory's vocabulary)",
+                            [f["fig_id"], n["fig_id"], dd["fig_id"]], other=True))
     # check 3: each stratum group's rows against the Total row, per column
     groups = defaultdict(list)
     for f in figs:
@@ -607,8 +661,11 @@ def strata_checks(quality, inventory, checked=frozenset()) -> list[dict]:
         total = totals.get((key[1], key[2], key[4], key[5]))
         if total is None or len(parts) < 2:
             continue
+        oth = key[4] not in _QS_STEP
         out.append(_sum_row(key[0], f"{key[1]} {key[2]}; stratum group '{key[3]}'; column "
-                            f"'{key[5]}'", total, parts, note))
+                            f"'{key[5]}'", total, parts,
+                            note + ("; other: quantity: outside the §6 checks (§5.1); "
+                                    "descriptive" if oth else ""), other=oth))
     return out
 
 
@@ -624,30 +681,52 @@ def load_quality(path: Path = QUALITY) -> list[dict]:
         return list(csv.DictReader(f))
 
 
-def run_checks(inventory, quality=()) -> list[dict]:
-    pct = percentage_checks(inventory)
+def run_checks(inventory, quality=(), corrected: bool = False) -> list[dict]:
+    """All check rows, `other:` rows included (flag `_other`; see split_other).
+    corrected=True applies the post-hoc corrections of §13 (19 November 2026): D2, sector
+    parts enter only check 3; D3, check 1 within one printed table or paragraph."""
+    sector = (frozenset(r["fig_id"] for r in inventory if sector_keyword(r)) if corrected
+              else frozenset())
+    pct = percentage_checks(inventory, exclude=sector)
     checked = {r["_figs"][0] for r in pct if r["pass"] in ("yes", "no")}
     strata = strata_checks(list(quality), inventory, checked)
-    pct = percentage_checks(inventory, {r["_figs"][0] for r in strata if r["check"] == CHECK2})
-    return (cascade_checks(inventory) + pct + sum_checks(inventory)
-            + cumulative_checks(inventory) + strata)
+    pct = percentage_checks(inventory, {r["_figs"][0] for r in strata if r["check"] == CHECK2},
+                            exclude=sector)
+    return (cascade_checks(inventory, one_cascade=corrected, exclude=sector) + pct
+            + sum_checks(inventory) + cumulative_checks(inventory, exclude=sector) + strata)
+
+
+def split_other(results) -> tuple[list[dict], list[dict]]:
+    """(rows of the §6 checks, rows involving `other:` figures). §5.1 keeps `other:`
+    figures out of §6; their rows are reported descriptively. If no check-2 row remains,
+    one n/a row says why."""
+    main = [r for r in results if not r.get("_other")]
+    other = [r for r in results if r.get("_other")]
+    if not any(r["check"] == CHECK2 for r in main):
+        main.append(_row(CHECK2, "all documents", "no input", "", "", "n/a",
+                         "not run: every stated percentage is an other: quantity or has an "
+                         "other: numerator or denominator; reported in "
+                         "q1_other_descriptive.csv (§5.1)", []))
+    return main, other
 
 
 def failures(results) -> dict[str, list[str]]:
-    """fig_id -> descriptions of the failed within-source checks (1-3) involving it."""
+    """fig_id -> descriptions of the failed within-source checks (1-3) involving it.
+    Rows of `other:` figures are outside §6 and are not counted."""
     out = defaultdict(list)
     for r in results:
-        if r["pass"] == "no" and r["check"][0] in "123":
+        if r["pass"] == "no" and r["check"][0] in "123" and not r.get("_other"):
             desc = f"check {r['check']} failed ({r['inputs'][:160]}...; observed {r['observed']})"
             for fid in r["_figs"]:
                 out[fid].append(desc)
     return dict(out)
 
 
-def write(results, path: Path = OUT) -> None:
+def write(results, path: Path = OUT, columns=None) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=COLUMNS, lineterminator="\n", extrasaction="ignore")
+        w = csv.DictWriter(f, fieldnames=columns or COLUMNS, lineterminator="\n",
+                           extrasaction="ignore")
         w.writeheader()
         w.writerows(results)
 
@@ -662,11 +741,19 @@ def summary(results) -> dict:
 def main() -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
-    inv = load_inventory()
-    res = run_checks(inv, load_quality())
-    write(res)
-    for check, c in sorted(summary(res).items()):
-        print(f"{check}: pass {c['yes']}, fail {c['no']}, n/a {c['n/a']}")
+    inv, qual = load_inventory(), load_quality()
+    reg_main, reg_other = split_other(run_checks(inv, qual))
+    cor_main, _ = split_other(run_checks(inv, qual, corrected=True))
+    write(reg_main, OUT)
+    write(cor_main, OUT_CORRECTED)
+    # The corrections D2-D3 concern the §6 checks and §7 grouping; the descriptive rows of
+    # `other:` figures are computed once, under the registered rules.
+    desc = [dict(r, label=OTHER_LABEL) for r in reg_other]
+    write(desc, OUT_OTHER, ["label"] + COLUMNS)
+    for name, res in (("registered", reg_main), ("corrected", cor_main),
+                      ("other: descriptive", reg_other)):
+        for check, c in sorted(summary(res).items()):
+            print(f"{name}: {check}: pass {c['yes']}, fail {c['no']}, n/a {c['n/a']}")
     return 0
 
 

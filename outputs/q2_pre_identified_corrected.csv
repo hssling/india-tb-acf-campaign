@@ -1,0 +1,11 @@
+item,plan_clause,run,n_entry_pairs,n_disagree,classes,note
+RS Q2511 (answer against its OGD mirror),§7.4,not run,0,0,,"the OGD mirror was not obtained, so its field label cannot be compared; the answer prints 'Notification in 2024 (Jan- Oct)' with '*As on 19th Nov 2024' (§13, 19 November 2026)"
+RS Q2511 against the other sources in its §7.1 groups,§7.4; §7.1,run,144,108,3a: 105; 3b: 3,window as printed
+RS Q1900 January-October 2025 against RS Q1093,§7.4; §9.5.5,run,36,0,,pre-specified
+LS Q261 2023 against the India TB Report 2024,§7.4,run,36,0,,the report's Public and Private columns are not grouped (D2)
+"Q1216 against Q3467, 2023 and 2024 (guard)",§7.4; §9.5.2,run,72,72,3a: 72,guard ratios attached in the note column
+Q1216 2023 against the India TB Report 2024,§7.4,run,36,0,,the report's Public and Private columns are not grouped (D2)
+Named list against the CTD table,§9.2,run,4,4,4: 4,four States differ
+RS Q420 (2025 full year) against Q1216 (exploratory),§13 (18 November 2026),run,36,36,3a: 20; 3b: 16,exploratory
+RS Q1900 2024 against Q1216 2024 (exploratory),§13 (18 November 2026),run,36,0,,exploratory
+"Guard States outside [0.95, 1.05] (per coarsened unit and year)",§9.5.2; §7.4,recorded in the guard,29,29,,late-report-consistent: 11

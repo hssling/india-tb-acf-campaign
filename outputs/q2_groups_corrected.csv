@@ -1,0 +1,135 @@
+group_key,quantity,geography,scope,windows_or_labels,n_figures,n_entries,n_documents,n_distinct_values,min_value,max_value,n_entry_pairs,n_entry_pairs_disagree,value_pairs_by_class,value_pairs_by_class_prespecified,n_entry_pairs_exploratory
+districts_selected|India|phase 1|g01,districts_selected,India,phase 1,100-day campaign,15,14,14,2,347,455,91,13,4: 1,4: 1,0
+nns|India|programme-wide|g01,nns,India,programme-wide,2023-01-01..2023-09-30 | january to september 2023,2,2,1,2,4971,5000,1,1,4: 1,4: 1,0
+nns|India|unspecified|g01,nns,India,unspecified,2023-01-01..2023-09-30,2,1,1,1,4971,4971,0,0,,,0
+presumptive|India|unspecified|g01,presumptive,India,unspecified,2023-01-01..2023-09-30 | 2023-03-24..2023-04-13,2,2,2,2,11357,523000,1,1,3b: 1,3b: 1,0
+presumptive|Jammu and Kashmir|unspecified|g01,presumptive,Jammu and Kashmir,unspecified,three days,4,4,4,1,250,250,6,0,,,0
+screened|India|phase 1|g01,screened,India,phase 1,100-day campaign,5,5,5,3,56300000,280000000,10,7,4: 3,4: 3,0
+screened|India|programme-wide|g01,screened,India,programme-wide,2021 | 2021-01-01..2021-12-31,2,2,1,2,22300000,223879862,1,1,4: 1,4: 1,0
+screened|India|programme-wide|g02,screened,India,programme-wide,2023 | 2023-01-01..2023-09-30 | 2023-01-01..2023-12-31 | january to september 2023,4,3,2,3,581633,205331541,3,2,agree: 1; 1: 2,agree: 1; 1: 2,0
+screened|India|unspecified|g01,screened,India,unspecified,2023-01-01..2023-09-30 | 2023-03-24..2023-04-13,3,3,2,3,9321,28600000,3,3,3b: 2; 4: 1,3b: 2; 4: 1,0
+screened|India|unspecified|g02,screened,India,unspecified,2024-12-07..2025-03-24 | 2024-12-07..2026-11-08 | 2026-03-24..2026-07-04,3,3,3,3,20200000,250000000,2,1,agree: 1; 3a: 1,agree: 1; 3a: 1,0
+screened|India|unspecified|g03,screened,India,unspecified,campaign to date,9,5,5,2,190000000,200000000,10,0,agree: 1,agree: 1,0
+screened|India|unspecified|g04,screened,India,unspecified,first 30 days,2,1,1,1,20000000,20000000,0,0,,,0
+screened|India|unspecified|g05,screened,India,unspecified,since december 2024,2,2,2,2,200000000,281000000,1,0,agree: 1,agree: 1,0
+screened|Jammu and Kashmir|unspecified|g01,screened,Jammu and Kashmir,unspecified,three days,4,4,4,1,1250,1250,6,0,,,0
+tb_cases|Andaman and Nicobar Islands|unspecified|g01,tb_cases,Andaman and Nicobar Islands,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,488,561,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Andaman and Nicobar Islands|unspecified|g02,tb_cases,Andaman and Nicobar Islands,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,445,534,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Andaman and Nicobar Islands|unspecified|g03,tb_cases,Andaman and Nicobar Islands,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,522,550,6,5,3b: 3,3b: 1,3
+tb_cases|Andhra Pradesh|unspecified|g01,tb_cases,Andhra Pradesh,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,86033,89064,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Andhra Pradesh|unspecified|g02,tb_cases,Andhra Pradesh,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,69371,83960,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Andhra Pradesh|unspecified|g03,tb_cases,Andhra Pradesh,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,65695,78363,6,5,3a: 3,3a: 1,3
+tb_cases|Arunachal Pradesh|unspecified|g01,tb_cases,Arunachal Pradesh,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,2604,2606,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Arunachal Pradesh|unspecified|g02,tb_cases,Arunachal Pradesh,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,2430,2939,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Arunachal Pradesh|unspecified|g03,tb_cases,Arunachal Pradesh,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,2168,2509,6,5,3a: 3,3a: 1,3
+tb_cases|Assam|unspecified|g01,tb_cases,Assam,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,50180,51862,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Assam|unspecified|g02,tb_cases,Assam,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,42202,50456,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Assam|unspecified|g03,tb_cases,Assam,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,44008,50566,6,5,3a: 3,3a: 1,3
+tb_cases|Bihar|unspecified|g01,tb_cases,Bihar,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,184706,186974,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Bihar|unspecified|g02,tb_cases,Bihar,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,167193,204309,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Bihar|unspecified|g03,tb_cases,Bihar,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,180203,220637,6,5,3a: 3,3a: 1,3
+tb_cases|Chandigarh|unspecified|g01,tb_cases,Chandigarh,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,3912,6721,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Chandigarh|unspecified|g02,tb_cases,Chandigarh,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,4108,6960,10,8,3a: 2; 3b: 1 (1 with other classes noted),3a: 2; 3b: 1,4
+tb_cases|Chandigarh|unspecified|g03,tb_cases,Chandigarh,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,5765,6454,6,5,3a: 3,3a: 1,3
+tb_cases|Chhattisgarh|unspecified|g01,tb_cases,Chhattisgarh,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,37473,38924,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Chhattisgarh|unspecified|g02,tb_cases,Chhattisgarh,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,32526,39593,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Chhattisgarh|unspecified|g03,tb_cases,Chhattisgarh,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,34540,39365,6,5,3a: 3,3a: 1,3
+tb_cases|Dadra and Nagar Haveli and Daman and Diu|unspecified|g01,tb_cases,Dadra and Nagar Haveli and Daman and Diu,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,822,1167,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Dadra and Nagar Haveli and Daman and Diu|unspecified|g02,tb_cases,Dadra and Nagar Haveli and Daman and Diu,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,790,1037,10,8,3a: 2; 3b: 1 (1 with other classes noted),3a: 2; 3b: 1,4
+tb_cases|Dadra and Nagar Haveli and Daman and Diu|unspecified|g03,tb_cases,Dadra and Nagar Haveli and Daman and Diu,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,1123,1334,6,5,3a: 2; 3b: 1,3a: 1,3
+tb_cases|Delhi|unspecified|g01,tb_cases,Delhi,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,82426,100523,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Delhi|unspecified|g02,tb_cases,Delhi,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,88868,105343,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Delhi|unspecified|g03,tb_cases,Delhi,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,98309,113809,6,5,3a: 2; 3b: 1,3a: 1,3
+tb_cases|Goa|unspecified|g01,tb_cases,Goa,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,1823,2082,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Goa|unspecified|g02,tb_cases,Goa,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,1710,2079,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Goa|unspecified|g03,tb_cases,Goa,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,1597,1894,6,5,3a: 2; 3b: 1,3a: 1,3
+tb_cases|Gujarat|unspecified|g01,tb_cases,Gujarat,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,133898,144507,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Gujarat|unspecified|g02,tb_cases,Gujarat,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,113431,137955,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Gujarat|unspecified|g03,tb_cases,Gujarat,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,111909,131541,6,5,3a: 3,3a: 1,3
+tb_cases|Haryana|unspecified|g01,tb_cases,Haryana,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,75745,80490,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Haryana|unspecified|g02,tb_cases,Haryana,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,73703,86635,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Haryana|unspecified|g03,tb_cases,Haryana,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,77377,88758,6,5,3a: 2; 3b: 1,3a: 1,3
+tb_cases|Himachal Pradesh|unspecified|g01,tb_cases,Himachal Pradesh,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,15399,15648,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Himachal Pradesh|unspecified|g02,tb_cases,Himachal Pradesh,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,13429,15621,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Himachal Pradesh|unspecified|g03,tb_cases,Himachal Pradesh,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,13223,14643,6,5,3a: 2; 3b: 1,3a: 1,3
+tb_cases|India|phase 1|g01,tb_cases,India,phase 1,100-day campaign,6,5,4,4,159000,719000,10,4,agree: 3; 2: 2; 4: 1 (1 with other classes noted),agree: 3; 2: 2; 4: 1 (1 with other classes noted),0
+tb_cases|India|programme-wide|g01,tb_cases,India,programme-wide,2021 | 2021-01-01..2021-12-31,3,2,2,2,41659,73772,1,1,4: 1,4: 1,0
+tb_cases|India|programme-wide|g02,tb_cases,India,programme-wide,2023-01-01..2023-12-31 | january to september 2023,2,2,2,2,117,35438,1,1,3a: 1,3a: 1,0
+tb_cases|India|unspecified|g01,tb_cases,India,unspecified,2023-01-01..2023-09-30 | 2023-01-01..2023-12-31 | 2023-03-24..2023-04-13,4,4,2,4,117,2552257,6,6,2: 2; 3a: 3; 3b: 1,2: 2; 3a: 3; 3b: 1,0
+tb_cases|India|unspecified|g02,tb_cases,India,unspecified,2024-12-07..2025-03-24 | 2024-12-07..2025-12-30 | 2024-12-07..2026-11-08 | 2026-03-24..2026-07-04,4,4,4,4,700000,4864000,4,1,agree: 3; 3a: 1,agree: 3; 3a: 1,0
+tb_cases|India|unspecified|g03,tb_cases,India,unspecified,campaign to date,9,5,5,3,2450000,3265000,10,0,agree: 3,agree: 3,0
+tb_cases|India|unspecified|g04,tb_cases,India,unspecified,since its inception,2,2,2,1,300000,300000,1,0,,,0
+tb_cases|India|unspecified|g05,tb_cases,India,unspecified,first 30 days,2,1,1,1,148000,148000,0,0,,,0
+tb_cases|Jammu and Kashmir|unspecified|g01,tb_cases,Jammu and Kashmir,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,11382,11754,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Jammu and Kashmir|unspecified|g02,tb_cases,Jammu and Kashmir,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,10442,12200,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Jammu and Kashmir|unspecified|g03,tb_cases,Jammu and Kashmir,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,11890,12554,6,5,3b: 3,3b: 1,3
+tb_cases|Jharkhand|unspecified|g01,tb_cases,Jharkhand,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,60592,61717,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Jharkhand|unspecified|g02,tb_cases,Jharkhand,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,53213,63913,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Jharkhand|unspecified|g03,tb_cases,Jharkhand,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,56192,65815,6,5,3a: 3,3a: 1,3
+tb_cases|Karnataka|unspecified|g01,tb_cases,Karnataka,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,74493,81862,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Karnataka|unspecified|g02,tb_cases,Karnataka,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,65186,78369,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Karnataka|unspecified|g03,tb_cases,Karnataka,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,63047,75174,6,5,3a: 3,3a: 1,3
+tb_cases|Kerala|unspecified|g01,tb_cases,Kerala,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,20558,21799,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Kerala|unspecified|g02,tb_cases,Kerala,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,17267,20843,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Kerala|unspecified|g03,tb_cases,Kerala,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,16498,19432,6,5,3a: 3,3a: 1,3
+tb_cases|Ladakh|unspecified|g01,tb_cases,Ladakh,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,320,328,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Ladakh|unspecified|g02,tb_cases,Ladakh,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,235,318,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Ladakh|unspecified|g03,tb_cases,Ladakh,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,246,281,6,5,3a: 2; 3b: 1,3a: 1,3
+tb_cases|Lakshadweep|unspecified|g01,tb_cases,Lakshadweep,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,6,13,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Lakshadweep|unspecified|g02,tb_cases,Lakshadweep,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,6,14,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Lakshadweep|unspecified|g03,tb_cases,Lakshadweep,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,14,19,6,5,3a: 3,3a: 1,3
+tb_cases|Madhya Pradesh|unspecified|g01,tb_cases,Madhya Pradesh,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,178884,184691,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Madhya Pradesh|unspecified|g02,tb_cases,Madhya Pradesh,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,149093,181026,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Madhya Pradesh|unspecified|g03,tb_cases,Madhya Pradesh,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,147443,176256,6,5,3a: 2; 3b: 1,3a: 1,3
+tb_cases|Maharashtra|unspecified|g01,tb_cases,Maharashtra,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,205909,227664,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Maharashtra|unspecified|g02,tb_cases,Maharashtra,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,186706,230163,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Maharashtra|unspecified|g03,tb_cases,Maharashtra,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,188653,224648,6,5,3a: 2; 3b: 1,3a: 1,3
+tb_cases|Manipur|unspecified|g01,tb_cases,Manipur,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,2495,2522,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Manipur|unspecified|g02,tb_cases,Manipur,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,2067,2561,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Manipur|unspecified|g03,tb_cases,Manipur,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,2190,2566,6,5,3a: 3,3a: 1,3
+tb_cases|Meghalaya|unspecified|g01,tb_cases,Meghalaya,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,4493,4908,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Meghalaya|unspecified|g02,tb_cases,Meghalaya,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,3890,4564,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Meghalaya|unspecified|g03,tb_cases,Meghalaya,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,4089,4595,6,5,3a: 3,3a: 1,3
+tb_cases|Mizoram|unspecified|g01,tb_cases,Mizoram,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,2115,2273,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Mizoram|unspecified|g02,tb_cases,Mizoram,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,1985,2312,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Mizoram|unspecified|g03,tb_cases,Mizoram,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,2003,2293,6,5,3a: 3,3a: 1,3
+tb_cases|Nagaland|unspecified|g01,tb_cases,Nagaland,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,4192,4287,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Nagaland|unspecified|g02,tb_cases,Nagaland,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,3419,4059,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Nagaland|unspecified|g03,tb_cases,Nagaland,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,3604,4077,6,5,3a: 3,3a: 1,3
+tb_cases|Odisha|unspecified|g01,tb_cases,Odisha,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,60766,62387,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Odisha|unspecified|g02,tb_cases,Odisha,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,48917,60608,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Odisha|unspecified|g03,tb_cases,Odisha,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,51057,59916,6,5,3a: 3,3a: 1,3
+tb_cases|Puducherry|unspecified|g01,tb_cases,Puducherry,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,1507,4169,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Puducherry|unspecified|g02,tb_cases,Puducherry,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,1355,3700,10,8,3a: 2; 3b: 1 (1 with other classes noted),3a: 2; 3b: 1,4
+tb_cases|Puducherry|unspecified|g03,tb_cases,Puducherry,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,2824,3316,6,5,3a: 2; 3b: 1,3a: 1,3
+tb_cases|Punjab|unspecified|g01,tb_cases,Punjab,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,55224,56264,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Punjab|unspecified|g02,tb_cases,Punjab,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,49739,60456,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Punjab|unspecified|g03,tb_cases,Punjab,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,52578,60964,6,5,3a: 3,3a: 1,3
+tb_cases|Rajasthan|unspecified|g01,tb_cases,Rajasthan,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,159302,165123,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Rajasthan|unspecified|g02,tb_cases,Rajasthan,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,145405,171921,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Rajasthan|unspecified|g03,tb_cases,Rajasthan,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,151995,168515,6,5,3a: 2; 3b: 1,3a: 1,3
+tb_cases|Sikkim|unspecified|g01,tb_cases,Sikkim,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,1189,1391,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Sikkim|unspecified|g02,tb_cases,Sikkim,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,1122,1313,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Sikkim|unspecified|g03,tb_cases,Sikkim,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,1045,1197,6,5,3a: 3,3a: 1,3
+tb_cases|Tamil Nadu|unspecified|g01,tb_cases,Tamil Nadu,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,92945,98251,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Tamil Nadu|unspecified|g02,tb_cases,Tamil Nadu,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,77820,93276,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Tamil Nadu|unspecified|g03,tb_cases,Tamil Nadu,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,79326,93511,6,5,3a: 2; 3b: 1,3a: 1,3
+tb_cases|Telangana|unspecified|g01,tb_cases,Telangana,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,72100,74994,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Telangana|unspecified|g02,tb_cases,Telangana,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,62722,76611,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Telangana|unspecified|g03,tb_cases,Telangana,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,72840,86187,6,5,3a: 2; 3b: 1,3a: 1,3
+tb_cases|Tripura|unspecified|g01,tb_cases,Tripura,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,3386,3425,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Tripura|unspecified|g02,tb_cases,Tripura,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,2760,3422,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Tripura|unspecified|g03,tb_cases,Tripura,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,3016,3387,6,5,3a: 2; 3b: 1,3a: 1,3
+tb_cases|Uttar Pradesh|unspecified|g01,tb_cases,Uttar Pradesh,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,613851,632872,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Uttar Pradesh|unspecified|g02,tb_cases,Uttar Pradesh,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,563573,681779,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Uttar Pradesh|unspecified|g03,tb_cases,Uttar Pradesh,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,604726,705511,6,5,3a: 3,3a: 1,3
+tb_cases|Uttarakhand|unspecified|g01,tb_cases,Uttarakhand,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,25674,26829,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|Uttarakhand|unspecified|g02,tb_cases,Uttarakhand,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,24984,29334,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|Uttarakhand|unspecified|g03,tb_cases,Uttarakhand,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,25165,28356,6,5,3a: 3,3a: 1,3
+tb_cases|West Bengal|unspecified|g01,tb_cases,West Bengal,unspecified,2023 | 2023 (jan dec) | 2023-01-01..2023-12-31,4,4,4,2,97535,102728,6,3,3a: 1 (1 with other classes noted),3a: 1 (1 with other classes noted),0
+tb_cases|West Bengal|unspecified|g02,tb_cases,West Bengal,unspecified,2024 | 2024 (jan dec) | 2024 (jan oct) | 2024 (jan to dec),5,5,5,3,83962,99721,10,8,3a: 3 (1 with other classes noted),3a: 3,4
+tb_cases|West Bengal|unspecified|g03,tb_cases,West Bengal,unspecified,"2025 (jan dec) | 2025 (jan oct, 2025) | 2025 (jan to oct)",4,4,4,3,87132,101756,6,5,3a: 2; 3b: 1,3a: 1,3
+tested|India|programme-wide|g01,tested,India,programme-wide,2021 | 2021-01-01..2021-12-31,2,1,1,1,1752903,1752903,0,0,,,0
+tested|India|programme-wide|g02,tested,India,programme-wide,2023-01-01..2023-12-31 | january to september 2023,2,2,2,2,7527,2175689,1,1,3a: 1,3a: 1,0
+tested|India|unspecified|g01,tested,India,unspecified,2023-01-01..2023-09-30 | 2023-01-01..2023-12-31 | 2023-03-24..2023-04-13,3,3,2,3,7527,2180000,3,3,3a: 2; 3b: 1,3a: 2; 3b: 1,0
+tested|India|unspecified|g02,tested,India,unspecified,2024-12-07..2025-12-30 | 2024-12-07..2026-11-08,4,4,2,4,15600000,110000000,6,4,agree: 2; 3a: 3; 4: 1,agree: 2; 3a: 3; 4: 1,0

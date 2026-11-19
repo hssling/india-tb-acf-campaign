@@ -36,6 +36,17 @@ pairs; the guard's per-State ratios (§9.5.2) are attached to the Q1216-Q3467 pa
 the label late-report-consistent for 2024 ratios above 1.05. The §9.2 named-list counts
 (counts of list rows, not printed figures) are classified by the same decision order.
 
+Two sets are written (§13, 19 November 2026). The registered set applies the rules above
+as registered (outputs/q2_*.csv). The corrected set, a post-hoc deviation made after the
+registered output was seen, is written to outputs/q2_*_corrected.csv: D1, a figure's span
+is [window_start, window_end] where window_end is printed (as_on extends it only where
+window_end is blank); where two spans are then equal and both cut-offs are stated, the
+§7.3 later-cut-off direction is read from the cut-offs; D2, printed sector parts
+(q1_consistency.sector_keyword) are not grouped; D3, class 1 follows the corrected Q1
+checks (check 1 within one printed table or paragraph). `other:` rows of Q1 never feed
+class 1 (§5.1). outputs/q2_summary_registered_vs_corrected.csv sets the counts side by
+side; outputs/q2_not_formed.csv lists candidate pairs the rules do not group.
+
 Run: python -I src/q2_reconcile.py   (runs the Q1 checks in memory for class 1)
 Standard library only (§11).
 """
@@ -97,15 +108,20 @@ def stated(r) -> bool:
     return bool(r["window_start"]) and bool(r["window_end"] or r["as_on"])
 
 
-def span(r) -> tuple[date, date]:
+def span(r, corrected: bool = False) -> tuple[date, date]:
+    """Registered (§7.1): [window_start, the later of window_end and as_on]. Corrected
+    (D1, §13, 19 November 2026): [window_start, window_end] where window_end is printed;
+    as_on extends the span only where window_end is blank."""
+    if corrected and r["window_end"]:
+        return date.fromisoformat(r["window_start"]), date.fromisoformat(r["window_end"])
     ends = [date.fromisoformat(x) for x in (r["window_end"], r["as_on"]) if x]
     return date.fromisoformat(r["window_start"]), max(ends)
 
 
-def related(a, b) -> list[str]:
+def related(a, b, corrected: bool = False) -> list[str]:
     out = []
     if stated(a) and stated(b):
-        (a0, a1), (b0, b1) = span(a), span(b)
+        (a0, a1), (b0, b1) = span(a, corrected), span(b, corrected)
         if a0 <= b1 and b0 <= a1:
             out.append("windows overlap")
     if a["window_label"] and a["window_label"] == b["window_label"]:
@@ -134,16 +150,26 @@ def _window_text(r) -> str:
 
 # --------------------------------------------------------------- decision order (§7.3)
 
-def _window_class(a, b):
+def _window_class(a, b, corrected: bool = False):
     if not (stated(a) and stated(b)):
         return None
     if (a["window_start"], a["window_end"], a["as_on"]) == (
             b["window_start"], b["window_end"], b["as_on"]):
         return None
-    sa, sb = span(a), span(b)
+    sa, sb = span(a, corrected), span(b, corrected)
     ia, ib = q1.interval(a), q1.interval(b)
     text = f"spans {sa[0]}..{sa[1]} and {sb[0]}..{sb[1]}"
     if sa == sb:
+        if corrected and a["as_on"] and b["as_on"] and a["as_on"] != b["as_on"]:
+            # D1 keeps as_on out of the span, so the §7.3 "later cut-off" is read from
+            # the two stated cut-offs of the same window
+            late, early, which = (ia, ib, "first") if a["as_on"] > b["as_on"] else (
+                ib, ia, "second")
+            text += f"; same window, cut-offs {a['as_on']} and {b['as_on']}"
+            if late[1] < early[0]:
+                return "3b", (text + f": the {which} (later cut-off) gives the smaller value, "
+                              "which the cut-offs do not explain")
+            return "3a", text + f": the {which} (later cut-off) gives the larger value"
         return "3a", text + "; equal spans (§7.3: the row is 3a)"
     if sa[0] <= sb[0] and sb[1] <= sa[1]:
         big, small, which = ia, ib, "first"
@@ -158,7 +184,7 @@ def _window_class(a, b):
     return "3a", text + f"; {rel}: the {which} (later or longer) gives the larger value"
 
 
-def classify(a, b, failed, cumulative_failed=frozenset()) -> dict:
+def classify(a, b, failed, cumulative_failed=frozenset(), corrected: bool = False) -> dict:
     """§7.3 class of a disagreeing pair of figures. `failed`: fig_id -> failed checks
     1-3 (q1_consistency.failures); `cumulative_failed`: frozensets of fig_id pairs that
     fail check 4."""
@@ -175,7 +201,7 @@ def classify(a, b, failed, cumulative_failed=frozenset()) -> dict:
     if ca and cb and "unspecified" not in (ca, cb) and ca != cb:
         found.append(("2", f"definitions: '{a['definition_verbatim']}' ({ca}) vs "
                            f"'{b['definition_verbatim']}' ({cb})"))
-    w = _window_class(a, b)
+    w = _window_class(a, b, corrected)
     if w:
         found.append(w)
     if not found:
@@ -310,7 +336,8 @@ def _side(prefix, figs):
     }
 
 
-def _pair_row(key, q, geo, scope, ea, eb, fig_pairs, failed, cumf, guard, sector, origin):
+def _pair_row(key, q, geo, scope, ea, eb, fig_pairs, failed, cumf, guard, sector, origin,
+              corrected=False):
     bases = sorted({b for _, _, bs in fig_pairs for b in bs})
     agree = any(q1.overlap(f["_iv"], g["_iv"]) for f, g, _ in fig_pairs)
     rep = fig_pairs[0]
@@ -322,7 +349,7 @@ def _pair_row(key, q, geo, scope, ea, eb, fig_pairs, failed, cumf, guard, sector
            "agree": "yes" if agree else "no", "class": "", "class_label": "", "rule": "",
            "other_classes": "", "evidence": "", "origin": origin}
     if not agree:
-        results = [(classify(f, g, failed, cumf), f, g) for f, g, _ in fig_pairs]
+        results = [(classify(f, g, failed, cumf, corrected), f, g) for f, g, _ in fig_pairs]
         results.sort(key=lambda t: CLASSES.index(t[0]["cls"]))
         best, f, g = results[0]
         others = list(dict.fromkeys(best["others"] + [r["cls"] for r, _, _ in results[1:]
@@ -343,12 +370,20 @@ def _pair_row(key, q, geo, scope, ea, eb, fig_pairs, failed, cumf, guard, sector
     return row
 
 
-def compare(rows, failed, cumulative_failed=frozenset(), guard=None, sector=frozenset()):
-    """Pairs of entries per §7.1 and their §7.3 classes. Returns (pair rows, info)."""
+def compare(rows, failed, cumulative_failed=frozenset(), guard=None, sector=frozenset(),
+            corrected: bool = False):
+    """Pairs of entries per §7.1 and their §7.3 classes. Returns (pair rows, info).
+    corrected=True (§13, 19 November 2026, post hoc): D1 spans end at window_end where it
+    is printed; D2 printed sector parts (q1.sector_keyword) are not grouped (they are
+    listed in info['sector_excluded'] with the keyword that matched)."""
     figs, info = [], {"no_interval": [], "unrelated_entry_pairs": 0, "groups": [],
-                      "different_scope": []}
+                      "different_scope": [], "sector_excluded": []}
     for r in rows:
         if r["quantity"].startswith("other:"):
+            continue
+        kw = q1.sector_keyword(r) if corrected else ""
+        if kw:
+            info["sector_excluded"].append({"fig_id": r["fig_id"], "keyword": kw})
             continue
         iv = q1.interval(r)
         if iv is None:
@@ -364,7 +399,7 @@ def compare(rows, failed, cumulative_failed=frozenset(), guard=None, sector=froz
         seen = set()
         for f, g in combinations(fs, 2):
             if f["scope"] != g["scope"]:
-                bs = related(f, g)
+                bs = related(f, g, corrected)
                 if bs:
                     a, b = sorted([f, g], key=lambda x: (x["scope"], x["source_file"], x["value"]))
                     k = (a["scope"], a["source_file"], a["value"], b["scope"], b["source_file"],
@@ -386,7 +421,7 @@ def compare(rows, failed, cumulative_failed=frozenset(), guard=None, sector=froz
             find, union = _uf(len(members))
             rel = {}
             for i, j in combinations(range(len(members)), 2):
-                bs = related(members[i], members[j])
+                bs = related(members[i], members[j], corrected)
                 if bs:
                     rel[(i, j)] = bs
                     union(i, j)
@@ -417,7 +452,7 @@ def compare(rows, failed, cumulative_failed=frozenset(), guard=None, sector=froz
                     pair_rows.append(_pair_row(
                         key, q, geo, scope, [idx[i] for i in entries[ka]],
                         [idx[j] for j in entries[kb]], fp, failed, cumulative_failed, guard,
-                        sector, "§7.1 comparison group"))
+                        sector, "§7.1 comparison group", corrected))
                 out += pair_rows
                 info["groups"].append(_group_summary(key, q, geo, scope, idx, entries,
                                                      pair_rows))
@@ -617,7 +652,9 @@ def _write(path, columns, rows):
         w.writerows(rows)
 
 
-def pre_identified_status(pairs, guard) -> list[dict]:
+def pre_identified_status(pairs, guard, corrected: bool = False) -> list[dict]:
+    sector_note = ("the report's Public and Private columns are not grouped (D2)" if corrected
+                   else "includes the report's Public and Private columns (sector_part = yes)")
     def stats(rows):
         dis = [r for r in rows if r["agree"] == "no"]
         c = defaultdict(int)
@@ -637,13 +674,13 @@ def pre_identified_status(pairs, guard) -> list[dict]:
          "pre-specified"),
         ("LS Q261 2023 against the India TB Report 2024", "§7.4",
          lambda r: "LS Q261 2023" in r["pre_identified"], "run",
-         "includes the report's Public and Private columns (sector_part = yes)"),
+         sector_note),
         ("Q1216 against Q3467, 2023 and 2024 (guard)", "§7.4; §9.5.2",
          lambda r: "Q1216 against Q3467" in r["pre_identified"], "run",
          "guard ratios attached in the note column"),
         ("Q1216 2023 against the India TB Report 2024", "§7.4",
          lambda r: "Q1216 2023 against the India TB Report" in r["pre_identified"], "run",
-         "includes the report's Public and Private columns (sector_part = yes)"),
+         sector_note),
         ("Named list against the CTD table", "§9.2",
          lambda r: r["pre_identified"].startswith("§9.2"), "run", "four States differ"),
         ("RS Q420 (2025 full year) against Q1216 (exploratory)", "§13 (18 November 2026)",
@@ -670,40 +707,156 @@ def pre_identified_status(pairs, guard) -> list[dict]:
     return out
 
 
-def run(write: bool = True) -> dict:
-    inv = q1.load_inventory()
-    checks = q1.run_checks(inv, q1.load_quality())
+# ------------------------------------------------ candidates the rules cannot group
+
+# Candidate discrepancies named before this analysis whose figures the §7.1 rules may not
+# put in one group. Whether each pair is formed, and why not, is computed from the fields.
+NOT_FORMED_CANDIDATES = [
+    ("GHA2023: national ACF-diagnosed, S1 Annex against S2 Annex (and the Results sentence)",
+     ["GHA2023SM.s1.india.number-diagnosed-among-tested.tb_cases",
+      "GHA2023SM.s2.india.tb-acf-cases-diagnosed-among-tested-reported-as-acf-detected.tb_cases",
+      "GHA2023.freq.sentence.tb_cases"]),
+    ("PIB 2105575: 3.57 lakh (highlight bullet) against 3.5 lakh (body)",
+     ["PIB2105575.p003.s-since-the-launch-of-100-day-3-57-lakh.tb_cases",
+      "PIB2105575.p002.s-over-3-5-lakh-tb-patients.tb_cases"]),
+]
+NOT_FORMED_COLUMNS = ["candidate", "a_fig_id", "a_value_printed", "b_fig_id", "b_value_printed",
+                      "formed_registered", "formed_corrected", "reason"]
+
+
+def _why_not(a, b) -> str:
+    why = []
+    for f in ("quantity", "geography", "scope"):
+        if a[f] != b[f]:
+            why.append(f"{f} differs ('{a[f]}' / '{b[f]}')")
+    if not (stated(a) and stated(b)):
+        why.append("a window is unstated (" + "; ".join(
+            f"{r['fig_id']}: {'stated' if stated(r) else 'unstated'}" for r in (a, b)) + ")")
+    if not (a["window_label"] and a["window_label"] == b["window_label"]):
+        why.append(f"window labels are not identical and non-blank ('{a['window_label']}' / "
+                   f"'{b['window_label']}')")
+    if a["definition_class"] != b["definition_class"]:
+        why.append(f"definition classes '{a['definition_class']}' / '{b['definition_class']}'")
+    return "; ".join(why)
+
+
+def not_formed(inventory) -> list[dict]:
+    """The descriptive 'not formed' table: pairs the §7.1 rules do not group, with the
+    reason, and the national totals 9.02 crore / 3.01 lakh, searched for in the inventory."""
+    by_id = {r["fig_id"]: r for r in inventory}
+    out = []
+    for cand, ids in NOT_FORMED_CANDIDATES:
+        for x, y in combinations(ids, 2):
+            a, b = by_id[x], by_id[y]
+            same = all(a[f] == b[f] for f in ("quantity", "geography", "scope"))
+            fr = same and bool(related(a, b))
+            fc = same and bool(related(a, b, corrected=True))
+            out.append({"candidate": cand, "a_fig_id": x, "a_value_printed": a["value_printed"],
+                        "b_fig_id": y, "b_value_printed": b["value_printed"],
+                        "formed_registered": "yes" if fr else "no",
+                        "formed_corrected": "yes" if fc else "no",
+                        "reason": "" if fr and fc else _why_not(a, b)})
+    hits = [r["fig_id"] for r in inventory
+            if ("9.02" in r["value_printed"] and "cr" in r["value_printed"].lower())
+            or ("3.01" in r["value_printed"] and "lakh" in r["value_printed"].lower())]
+    out.append({"candidate": "national campaign totals 9.02 crore screened / 3.01 lakh",
+                "a_fig_id": " ".join(hits), "a_value_printed": "", "b_fig_id": "",
+                "b_value_printed": "", "formed_registered": "no", "formed_corrected": "no",
+                "reason": ("found in the inventory: " + " ".join(hits)) if hits else
+                ("not found in any include = yes official source: no figure printed as "
+                 "9.02 crore or 3.01 lakh is in data/figures_inventory.csv")})
+    return out
+
+
+# ------------------------------------------------------- the two sets and their summary
+
+def _class_counts(pairs) -> dict:
+    c = defaultdict(int)
+    for r in pairs:
+        c[r["class"] or "agree"] += 1
+    return c
+
+
+def summary_rows(reg, cor) -> list[dict]:
+    rows = []
+
+    def add(metric, a, b):
+        rows.append({"metric": metric, "registered": a, "corrected": b})
+    for name, sel in (("all", lambda r: True),
+                      ("pre-specified", lambda r: r["analysis"] == "pre-specified"),
+                      ("exploratory", lambda r: r["analysis"] == "exploratory")):
+        pr = [r for r in reg["pairs"] if sel(r)]
+        pc = [r for r in cor["pairs"] if sel(r)]
+        add(f"Q2 entry pairs ({name})", len(pr), len(pc))
+        cr, cc = _class_counts(pr), _class_counts(pc)
+        for k in ["agree"] + list(CLASSES):
+            add(f"Q2 {name}: {'agree' if k == 'agree' else 'class ' + k}", cr[k], cc[k])
+    add("Q2 comparison groups formed (§7.1)", len(reg["info"]["groups"]),
+        len(cor["info"]["groups"]))
+    add("Q2 named-list rows (§9.2)", sum(r["origin"].startswith("§9.2") for r in reg["pairs"]),
+        sum(r["origin"].startswith("§9.2") for r in cor["pairs"]))
+    add("Q2 different-scope pairs listed", len(reg["info"]["different_scope"]),
+        len(cor["info"]["different_scope"]))
+    add("Q2 sector-part figures not grouped (D2)", 0, len(cor["info"]["sector_excluded"]))
+    add("Q2 same-group entry pairs not directly related", reg["info"]["unrelated_entry_pairs"],
+        cor["info"]["unrelated_entry_pairs"])
+    for check in (q1.CHECK1, q1.CHECK2, q1.CHECK3, q1.CHECK4):
+        sr = q1.summary(reg["checks"]).get(check, {"yes": 0, "no": 0, "n/a": 0})
+        sc = q1.summary(cor["checks"]).get(check, {"yes": 0, "no": 0, "n/a": 0})
+        for k, lab in (("yes", "pass"), ("no", "fail"), ("n/a", "n/a")):
+            add(f"Q1 check {check}: {lab}", sr[k], sc[k])
+    return rows
+
+
+def run_set(inv, quality_rows, guard, corrected: bool) -> dict:
+    checks_all = q1.run_checks(inv, quality_rows, corrected=corrected)
+    checks, _ = q1.split_other(checks_all)
     failed = q1.failures(checks)
     cumf = frozenset(frozenset(r["_figs"]) for r in checks
                      if r["check"] == q1.CHECK4 and r["pass"] == "no")
-    guard = load_guard()
-    pairs, info = compare(inv, failed, cumf, guard, q1.sector_parts(checks))
+    sector = frozenset() if corrected else q1.sector_parts(checks_all)
+    pairs, info = compare(inv, failed, cumf, guard, sector, corrected=corrected)
     pairs += named_list_rows(inv, failed)
+    return {"pairs": pairs, "info": info, "checks": checks,
+            "pre": pre_identified_status(pairs, guard, corrected)}
+
+
+def run(write: bool = True) -> dict:
+    inv = q1.load_inventory()
+    guard = load_guard()
+    qrows = q1.load_quality()
+    reg = run_set(inv, qrows, guard, corrected=False)
+    cor = run_set(inv, qrows, guard, corrected=True)
     quality = quality_reconciliation(load_quality())
-    pre = pre_identified_status(pairs, guard)
+    nf = not_formed(inv)
+    summ = summary_rows(reg, cor)
     if write:
-        _write(OUT / "q2_discrepancies.csv", PAIR_COLUMNS, pairs)
-        _write(OUT / "q2_groups.csv", list(info["groups"][0].keys()), info["groups"])
-        _write(OUT / "q2_different_scope.csv", list(info["different_scope"][0].keys()),
-               info["different_scope"])
-        _write(OUT / "q2_pre_identified.csv", list(pre[0].keys()), pre)
+        for res, suf in ((reg, ""), (cor, "_corrected")):
+            info = res["info"]
+            _write(OUT / f"q2_discrepancies{suf}.csv", PAIR_COLUMNS, res["pairs"])
+            _write(OUT / f"q2_groups{suf}.csv", list(info["groups"][0].keys()), info["groups"])
+            _write(OUT / f"q2_different_scope{suf}.csv", list(info["different_scope"][0].keys()),
+                   info["different_scope"])
+            _write(OUT / f"q2_pre_identified{suf}.csv", list(res["pre"][0].keys()), res["pre"])
+        _write(OUT / "q2_sector_parts_corrected.csv", ["fig_id", "keyword"],
+               cor["info"]["sector_excluded"])
+        _write(OUT / "q2_not_formed.csv", NOT_FORMED_COLUMNS, nf)
+        _write(OUT / "q2_summary_registered_vs_corrected.csv",
+               ["metric", "registered", "corrected"], summ)
         _write(OUT / "q2_quality_studies.csv", QS_COLUMNS, quality)
-    return {"pairs": pairs, "info": info, "quality": quality, "pre": pre, "checks": checks}
+    return {"pairs": reg["pairs"], "info": reg["info"], "pre": reg["pre"],
+            "checks": reg["checks"], "corrected": cor, "quality": quality,
+            "not_formed": nf, "summary": summ}
 
 
 def main() -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     res = run()
-    pairs = res["pairs"]
-    c = defaultdict(int)
-    for r in pairs:
-        c[r["class"] or "agree"] += 1
-    print(f"groups {len(res['info']['groups'])}; entry pairs {len(pairs)}; "
-          + "; ".join(f"{k}: {c[k]}" for k in ["agree"] + list(CLASSES) if c[k]))
-    print(f"different-scope pairs {len(res['info']['different_scope'])}; figures without a "
-          f"single value {len(res['info']['no_interval'])}; same-group entry pairs not "
-          f"directly related {res['info']['unrelated_entry_pairs']}")
+    for name, r in (("registered", res), ("corrected", res["corrected"])):
+        c = _class_counts(r["pairs"])
+        print(f"{name}: groups {len(r['info']['groups'])}; entry pairs {len(r['pairs'])}; "
+              + "; ".join(f"{k}: {c[k]}" for k in ["agree"] + list(CLASSES) if c[k]))
     return 0
 
 

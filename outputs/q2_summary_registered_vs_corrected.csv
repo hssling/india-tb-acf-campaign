@@ -1,0 +1,39 @@
+metric,registered,corrected
+Q2 entry pairs (all),1765,974
+Q2 all: agree,345,344
+Q2 all: class 1,18,2
+Q2 all: class 2,2,4
+Q2 all: class 3a,849,450
+Q2 all: class 3b,167,35
+Q2 all: class 4,384,139
+Q2 entry pairs (pre-specified),1405,722
+Q2 pre-specified: agree,309,308
+Q2 pre-specified: class 1,18,2
+Q2 pre-specified: class 2,2,4
+Q2 pre-specified: class 3a,628,290
+Q2 pre-specified: class 3b,100,15
+Q2 pre-specified: class 4,348,103
+Q2 entry pairs (exploratory),360,252
+Q2 exploratory: agree,36,36
+Q2 exploratory: class 1,0,0
+Q2 exploratory: class 2,0,0
+Q2 exploratory: class 3a,221,160
+Q2 exploratory: class 3b,67,20
+Q2 exploratory: class 4,36,36
+Q2 comparison groups formed (§7.1),62,134
+Q2 named-list rows (§9.2),4,4
+Q2 different-scope pairs listed,249,177
+Q2 sector-part figures not grouped (D2),0,73
+Q2 same-group entry pairs not directly related,2170,3
+Q1 check 1 cascade does not grow: pass,805,776
+Q1 check 1 cascade does not grow: fail,4,0
+Q1 check 1 cascade does not grow: n/a,1,0
+Q1 check 2 percentage recomputes: pass,0,0
+Q1 check 2 percentage recomputes: fail,0,0
+Q1 check 2 percentage recomputes: n/a,1,1
+Q1 check 3 total equals the sum of its parts: pass,79,79
+Q1 check 3 total equals the sum of its parts: fail,5,5
+Q1 check 3 total equals the sum of its parts: n/a,0,0
+Q1 check 4 cumulative series never decreases: pass,0,0
+Q1 check 4 cumulative series never decreases: fail,0,0
+Q1 check 4 cumulative series never decreases: n/a,1,1

@@ -252,3 +252,108 @@ def test_real_quality_studies():
     assert out[("PGPH2025", "C1")]["numerator_n"] == "117"
     assert out[("PGPH2025", "C1")]["denominator_n"] == "7527"
     assert float(out[("PGPH2025", "C4")]["recomputed"]) == pytest.approx(581633 / 117, abs=0.05)
+
+
+# ------------------------------------- corrected set (§13, 19 November 2026; post hoc)
+
+def test_d1_span_ends_at_window_end_where_printed():
+    y23 = fig("a", "tb_cases", "100", source_file="A", window_start="2023-01-01",
+              window_end="2023-12-31", as_on="2026-02-06")
+    y25 = fig("b", "tb_cases", "90", source_file="B", window_start="2025-01-01",
+              window_end="2025-10-31")
+    assert q2.related(y23, y25) == ["windows overlap"]            # registered rule
+    assert q2.related(y23, y25, corrected=True) == []             # D1: different years
+    rows, _ = q2.compare([y23, y25], failed={}, corrected=True)
+    assert rows == []
+    # as_on still extends a span whose end is blank (a cumulative "since" figure)
+    since = fig("c", "screened", "10", source_file="A", window_start="2024-12-07",
+                as_on="2025-03-24", series_type="cumulative")
+    mid = fig("d", "screened", "20", source_file="B", window_start="2025-02-01",
+              window_end="2025-02-28")
+    assert q2.related(since, mid, corrected=True) == ["windows overlap"]
+    # same window, both cut-offs stated: the later cut-off giving the smaller value is 3b
+    q1216 = fig("e", "tb_cases", "100", source_file="A", window_start="2025-01-01",
+                window_end="2025-12-31", as_on="2026-02-06")
+    q420 = fig("f", "tb_cases", "110", source_file="B", window_start="2025-01-01",
+               window_end="2025-12-31", as_on="2026-01-21")
+    assert q2.classify(q1216, q420, failed={}, corrected=True)["cls"] == "3b"
+
+
+def _itr_rows():
+    t = "1.2. TB case notification"
+    col = "TB patients notified, n(% of achievement against target)"
+    common = dict(quantity="tb_cases", definition_class="notified", source_file="ITR",
+                  table_id="Annexure 1.2", window_start="2023-01-01", window_end="2023-12-31",
+                  geography="Bihar")
+    return [fig("pub", value="84049", context=f"{t} | {col}: Public | Bihar", **common),
+            fig("pri", value="102925", context=f"{t} | {col}: Private | Bihar", **common),
+            fig("tot", value="186974", context=f"{t} | {col}: Total | Bihar", **common)]
+
+
+def test_d2_sector_parts_not_grouped_but_summed():
+    itr = _itr_rows()
+    assert q1.sector_keyword(itr[0]) == "public"
+    assert q1.sector_keyword(itr[1]) == "private"
+    assert q1.sector_keyword(itr[2]) == ""
+    # a title naming one sector only is not a split
+    gha = fig("g", "tb_cases", "41659", table_id="S2 Annex", definition_class="diagnosed",
+              context="S2 Annex: total public notified TB cases and the ACF cases | "
+                      "TB ACF cases diagnosed | INDIA")
+    assert q1.sector_keyword(gha) == ""
+    other = fig("q", "tb_cases", "184706", source_file="Q", definition_class="notified",
+                window_start="2023-01-01", window_end="2023-12-31", geography="Bihar")
+    reg, _ = q2.compare(itr + [other], failed={})
+    assert any("pub" in r["a_fig_ids"] + r["b_fig_ids"] for r in reg)
+    cor, info = q2.compare(itr + [other], failed={}, corrected=True)
+    assert all("pub" not in r["a_fig_ids"] + r["b_fig_ids"] for r in cor)
+    assert all("pri" not in r["a_fig_ids"] + r["b_fig_ids"] for r in cor)
+    assert len(cor) == 1                                          # total vs Q only
+    assert {s["fig_id"]: s["keyword"] for s in info["sector_excluded"]} == {
+        "pub": "public", "pri": "private"}
+    c3 = [r for r in q1.run_checks(itr, corrected=True) if r["check"] == q1.CHECK3]
+    assert len(c3) == 1 and c3[0]["pass"] == "yes" and {"pub", "pri"} <= set(c3[0]["_figs"])
+
+
+def test_d3_cascade_within_one_printed_table_or_paragraph():
+    w = dict(window_start="2023-01-01", window_end="2023-12-31", source_file="ITR")
+    prose = fig("d", "tb_cases", "35438", definition_class="diagnosed", **w)
+    prose["page_or_para"] = "PDF page 54; para 2"
+    table = fig("n", "tb_cases", "2552257", definition_class="notified", table_id="Annexure 1.2",
+                **w)
+    table["page_or_para"] = "PDF page 188; Annexure 1.2"
+    reg = [r for r in q1.run_checks([prose, table]) if r["check"] == q1.CHECK1]
+    assert [r["pass"] for r in reg] == ["no"]                     # registered: one cell
+    cor = [r for r in q1.run_checks([prose, table], corrected=True) if r["check"] == q1.CHECK1]
+    assert cor == []                                              # D3: two printed cascades
+    same = dict(table, fig_id="d2", value="35438", value_printed="35438",
+                definition_class="diagnosed")
+    cor2 = [r for r in q1.run_checks([same, table], corrected=True) if r["check"] == q1.CHECK1]
+    assert [r["pass"] for r in cor2] == ["no"]                    # one table: compared
+    # Q2 class 1 follows the corrected check 1
+    other = fig("x", "tb_cases", "117", definition_class="diagnosed", source_file="P",
+                window_start="2023-01-01", window_end="2023-09-30")
+    rows = [prose, table, other]
+    f_reg = q1.failures(q1.run_checks(rows))
+    f_cor = q1.failures(q1.run_checks(rows, corrected=True))
+    c_reg = q2.classify(prose, other, failed=f_reg)["cls"]
+    c_cor = q2.classify(prose, other, failed=f_cor, corrected=True)["cls"]
+    assert c_reg == "1" and c_cor != "1"
+
+
+def test_no_other_quantity_in_q1_checks():
+    inv = q1.load_inventory()
+    other_ids = {r["fig_id"] for r in inv if r["quantity"].startswith("other:")}
+    for corrected in (False, True):
+        main, desc = q1.split_other(q1.run_checks(inv, q1.load_quality(), corrected=corrected))
+        assert desc and all(r.get("_other") for r in desc)
+        for r in main:
+            assert not other_ids & set(r["_figs"]), r["inputs"][:120]
+            assert not r.get("_other")
+    import csv as _csv
+    for name in ("q1_checks.csv", "q1_checks_corrected.csv"):
+        path = q1.ROOT / "outputs" / name
+        if path.exists():
+            with open(path, encoding="utf-8", newline="") as f:
+                for row in _csv.DictReader(f):
+                    toks = set(row["inputs"].replace(",", " ").replace(";", " ").split())
+                    assert not toks & other_ids, (name, row["inputs"][:120])
