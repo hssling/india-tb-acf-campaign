@@ -348,10 +348,12 @@ def render_figure3(d: dict):
     for p in sorted(pts, key=lambda p: -p["w"]):  # large circles first, small ones on top
         ax.scatter([p["E"]], [p["y"]], s=6 + 380 * p["w"] / wmax, facecolor=LIGHT, edgecolor="black",
                    linewidth=0.6, zorder=3)
-    for p in sorted(pts, key=lambda p: -p["w"])[:2]:  # the two heaviest States, named below their circle
+    above = {"Uttar Pradesh"}  # named above its circle: below it, the label would overlap a small point
+    for p in sorted(pts, key=lambda p: -p["w"])[:2]:  # the two heaviest States, named next to their circle
         r = (6 + 380 * p["w"] / wmax) ** 0.5 / 2
-        ax.annotate(p["name"], (p["E"], p["y"]), xytext=(0, -r - 2), textcoords="offset points",
-                    ha="center", va="top", fontsize=6.8)
+        up = p["name"] in above
+        ax.annotate(p["name"], (p["E"], p["y"]), xytext=(0, r + 2 if up else -r - 2), textcoords="offset points",
+                    ha="center", va="bottom" if up else "top", fontsize=6.8)
     ax.set_yscale("log")
     ax.set_ylim(1.5, 1000)  # headroom so the correlation annotation clears the highest point (Delhi)
     log_axis(ax.yaxis, [2, 5, 10, 20, 50, 100, 200, 500, 1000])
