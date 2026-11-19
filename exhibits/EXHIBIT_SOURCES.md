@@ -19,7 +19,8 @@ Every number in an exhibit is read from the files below (or is a count of their 
 | Figure 1 | Plotted claims | data/figures_inventory.csv | `value`, `qualifier`, `definition_class`, `pub_date` / `window_end` / `as_on`; selection rule in make_figures.py |
 | Figure 2 | Points | outputs/q4_states.csv | `E`, `x`, `w` (set D, computable, full-year and placebo contrasts) |
 | Figure 2 | Fit lines | outputs/q4_summary.csv | `gamma0`, `gamma1` (set D, `primary` and `placebo`) |
-| Table S1 | Q4 summary | outputs/q4_summary.csv | `gamma1`, intervals, `exp_0_1_gamma1`, `n`, `label` |
-| Table S2 | State-level yield | outputs/q3_yield_summary.csv | as Table 3, all States |
-| Table S3a, S3b | Discrepancy list | outputs/q2_discrepancies.csv, outputs/q2_discrepancies_corrected.csv | `a_value_printed`, `b_value_printed`, `class` |
-| Table S4 | Quality studies | outputs/q2_quality_studies.csv | `published_value`, `recomputed`, `ci95_low`, `ci95_high` |
+| Table S1 | Pairs and classes by comparison group | outputs/q2_discrepancies.csv, outputs/q2_discrepancies_corrected.csv | row counts by `group_key`, `agree`, `class` |
+| Supplementary data S1a, S1b | Every entry pair | outputs/q2_discrepancies.csv, outputs/q2_discrepancies_corrected.csv | one row per output row; columns in make_tables.DATA_COLUMNS (verbatim, or reader names of `quantity`, `scope`, `group_key`, `a_source`, `b_source`) |
+| Table S2 | Quality studies | outputs/q2_quality_studies.csv | `published_value`, `recomputed`, `ci95_low`, `ci95_high` |
+| Table S3 | State-level yield | outputs/q3_yield_summary.csv | as Table 3, all States |
+| Table S4 | Q4 summary | outputs/q4_summary.csv | `gamma1`, intervals, `exp_0_1_gamma1`, `n`, `label`; S2 row `loo_gamma1_min`, `loo_gamma1_max` |

@@ -624,7 +624,8 @@ def q3_wilson(x, n):
 def test_check_all_runs_every_check_and_pytest():
     names = [n for n, _ in check_all.STEPS]
     assert names == ["pytest -q", "check_plan_order", "check_deviations",
-                     "check_extraction_totals", "check_inventory", "check_outputs"]
+                     "check_extraction_totals", "check_inventory", "check_outputs",
+                     "check_manuscript_numbers", "check_docx_tie"]
 
 
 def test_every_check_script_has_main_and_the_repository_root():
@@ -632,3 +633,21 @@ def test_every_check_script_has_main_and_the_repository_root():
                 check_inventory, check_outputs):
         assert mod.ROOT == Path(__file__).resolve().parents[1]
         assert callable(mod.main)
+
+
+def test_edit_above_section13_reverted_later_is_still_flagged(repo):
+    """Every commit after registration is compared, not only HEAD."""
+    reg = commit(repo, {"docs/analysis_plan.md": PLAN}, "plan")
+    mid = commit(repo, {"docs/analysis_plan.md": PLAN.replace("Before.", "Changed.")}, "edit")
+    commit(repo, {"docs/analysis_plan.md": PLAN}, "revert")
+    bad = check_plan_order.problems(repo, reg, lgd=None)
+    assert len(bad) == 1 and bad[0].startswith(f"commit {mid[:7]}") and "above section 13" in bad[0]
+
+
+def test_renamed_outcome_file_is_matched_under_both_names(repo):
+    reg = commit(repo, {"docs/analysis_plan.md": PLAN, "data/extracted/notes.csv": "a\n1\n"}, "plan")
+    git(repo, "mv", "data/extracted/notes.csv", "data/extracted/pq_q9.csv")
+    git(repo, "commit", "-m", "rename")
+    lgd = commit(repo, {"docs/analysis_plan.md": PLAN + "\n**19 November 2026.** LGD.\n"}, "lgd")
+    bad = check_plan_order.problems(repo, reg, lgd=lgd)
+    assert len(bad) == 1 and "outcome data" in bad[0]

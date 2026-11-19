@@ -3,7 +3,7 @@
 ## Chosen journal: Public Health (Elsevier; Royal Society for Public Health), hybrid
 
 Source: https://www.sciencedirect.com/journal/public-health/publish/guide-for-authors
-Accessed: 20 November 2026. Article type: Original Research.
+Accessed: 19 November 2026. Article type: Original Research.
 
 - Length: at most 3,000 words.
 - Exhibits: at most 5 tables and figures together in the manuscript; further ones go online as supplementary material.

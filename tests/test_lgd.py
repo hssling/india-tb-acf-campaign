@@ -224,6 +224,6 @@ def test_evidence_manifest_matches_files():
     lines = (EVID / "MANIFEST.txt").read_text(encoding="utf-8").split("\n")
     pins = dict(reversed(ln.split("  ", 1)) for ln in lines
                 if ln and not ln.startswith("#"))
-    assert set(pins) == {"changes.csv", "rows.csv", "states.csv", "search_log.md"}
+    assert set(pins) == {"changes.csv", "rows.csv", "states.csv", "search_log.md", "NOTES.md"}
     for name, digest in pins.items():
         assert hashlib.sha256((EVID / name).read_bytes()).hexdigest() == digest, name

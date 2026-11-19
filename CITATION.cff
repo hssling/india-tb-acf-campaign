@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use this code or the analysis plan, please cite it as below."
 title: "India's active case-finding figures and the 100-day TB Mukt Bharat Abhiyaan: analysis code and pre-registered plan"
 abstract: >-
-  Pre-registered analysis plan, and the code that implements it, for a study
+  Pre-registered analysis plan, code, data and outputs of a study
   of India's published active case-finding (ACF) and TB Mukt Bharat Abhiyaan
   campaign figures: whether they are internally and mutually consistent,
   whether differences in definition, window or cut-off date explain their
@@ -10,6 +10,8 @@ abstract: >-
   notifications rose more, against each State's own trend, in States with a
   larger share of districts in phase 1 of the campaign.
 type: software
+version: "1.0.0"
+date-released: 2026-11-19
 authors:
   - family-names: "Siddalingaiah"
     given-names: "H S"

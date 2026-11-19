@@ -168,3 +168,77 @@ exit 1
 - The ordering rules (output or Q module before registration; outcome data before the LGD
   deviation commit 0ebcca1; CRLF conversion of the frozen text) are covered by temporary-git-repository
   tests in `tests/test_verification.py`, not by a scratch-clone rewrite of this history.
+
+## Manuscript and submission files (check_manuscript_numbers, check_docx_tie; mutate_manuscript.py)
+
+The manuscript (`manuscript/`, private and git-ignored) and the Public Health submission set
+built from it (`manuscript/submission/`, by `tools/build_submission.py`) were mutated by
+`python -I verification/mutate_manuscript.py --sweep` on 19 November 2026, against the working
+tree that became the commit adding this section. Each named mutation is applied to a fresh
+temporary copy of `manuscript/`; the real files are never written. Both checks are run on the
+copy: check_manuscript_numbers on the copied Markdown (against the committed outputs) and
+check_docx_tie on the copied Markdown and `.docx` files. The unmutated copy passes both (0
+problems each). A mutation whose anchor text is missing counts as NOT APPLIED and fails the run.
+Fixture tests: `tests/test_mutation_harness.py` and `tests/test_docx_tie.py`.
+
+| # | Kind | Mutation | Caught by |
+|---|------|----------|-----------|
+| 1a | number, docx only | 02 Results: 2,401 figures to 2,402 | check_docx_tie |
+| 1b | number, docx only | 01 title page: abstract word count 243 to 244 | check_docx_tie |
+| 2a | number, Markdown only | manuscript_src.md Results: 6,174 people to 6,175 | check_manuscript_numbers and check_docx_tie |
+| 2b | number, Markdown only | manuscript_src.md Abstract: 79 of 84 to 79 of 85 | check_manuscript_numbers and check_docx_tie |
+| 3a | author name, blinded docx | 02 Discussion: the author's name inserted in the text | check_docx_tie |
+| 3b | author name, blinded docx | 02 document properties: author (dc:creator) set to the author's name | check_docx_tie (BLINDING) |
+| 3c | author e-mail, blinded docx | 05 note under Table S2: the author's e-mail inserted | check_docx_tie |
+| 3d | repository URL, blinded docx | 02 Data availability: the blinding placeholder replaced by the repository URL | check_docx_tie |
+| 4a | reference number, Markdown | manuscript_src.md: citation ^19^ to ^24^ | check_manuscript_numbers and check_docx_tie |
+| 4b | reference number, docx only | 02: superscript citation 19 to 24 | check_docx_tie |
+| 4c | reference number, docx only | 02 References: entries 2 and 3 renumbered 3 and 2 | check_docx_tie |
+| 5a | table cell, docx only | 02 Table 3: 33.0 (32.7 to 33.2) to 33.1 | check_docx_tie |
+| 5b | table cell, docx only | 05 Table S3: 191.3 (87.7 to 416.8) to 191.4 | check_docx_tie |
+| 5c | table cell, Markdown only | tables.md Table 1: 2,401 to 2,402 | check_docx_tie |
+| 6a | gamma sign, Markdown | manuscript_src.md Results: γ1 was 0.042 to −0.042 | check_manuscript_numbers and check_docx_tie |
+| 6b | gamma sign, docx only | 02 Results: γ1 was 0.042 to −0.042 | check_docx_tie |
+| 6c | gamma sign, docx only | 05 Table S4: placebo γ1 −0.119 to 0.119 | check_docx_tie |
+| 7a | internal identifier, Markdown | manuscript_src.md Methods: "(RS Q1216)" inserted | check_manuscript_numbers and check_docx_tie |
+| 7b | internal identifier, docx only | 02 Discussion: "(Task 7)" inserted | check_docx_tie |
+| 7c | internal identifier, docx only | 05 note under Table S2: "ITR2024" inserted | check_docx_tie |
+
+```
+named mutations: 20 of 20 caught
+sweep, manuscript_src.md number tokens (check_manuscript_numbers): caught 410 of 410
+sweep, 02_manuscript_anonymised.docx number tokens (check_docx_tie): caught 942 of 942
+```
+
+The two sweeps change every number token, one at a time, by increasing its last digit (9
+becomes 0): in manuscript_src.md (every section but the References), checked by
+check_manuscript_numbers; and in the text of 02_manuscript_anonymised.docx (body, references
+and tables), checked by check_docx_tie.
+
+Mutation 5c (a table cell edited in tables.md only) is caught by the tie, not by
+check_manuscript_numbers, which scans tables.md for wording and blinding only; the table values
+themselves are traced to `outputs/` by `exhibits/make_tables.py` (`trace.json`) and its tests.
+Building the set also exposed a defect the tie caught at once: a Table S1a/S1b cell holding two
+printed forms ("73,772 | 73772") split into an extra column in tables.md, and pandoc dropped
+the last cell of those two rows. `exhibits/make_tables.py` now escapes a `|` inside a cell.
+
+### Supplementary data files and journal italics (19 November 2026, second run)
+
+After the full discrepancy lists left the supplement for Supplementary data S1a and S1b (CSV and
+XLSX; Table S1 now summarises the pairs by comparison group) and journal titles were set in
+italics, `python -I verification/mutate_manuscript.py` was rerun on the rebuilt set: mutations
+1a to 7c as above were again all caught (anchors in 05 now point to Tables S2 to S4), and four
+were added:
+
+| # | Kind | Mutation | Caught by |
+|---|------|----------|-----------|
+| 8a | supplementary data, CSV | 09 (S1a): first A value 347 to 348 | check_docx_tie (verbatim column and SHA-256 against outputs/) |
+| 8b | supplementary data, CSV | 10 (S1b): last row deleted | check_docx_tie (973 rows against 974 in the output) |
+| 8c | supplementary data, XLSX | 11, sheet S1b: cell K2 (A value, printed) set to 999 | check_docx_tie (XLSX differs from the CSV) |
+| 9a | AMA italics, docx only | 02 References: italics removed from the first journal title | check_docx_tie (ITALICS) |
+
+```
+named mutations: 24 of 24 caught
+```
+
+The number-token sweeps were not rerun for this change.

@@ -1,0 +1,35 @@
+# Adapted from hssling/india-state-tb-score (MIT), manuscript/word_count_word.ps1, commit 05bcaa7; modified: Public Health limits; the main text ends at the first heading after Discussion; JSON keys per section
+# Count the abstract and the main text of the anonymised manuscript in Microsoft Word.
+# Usage: powershell -NoProfile -File word_count_word.ps1 <docx> <out.json>
+# Opens its own Word instance (read-only, hidden) and quits only that instance.
+# Abstract: the paragraphs between the "Abstract" heading and the Keywords line (its run-in
+# headings Objectives ... Conclusions included, Keywords excluded).
+# Main text: Introduction to Discussion, headings excluded, run-in bold subheadings included;
+# it ends at the first heading after Discussion (Ethical approval). Tables are not counted.
+param([string]$Docx, [string]$Out)
+$word = New-Object -ComObject Word.Application
+$word.Visible = $false
+$word.DisplayAlerts = 0
+try {
+  $d = $word.Documents.Open($Docx, $false, $true)
+  $state = ""; $abs = 0; $main = 0; $sec = @{}; $cur = ""
+  foreach ($p in $d.Paragraphs) {
+    $t = $p.Range.Text.Trim()
+    $isHeading = $p.OutlineLevel -lt 10
+    if ($isHeading) {
+      if ($t -eq "Abstract") { $state = "abs" }
+      elseif ($t -in @("Introduction", "Methods", "Results", "Discussion")) { $state = "main"; $cur = $t; $sec[$t] = 0 }
+      else { $state = "" }
+      continue
+    }
+    if ($t -like "Keywords:*") { $state = "" ; continue }
+    if ($p.Range.Information(12)) { continue }          # inside a table
+    $n = $p.Range.ComputeStatistics(0)
+    if ($state -eq "abs") { $abs += $n }
+    if ($state -eq "main") { $main += $n; $sec[$cur] += $n }
+  }
+  $pages = $d.ComputeStatistics(2)
+  $d.Close(0)
+  $json = '{"abstract": ' + $abs + ', "main_text": ' + $main + ', "sections": {"Introduction": ' + $sec["Introduction"] + ', "Methods": ' + $sec["Methods"] + ', "Results": ' + $sec["Results"] + ', "Discussion": ' + $sec["Discussion"] + '}, "pages": ' + $pages + '}'
+  Set-Content -Path $Out -Value $json -Encoding ascii
+} finally { $word.Quit() }

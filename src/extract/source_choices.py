@@ -797,10 +797,54 @@ def pq_more_rows() -> list[dict]:
     return rows
 
 
+ADD_DATE = "2026-11-19"
+DELHI_URL = ("https://revenue.delhi.gov.in/sites/default/files/revenue/generic_multiple_files/"
+             "268793_list.pdf")
+DELHI_SHA = "a4952090be78fca89a2c79d52908877a33de3b62bc06c4ca7e9e91c7210a0ca9"
+
+
+def release_rows() -> list[dict]:
+    """Dated addendum at release (19 November 2026; additions only, no earlier row changed):
+    a cross-reference from Q3T-PQ to the Part E answers obtained later, and the re-reading of
+    the Delhi notice behind LGD-C-DL-04 from page images."""
+    d = ADD_DATE
+    return [
+        _rec("ADD-01", "Q3 tables (§8.4)", "data/source_choices.csv", "Q3T-PQ; PQE-01 to PQE-06",
+             "Cross-reference (Q3T-PQ is left as written): Q3T-PQ records that the five "
+             "parliamentary answers that might print a State ACF table (Rajya Sabha Q. 414 of "
+             "6 Feb 2024, Q. 278, Q. 279 and Q. 2051 of 2025; Lok Sabha Q. 79) were not "
+             "obtained. They were obtained later, supplied by the author, and entered as the "
+             "Part E addendum (PQE-01 to PQE-06)",
+             "none of the five prints a State ACF table (PQE-02 to PQE-06: no Q3 table); the "
+             "Q3 tables (Q3T-2018 to Q3T-2023) and outputs/q3_yield.csv are unchanged",
+             "§5.4 (dated addendum, additions only); §8.3; §8.4",
+             "PQE-02 to PQE-06; data/extracted/pq_q414_annexurei_<year>.csv and "
+             "pq_q414_annexureii_<year>.csv (programme-wide tables, no ACF numerator)", d),
+        _rec("ADD-02", "LGD denominator", DELHI_URL,
+             "Delhi Gazette Extraordinary, Part IV, printed pages 20-33: Revenue Department "
+             "notification F. 223/SDM-II(HQ)/Land/2025/285 of 25 December 2025; Table I on "
+             "pages 20-21",
+             "Re-reading of the notice behind LGD-C-DL-04 (Shahdara abolished): the 14 pages "
+             "of the cached copy of the online document (SHA-256 " + DELHI_SHA + ") were "
+             "rendered to images and read by eye",
+             "consistent with the coding, counts unchanged (Delhi 11 at 7 December 2024; "
+             "LGD-S-DELHI): the notice opens 'In supersession of all previous notifications "
+             "on the subject' and creates 'thirteen (13) Areas'; Table I lists 13 Areas "
+             "(South East, Old Delhi, North, New Delhi, Central, Central North, South West, "
+             "Outer North, North West, North East, East, South, West); Shahdara is not an "
+             "Area and appears only as Sub-Division 4 of North East. The notice names no "
+             "district as abolished, so the abolition stays an inference (changes.csv DL-04)",
+             "§13 (19 November 2026, district denominator from official notices)",
+             "data/lgd_evidence/NOTES.md; data/lgd_evidence/changes.csv DL-01 to DL-04; the "
+             "Delhi Food, Supplies and Consumer Affairs order of 2 January 2026 calls the "
+             "same 13 units '13 Revenue Districts'", d),
+    ]
+
+
 def build() -> list[dict]:
     rows = (exposure() + lgd() + labels_() + totals() + named() + scope() + quality()
             + general() + q4() + outcome_tables() + trend() + coarsening() + q3_tables()
-            + guard_rows() + online_rows() + pq_more_rows())
+            + guard_rows() + online_rows() + pq_more_rows() + release_rows())
     ids = [r["decision_id"] for r in rows]
     dup = sorted({i for i in ids if ids.count(i) > 1})
     if dup:

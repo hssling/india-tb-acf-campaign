@@ -230,13 +230,13 @@ def test_source_choices_addendum_is_dated_and_rebuilds():
     # existing frozen rows are unchanged: no SCO row names a Part D page
     assert not [r for r in rows if r["decision_id"].startswith("SCO-")
                 and r["source_file"] in W.OWN_FILES]
-    # appended after the guard addendum, as one block (later addenda, e.g. Part E's
-    # PQE rows, follow it)
+    # appended after the guard addendum, as one block (later addenda, Part E's PQE rows
+    # and the release addendum's ADD rows, follow it)
     idx = [k for k, r in enumerate(rows) if r["decision_id"].startswith("WEB-")]
     assert idx == list(range(idx[0], idx[0] + len(web)))
     assert max(k for k, r in enumerate(rows) if r["decision_id"].startswith("GRD-")) \
         < idx[0]
-    assert all(r["decision_id"].startswith("PQE-") for r in rows[idx[-1] + 1:])
+    assert all(r["decision_id"].startswith(("PQE-", "ADD-")) for r in rows[idx[-1] + 1:])
     assert _read(CHOICES) == [{k: str(v) for k, v in r.items()} for r in rows]
 
 

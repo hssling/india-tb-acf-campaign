@@ -104,10 +104,12 @@ def test_source_choices_part_e_addendum():
     assert any("MHA" in r["decision"] and r["result"].startswith("unavailable")
                for r in e)
     assert all(r["date"] == "2026-11-19" for r in e)
-    # the addendum follows every frozen row
+    # the addendum follows every frozen row; only the later release addendum (ADD-) follows it
     ids = [r["decision_id"] for r in rows]
     assert ids.index(e[0]["decision_id"]) > max(
-        k for k, i in enumerate(ids) if not i.startswith("PQE-"))
+        k for k, i in enumerate(ids) if not i.startswith(("PQE-", "ADD-")))
+    assert ids.index(e[-1]["decision_id"]) < min(
+        k for k, i in enumerate(ids) if i.startswith("ADD-"))
     path = ROOT / "data/source_choices.csv"
     assert _read(path) == [{k: str(v) for k, v in r.items()} for r in rows]
 
@@ -156,3 +158,18 @@ def test_pqe10_records_the_archive_copy():
     assert ("http://web.archive.org/web/20250503135936/https://www.mha.gov.in/sites/"
             "default/files/AdvisoryPR_08012025.pdf") in r["evidence"]
     assert "not obtained" in r["evidence"] and "2026-11-19" in r["evidence"]
+
+
+def test_release_addendum_is_last_dated_and_additions_only():
+    from src.extract import source_choices as S
+    rows = S.build()
+    ids = [r["decision_id"] for r in rows]
+    add = [r for r in rows if r["decision_id"].startswith("ADD-")]
+    assert [r["decision_id"] for r in add] == ["ADD-01", "ADD-02"] and ids[-2:] == ["ADD-01", "ADD-02"]
+    assert all(r["date"] == "2026-11-19" for r in add)
+    assert "Q3T-PQ" in add[0]["locator"] and "no Q3 table" in add[0]["result"]
+    assert "Shahdara" in add[1]["decision"] and "counts unchanged" in add[1]["result"]
+    assert "supersession of all previous notifications" in add[1]["result"]
+    # the rows it cross-references are unchanged
+    q3t = next(r for r in rows if r["decision_id"] == "Q3T-PQ")
+    assert "were not obtained in this task" in q3t["decision"]

@@ -14,7 +14,7 @@ A search result led to the LGD NAPIX web service:
 - **Judgement:** these records are treated as "the LGD public page for that district". They are an official LGD public data feed, not an HTML district page.
 - The feed shows only the latest transaction per district. History, including abolished districts, is not available: `/status/inactive` and `/status/all` return 404.
 
-Note on downloads: WebFetch's harness automatically cached the binary of every PDF or YAML it fetched, under `C:\Users\hssli\.claude\projects\D--onehealth-amr-meta-nma\6790650e-8cd6-4d3d-bfa1-dd563fae2783\tool-results\webfetch-17950*.{pdf,bin}`. These caches were not saved on purpose.
+Note on downloads: WebFetch's harness automatically cached the binary of every PDF or YAML it fetched, in the tool's local cache (files named `webfetch-17950*.{pdf,bin}`). These caches were not saved on purpose.
 - Some image-only PDFs were readable only through those caches (Read/pdftotext), and they were read that way: the Delhi gazette, the Delhi FSD order, the CEO Delhi map, the Ladakh release, the Arunachal Act and the Assam guardian-minister notifications.
 - The LGD YAML was parsed from its cache into the scratchpad.
 - The author may wish to delete these caches.

@@ -14,7 +14,8 @@ import make_tables as mt  # noqa: E402
 
 PLAIN = {"Data year", "Class", "Quantity and scope", "Evidence", "Row", "Source table", "Analysis", "Study",
          "Indicator", "Geography", "Scope", "A source", "B source", "Quantity", "Class of entry pair", "State",
-         "Denominator", "Label", "Status", "Published", "Source"}
+         "Denominator", "Label", "Status", "Published", "Source", "Source of A", "Source of B",
+         "Quantity, geography and scope", "Group"}
 
 
 def read(rel):
@@ -84,7 +85,7 @@ def test_spot_checks_against_outputs(built):
     assert f"{float(r['value']):,.0f}" in row[5]
     assert f"{int(r['denominator']):,}" == row[2]
     q = {x["metric"]: x for x in read("outputs/q2_summary_registered_vs_corrected.csv")}
-    assert ex["Table 2"]["panels"][0][1][0][3] == f"{int(q['Q2 entry pairs (all)']['corrected']):,}"
+    assert ex["Table 2"]["panels"][0][1][0][4] == f"{int(q['Q2 entry pairs (all)']['corrected']):,}"
 
 
 def test_build_writes_local_files():
@@ -102,3 +103,45 @@ def test_figures_build():
     assert r.returncode == 0, r.stderr
     for n in ("figure1.png", "figure1.pdf", "figure2.png", "figure2.pdf"):
         assert (ROOT / "manuscript" / "exhibits" / n).stat().st_size > 5000
+
+
+def test_md_table_escapes_a_pipe_inside_a_cell():
+    out = mt.md_table(["A", "B"], [["73,772 | 73772", "41,659"]])
+    assert out.splitlines()[-1] == r"| 73,772 \| 73772 | 41,659 |"
+
+
+def test_table_s1_totals_equal_table_2(built):
+    ex, _ = built
+    rows = ex["Table S1"]["panels"][0][1]
+    t2 = ex["Table 2"]["panels"][0][1]
+    totals = [r for r in rows if r[1] == "All groups"]
+    assert [r[0] for r in totals] == ["Registered", "Corrected (post hoc)"]
+    for tot, col in zip(totals, (2, 4)):  # Table 2 columns: registered all, corrected all
+        assert tot[5] == t2[0][col] and tot[6] == t2[1][col]
+        assert tot[7:] == [r[col] for r in t2[2:7]]
+
+
+def test_supplementary_data_has_every_pair():
+    for _, f, _, _ in mt.Q2_SETS:
+        header, rows = mt.supplementary_data(f)
+        src = read(f)
+        assert len(rows) == len(src) and header == [h for h, _, _ in mt.DATA_COLUMNS]
+        j = header.index("Evidence")
+        assert all(r[j] == s["evidence"] for r in rows for s in [src[int(r[0]) - 1]])
+        assert mt.supplementary_data_bytes(f).decode("utf-8").count(chr(10)) >= len(src) + 1
+
+
+def test_table_2_evidence_is_short(built):
+    ex, _ = built
+    assert all(len(r[-1]) <= 40 for r in ex["Table 2"]["panels"][1][1])
+
+
+def test_make_figures_without_matplotlib_exits_1(tmp_path):
+    """Run directly with matplotlib hidden: a message on stderr and exit code 1."""
+    (tmp_path / "matplotlib.py").write_text("raise ImportError('hidden for the test')\n", encoding="utf-8")
+    code = ("import runpy, sys; sys.path.insert(0, sys.argv[1]); "
+            "runpy.run_path(sys.argv[2], run_name='__main__')")
+    r = subprocess.run([sys.executable, "-I", "-c", code, str(tmp_path),
+                        str(ROOT / "exhibits" / "make_figures.py")], cwd=tmp_path,
+                       capture_output=True, text=True)
+    assert r.returncode == 1 and "matplotlib is not installed" in r.stderr and r.stdout == ""
