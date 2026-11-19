@@ -1,4 +1,5 @@
-"""Tests of verification/check_manuscript_numbers.py on synthetic manuscripts (fixtures).
+"""Tests of verification/check_manuscript_numbers.py on synthetic manuscripts (fixtures): the v1.0.0
+audit profile ("v1"). The extension profile ("ext") is tested in tests/test_manuscript_numbers_ext.py.
 
 The manuscript and its section phrases (manuscript/section_phrases.json) are private and never
 read here. Each fixture manuscript is built from the synthetic FIXTURE_PHRASES below, filled
@@ -19,6 +20,7 @@ from verification import check_all
 from verification import check_manuscript_numbers as cmn
 
 ROOT = Path(__file__).resolve().parents[1]
+V1_DIR = "manuscript/v1_audit"  # the v1.0.0 audit manuscript: profile "v1"
 INPUTS = [  # the files catalogue() and claims() read
     "outputs", "data/figures_inventory.csv", "data/search_log.csv",
     "data/extracted/exposure_checks_reconstructed.csv", "data/extracted/guard_result.csv",
@@ -60,7 +62,7 @@ FIXTURE_PHRASES: dict[str, list[str]] = {
 
 def fixture_text() -> str:
     """A manuscript made only of the fixture phrases, plus exhibit and reference scaffolding."""
-    cat = cmn.catalogue_cached(ROOT)
+    cat = cmn.catalogue_cached(ROOT, "v1")
     parts = []
     for name, phrases in FIXTURE_PHRASES.items():
         body = " ".join(cmn.fill(p, cat)[0] for p in phrases)
@@ -88,11 +90,11 @@ def text() -> str:
 
 @pytest.fixture(scope="module")
 def gold(text) -> dict:
-    return cmn.golden(text, ROOT, FIXTURE_PHRASES)["sections"]
+    return cmn.golden(text, ROOT, FIXTURE_PHRASES, "v1")["sections"]
 
 
 def probs(t: str, g: dict | None) -> list[str]:
-    return cmn.problems(ROOT, t, g, required=FIXTURE_PHRASES)
+    return cmn.problems(ROOT, t, g, required=FIXTURE_PHRASES, profile="v1")
 
 
 # ------------------------------------------------------------------ formats
@@ -118,7 +120,7 @@ def test_wilson_matches_q3_outputs():
 # ------------------------------------------------------------------ catalogue and claims
 
 def test_catalogue_sources_name_existing_files():
-    for label, (value, source) in cmn.catalogue_cached(ROOT).items():
+    for label, (value, source) in cmn.catalogue_cached(ROOT, "v1").items():
         assert value, label
         if source.startswith("fixed"):
             continue
@@ -127,7 +129,7 @@ def test_catalogue_sources_name_existing_files():
 
 
 def test_catalogue_key_values():
-    cat = cmn.catalogue_cached(ROOT)
+    cat = cmn.catalogue_cached(ROOT, "v1")
     assert cat["q4.D.primary.g1"][0] == "0.042"
     assert cat["q4.D.primary.model"][0] == "0.003 to 0.081"
     assert cat["q4.D.primary.boot"][0] == "−0.025 to 0.100"
@@ -138,7 +140,7 @@ def test_catalogue_key_values():
 
 
 def test_claims_hold_on_committed_outputs():
-    assert cmn.claims(ROOT) == []
+    assert cmn.claims_v1(ROOT) == []
 
 
 # ------------------------------------------------------------------ the fixture passes
@@ -178,7 +180,7 @@ def test_extra_number_is_unaccounted(text, gold):
 
 
 def test_value_moved_to_another_section_is_caught(text, gold):
-    cat = cmn.catalogue_cached(ROOT)
+    cat = cmn.catalogue_cached(ROOT, "v1")
     ph = cmn.fill(FIXTURE_PHRASES["Results"][-1], cat)[0]
     t = text.replace(ph, "", 1).replace("## Ethical approval\n\n", "## Ethical approval\n\n" + ph + " ", 1)
     found = probs(t, gold)
@@ -187,7 +189,7 @@ def test_value_moved_to_another_section_is_caught(text, gold):
 
 
 def test_reordered_numbers_fail_the_golden_skeleton(text, gold):
-    cat = cmn.catalogue_cached(ROOT)
+    cat = cmn.catalogue_cached(ROOT, "v1")
     a = cmn.fill("Fixture intercept γ0 {q4.D.primary.g0}.", cat)[0]
     b = cmn.fill(next(x for x in FIXTURE_PHRASES["Results"] if x.startswith("Fixture ratio")), cat)[0]
     t = text.replace(a, "@@A@@").replace(b, a).replace("@@A@@", b)
@@ -299,7 +301,7 @@ def test_fails_on_a_malformed_phrases_file(tmp_path, body):
 
 
 def test_no_phrases_is_a_problem(text, gold):
-    assert any(p.startswith("PHRASES") for p in cmn.problems(ROOT, text, gold, required={}))
+    assert any(p.startswith("PHRASES") for p in cmn.problems(ROOT, text, gold, required={}, profile="v1"))
 
 
 def test_the_checker_holds_no_manuscript_phrases():
@@ -312,27 +314,27 @@ def test_end_to_end_regenerate_then_check(tmp_path, text):
         src, dst = ROOT / rel, tmp_path / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
         (shutil.copytree if src.is_dir() else shutil.copy2)(src, dst)
-    (tmp_path / cmn.DEFAULT_MS_DIR).mkdir(parents=True)
-    ms = tmp_path / cmn.DEFAULT_MS_DIR / cmn.MS_NAME
+    (tmp_path / V1_DIR).mkdir(parents=True)
+    ms = tmp_path / V1_DIR / cmn.MS_NAME
     ms.write_text(text, encoding="utf-8", newline="\n")
-    (tmp_path / cmn.DEFAULT_MS_DIR / cmn.PHRASES).write_text(json.dumps({"sections": FIXTURE_PHRASES}),
+    (tmp_path / V1_DIR / cmn.PHRASES).write_text(json.dumps({"sections": FIXTURE_PHRASES}),
                                                       encoding="utf-8")
-    code, out = run_main(tmp_path)
+    code, out = run_main(tmp_path, "--manuscript-dir", V1_DIR)
     assert code == 1 and "number_skeleton.json missing" in out
-    assert run_main(tmp_path, "--regenerate")[0] == 0
-    sk = json.loads((tmp_path / cmn.DEFAULT_MS_DIR / cmn.SKELETON).read_text(encoding="utf-8"))
+    assert run_main(tmp_path, "--manuscript-dir", V1_DIR, "--regenerate")[0] == 0
+    sk = json.loads((tmp_path / V1_DIR / cmn.SKELETON).read_text(encoding="utf-8"))
     assert set(sk) == {"about", "sections"}
-    code, out = run_main(tmp_path)
+    code, out = run_main(tmp_path, "--manuscript-dir", V1_DIR)
     assert code == 0 and out.strip().endswith("0 problem(s)"), out
     ms.write_text(text.replace("0.042", "0.043", 1), encoding="utf-8", newline="\n")
-    code, out = run_main(tmp_path)
+    code, out = run_main(tmp_path, "--manuscript-dir", V1_DIR)
     assert code == 1 and "MISSING in Abstract" in out
-    assert not re.search(r"\r", (tmp_path / cmn.DEFAULT_MS_DIR / cmn.SKELETON).read_bytes().decode("utf-8"))
+    assert not re.search(r"\r", (tmp_path / V1_DIR / cmn.SKELETON).read_bytes().decode("utf-8"))
 
 
 def test_regenerate_refuses_a_failing_text(text):
     with pytest.raises(SystemExit):
-        cmn.golden(text.replace("0.042", "0.043", 1), ROOT, FIXTURE_PHRASES)
+        cmn.golden(text.replace("0.042", "0.043", 1), ROOT, FIXTURE_PHRASES, "v1")
 
 
 def test_check_all_runs_the_manuscript_check():
@@ -358,7 +360,7 @@ def others(text) -> dict:
 
 
 def test_clean_other_files_pass(text, gold, others):
-    assert cmn.problems(ROOT, text, gold, others, required=FIXTURE_PHRASES) == []
+    assert cmn.problems(ROOT, text, gold, others, required=FIXTURE_PHRASES, profile="v1") == []
 
 
 def test_make_tables_formatter_matches_num3():
@@ -381,23 +383,23 @@ def test_make_tables_formatter_matches_num3():
 def test_other_files_are_scanned(text, gold, others, name, insert, expect):
     o = dict(others)
     o[name] = o[name] + insert
-    assert any(expect in p for p in cmn.problems(ROOT, text, gold, o, required=FIXTURE_PHRASES))
+    assert any(expect in p for p in cmn.problems(ROOT, text, gold, o, required=FIXTURE_PHRASES, profile="v1"))
 
 
 def test_blinding_of_the_tables(text, gold, others):
     o = dict(others)
     o["exhibits/tables.md"] += f"Prepared by {cmn.author_markers(ROOT)[0]}.\n"
-    found = cmn.problems(ROOT, text, gold, o, required=FIXTURE_PHRASES)
+    found = cmn.problems(ROOT, text, gold, o, required=FIXTURE_PHRASES, profile="v1")
     assert any(p.startswith("BLINDING in exhibits/tables.md") for p in found)
 
 
 def test_title_page_needs_one_doi_placeholder(text, gold, others):
     o = dict(others)
     o["first_page_src.md"] = o["first_page_src.md"].replace(cmn.DOI_PLACEHOLDER, "DOI to be added")
-    assert any("DOI placeholder" in p for p in cmn.problems(ROOT, text, gold, o, required=FIXTURE_PHRASES))
+    assert any("DOI placeholder" in p for p in cmn.problems(ROOT, text, gold, o, required=FIXTURE_PHRASES, profile="v1"))
 
 
 def test_ai_declaration_must_match_the_title_page(text, gold, others):
     o = dict(others)
     o["first_page_src.md"] = o["first_page_src.md"].replace("Claude Code", "Claude Code, and reviewed all code")
-    assert any(p.startswith("DECLARATION") for p in cmn.problems(ROOT, text, gold, o, required=FIXTURE_PHRASES))
+    assert any(p.startswith("DECLARATION") for p in cmn.problems(ROOT, text, gold, o, required=FIXTURE_PHRASES, profile="v1"))

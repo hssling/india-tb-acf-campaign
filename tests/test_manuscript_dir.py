@@ -70,7 +70,7 @@ def test_numbers_check_regenerates_into_the_named_folder(tmp_path, monkeypatch):
     ms.mkdir(parents=True)
     (ms / cmn.MS_NAME).write_text("# T\n", encoding="utf-8")
     (ms / cmn.PHRASES).write_text(json.dumps({"sections": {"Abstract": ["x"]}}), encoding="utf-8")
-    monkeypatch.setattr(cmn, "golden", lambda text, root, required: {"about": "", "sections": {}})
+    monkeypatch.setattr(cmn, "golden", lambda text, root, required, profile="ext": {"about": "", "sections": {}})
     code, out = run(cmn.main, tmp_path, ["--manuscript-dir", "manuscript/v1_audit", "--regenerate"])
     assert code == 0 and (ms / cmn.SKELETON).exists() and not (tmp_path / "manuscript" / cmn.SKELETON).exists()
     assert "manuscript/v1_audit/" + cmn.SKELETON in out

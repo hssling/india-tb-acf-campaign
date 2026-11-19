@@ -290,7 +290,8 @@ def cmn_problems(ms_dir: Path) -> list[str]:
     others = {n: (ms_dir / n).read_text(encoding="utf-8") for n in cmn.OTHER_FILES if (ms_dir / n).exists()}
     if not (ms_dir / cmn.PHRASES).exists():
         return [f"PHRASES: {cmn.PHRASES} missing"]
-    return cmn.problems(ROOT, text, gold, others, required=cmn.section_phrases(ms_dir))
+    return cmn.problems(ROOT, text, gold, others, required=cmn.section_phrases(ms_dir),
+                        profile=cmn.profile_for(ms_dir))
 
 
 def tie_problems(ms_dir: Path) -> list[str]:
@@ -418,7 +419,8 @@ def main(argv: list[str] | None = None, root: Path = ROOT) -> int:
         gold = json.loads((ms / cmn.SKELETON).read_text(encoding="utf-8"))["sections"]
         others = cmn.load_others(ms)
         required = cmn.section_phrases(ms)
-        c, t, e = sweep_md(text, lambda s: cmn.problems(root, s, gold, others, required=required))
+        prof = cmn.profile_for(ms)
+        c, t, e = sweep_md(text, lambda s: cmn.problems(root, s, gold, others, required=required, profile=prof))
         print(f"sweep, manuscript_src.md number tokens (check_manuscript_numbers): caught {c} of {t}")
         for x in e:
             print("  UNCAUGHT", x)

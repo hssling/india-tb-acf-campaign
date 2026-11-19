@@ -290,7 +290,7 @@ def table1(tr: Trace, fn: Notes):
     for a, name in (("stratum high", "Higher-intensity States" + strata), ("stratum low", "Lower-intensity States")):
         i = row_index(EL, analysis=a)
         rows.append(sub_row(name, EL, i, wls_sample(EL, i)))
-    rows.append(head_row("rho", fn.mark("weights", "Weighted by the number screened in 2023, so a few States with very large screening volumes carry most of the weight; the unweighted row counts each State once.")))
+    rows.append(head_row("rho", fn.mark("weights", "Weighted by the number screened in 2023, so a few States with very large screening volumes carry most of the weight (effective number of States about 3); the unweighted row counts each State once.")))
     i = row_index(AL, analysis="unweighted")
     rows.append(sub_row("Unweighted", AL, i, f"{tr.value(AL, i, 'n', 'round0')} States"))
     rows.append(head_row("theta"))
@@ -676,7 +676,7 @@ def main(argv: list[str] | None = None) -> int:
     out = Path(ap.parse_args(argv).out)
     out.mkdir(parents=True, exist_ok=True)
     ex, tr = build()
-    md = ["# Tables (generated from outputs/ext/ and outputs/ by exhibits/make_ext_tables.py)\n"]
+    md = ["# Tables\n"]
     for name, e in ex.items():
         md.append(f"## {name}. {e['title']}\n")
         for h, r in e["panels"]:
