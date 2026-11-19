@@ -10,6 +10,58 @@ Posterior and rank intervals reflect binomial sampling variance only, conditiona
 μ and τ² (plug-in); they omit between-year variation within a State and are therefore narrower
 than the true uncertainty.
 
+## Panel: data/ext/panel.csv and data/ext/panel_exclusions.csv
+
+Written by `python -I src/ext/panel.py` (plan §3) from the tables in `data/extracted/`. No
+estimate is computed there. Every analysis below reads this panel.
+
+### panel.csv (one row per unit per data year, sorted by unit, then year)
+
+There are 32 units in 2018 and 2019 and 35 in 2021–2023 (169 rows). A unit absent from a
+year's ACF table has no row in that year:
+
+- 2018 (India TB Report 2019): Madhya Pradesh, Manipur and Tripura (the table's notes say they
+  did not report separate ACF figures);
+- 2019 (India TB Report 2020): Chandigarh, Madhya Pradesh and Manipur. That edition's
+  notification annexure lists them, but a notification-only unit gets no row, so their 2019
+  notifications are not in the panel.
+
+| Column | Meaning |
+|---|---|
+| unit | coarsened unit (§3.2). Jammu and Kashmir and Ladakh are summed as `Jammu and Kashmir (incl. Ladakh)`, and Dadra and Nagar Haveli and Daman and Diu as one unit, in every year. A merged unit-year is blank (NA) if any member is NA |
+| year | data year: 2018, 2019, 2021, 2022 or 2023 (India TB Report 2019, 2020, 2022, 2023 and 2024; no edition covers 2020) |
+| screened, tested, diagnosed | people, as printed in the ACF annexure (2018: Annexure 1.7; later years: Annexure 6). The screened heading differs between editions (plan §3.1). Blank: NA in the source |
+| tested_definition | `tested`; `examined` in 2022, whose column counts people examined |
+| notified_public, notified_private, notified_total | TB notifications (people) from Annexure 1.2, for 2019, 2022 and 2023 only; blank in the other years |
+| est_population | estimated population in people (printed in lakhs; multiplied by 100,000), for 2019 and 2021 only. **Do not use the 2019 values**: see the flag `est_population_misaligned_itr2020` |
+| exposure_reconstructed, exposure_registered | E = min(1, c/L), the unit's share of districts in phase 1 of the campaign, with the reconstructed and the registered district denominator; the same in every year; blank where not computable |
+| small_ut | `yes` for the small UTs of §3.2 |
+| flags | `;`-separated, below |
+
+Flags:
+
+- `itr2023_states_not_india`: on every 2022 row. The State rows of the India TB Report 2023 do
+  not sum to its India row; the rows are used as printed, and the analyses leaving out 2022
+  cover the gap (§8).
+- `est_population_misaligned_itr2020`: on every 2019 row. The India TB Report 2020
+  estimated-population column is misaligned with its State rows as printed (plan §10,
+  19 November 2026; for example, Maharashtra 2019 reads 70,000 people). The values are kept as
+  printed so that the extraction can be checked against the source. No analysis uses them,
+  and nothing is realigned or imputed.
+- `member_zero_diagnosed:<members>`: a merged unit whose member is printed with zero diagnoses
+  while the unit's sum is positive. The only case is Jammu and Kashmir in 2021, where Ladakh
+  is printed 0; the unit enters with its summed count.
+- `exposure_registered_na`: the registered district denominator cannot be computed for the
+  unit, so `exposure_registered` is blank.
+
+### panel_exclusions.csv (one row per cell that is NA, zero or inconsistent)
+
+| Column | Meaning |
+|---|---|
+| unit, year | as in `panel.csv` |
+| field | the column concerned |
+| reason | NA in the source; zero diagnoses (left out of log-scale analyses, kept on the count and rank scale); zero screened; zero tested with diagnosed NA; diagnosed ≥ screened; or zero notifications |
+
 ## D1 part 1: pooled yield, shrinkage, ranks and tiers
 
 Written by `python -I src/ext/d1_yield.py` (plan §3.3, §4.1, §4.2). Analyses: each data year
@@ -388,8 +440,13 @@ Written by `python -I src/ext/d3_additionality.py` (plan §3.3, §6, §7.1, §9)
   more ACF diagnosis. It is an observational association. Were it causal, θ = 1 would
   correspond to full addition and θ = 0 to full substitution; these are reference values only.
   The null is 0. On the log scale θ is the proportional difference in notifications per
-  proportional difference in ACF diagnoses. The reference values 0 and 1 apply to the absolute scale only. Only three years overlap, so θ rests on
-  within-State change across three years.
+  proportional difference in ACF diagnoses. The reference values 0 and 1 apply to the
+  absolute scale only. Only three years overlap, so θ rests on within-State change across
+  three years.
+- **Unit-years without a panel row.** Chandigarh, Madhya Pradesh and Manipur have 2019
+  notifications in the India TB Report 2020 but no row in its ACF table, so they have no 2019
+  panel row (see the panel section above). Those unit-years are not in the estimation sample
+  and are not listed in `excluded`, which lists only panel rows.
 
 ### d3.csv (one row per specification: the main row, then the §7.1 grid order)
 

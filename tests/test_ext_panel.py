@@ -123,3 +123,22 @@ def test_national_totals():
             assert abs(S - nS) / nS < 0.05 and abs(D - nD) / nD < 0.05
         else:
             assert (S, D) == (nS, nD), (year, S, nS, D, nD)
+
+
+def test_2019_population_flagged_as_misaligned():
+    """The ITR 2020 population column is misaligned with its State rows as printed (plan
+    section 10): every 2019 row that carries it is flagged, and no other row is."""
+    rows = P.load_panel()
+    flag = "est_population_misaligned_itr2020"
+    for r in rows:
+        assert (flag in r["flags"].split(";")) == (
+            r["year"] == 2019 and r["est_population"] is not None), (r["unit"], r["year"])
+    assert sum(flag in r["flags"] for r in rows) == 32
+
+
+def test_committed_panel_files_equal_the_build(tmp_path):
+    rows, excl = P._cached()
+    P._write(tmp_path / "panel.csv", P.FIELDS, rows)
+    P._write(tmp_path / "panel_exclusions.csv", ("unit", "year", "field", "reason"), excl)
+    for name in ("panel.csv", "panel_exclusions.csv"):
+        assert (tmp_path / name).read_bytes() == (ROOT / "data" / "ext" / name).read_bytes(), name

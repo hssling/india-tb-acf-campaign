@@ -136,6 +136,10 @@ def _build() -> tuple:
             flags = []
             if year == 2022:
                 flags.append("itr2023_states_not_india")
+            if year == 2019 and Pop.get(u) is not None:
+                # ITR 2020 A6 population column misaligned with its State rows as printed
+                # (extension plan section 10, 19 November 2026): kept as printed, not used
+                flags.append("est_population_misaligned_itr2020")
             if u in zero_members:
                 flags.append("member_zero_diagnosed:" + "/".join(sorted(zero_members[u])))
             if expo_reg.get(u) is None:
