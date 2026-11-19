@@ -1,0 +1,285 @@
+section,unit,quantity,panel_year,panel_value,panel_source,study,study_table,study_period,study_value,study_derivation,note
+state 2021,Andaman and Nicobar Islands,screened,2021,284916,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,36104,printed,
+state 2021,Andaman and Nicobar Islands,tested,2021,2370,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,753,printed,
+state 2021,Andaman and Nicobar Islands,diagnosed,2021,65,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,20,printed,
+state 2021,Andaman and Nicobar Islands,population,2021,390000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,390690,printed,panel value is the ITR 2022 estimated population
+state 2021,Andaman and Nicobar Islands,acf_diagnosed_s2,2021,65,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,20,printed,panel value is 2021 ACF diagnosed
+state 2021,Andaman and Nicobar Islands,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,502,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Andaman and Nicobar Islands,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,4.0,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Andhra Pradesh,screened,2021,3487832,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,1862856,printed,
+state 2021,Andhra Pradesh,tested,2021,94610,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,77960,printed,
+state 2021,Andhra Pradesh,diagnosed,2021,3147,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,2560,printed,
+state 2021,Andhra Pradesh,population,2021,52890000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,52887016,printed,panel value is the ITR 2022 estimated population
+state 2021,Andhra Pradesh,acf_diagnosed_s2,2021,3147,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,2560,printed,panel value is 2021 ACF diagnosed
+state 2021,Andhra Pradesh,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,62100,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Andhra Pradesh,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,4.1,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Arunachal Pradesh,screened,2021,99903,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,112064,printed,
+state 2021,Arunachal Pradesh,tested,2021,2302,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,1633,printed,
+state 2021,Arunachal Pradesh,diagnosed,2021,83,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,77,printed,
+state 2021,Arunachal Pradesh,population,2021,1670000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,1667277,printed,panel value is the ITR 2022 estimated population
+state 2021,Arunachal Pradesh,acf_diagnosed_s2,2021,83,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,77,printed,panel value is 2021 ACF diagnosed
+state 2021,Arunachal Pradesh,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,2710,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Arunachal Pradesh,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,2.8,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Assam,screened,2021,138770,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,148890,printed,
+state 2021,Assam,tested,2021,10400,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,11038,printed,
+state 2021,Assam,diagnosed,2021,259,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,354,printed,
+state 2021,Assam,population,2021,35480000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,35475942,printed,panel value is the ITR 2022 estimated population
+state 2021,Assam,acf_diagnosed_s2,2021,259,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,354,printed,panel value is 2021 ACF diagnosed
+state 2021,Assam,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,29389,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Assam,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,1.2,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Bihar,screened,2021,1771794,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,1291776,printed,
+state 2021,Bihar,tested,2021,31485,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,31691,printed,
+state 2021,Bihar,diagnosed,2021,2912,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,2782,printed,
+state 2021,Bihar,population,2021,127090000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,116284977,printed,panel value is the ITR 2022 estimated population
+state 2021,Bihar,acf_diagnosed_s2,2021,2912,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,2782,printed,panel value is 2021 ACF diagnosed
+state 2021,Bihar,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,61467,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Bihar,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,4.5,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Chandigarh,screened,2021,6962,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,5968,printed,
+state 2021,Chandigarh,tested,2021,703,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,684,printed,
+state 2021,Chandigarh,diagnosed,2021,36,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,46,printed,
+state 2021,Chandigarh,population,2021,1190000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,1186275,printed,panel value is the ITR 2022 estimated population
+state 2021,Chandigarh,acf_diagnosed_s2,2021,36,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,46,printed,panel value is 2021 ACF diagnosed
+state 2021,Chandigarh,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,4220,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Chandigarh,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,1.1,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Chhattisgarh,screened,2021,26373567,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,2385625,printed,
+state 2021,Chhattisgarh,tested,2021,33338,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,7067,printed,
+state 2021,Chhattisgarh,diagnosed,2021,2300,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,509,printed,
+state 2021,Chhattisgarh,population,2021,30530000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,29579112,printed,panel value is the ITR 2022 estimated population
+state 2021,Chhattisgarh,acf_diagnosed_s2,2021,2300,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,509,printed,panel value is 2021 ACF diagnosed
+state 2021,Chhattisgarh,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,23644,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Chhattisgarh,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,2.2,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Dadra and Nagar Haveli and Daman and Diu,screened,2021,921614,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,33284,printed,
+state 2021,Dadra and Nagar Haveli and Daman and Diu,tested,2021,3092,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,47,printed,
+state 2021,Dadra and Nagar Haveli and Daman and Diu,diagnosed,2021,32,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,1,printed,
+state 2021,Dadra and Nagar Haveli and Daman and Diu,population,2021,830000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,73628,printed,panel value is the ITR 2022 estimated population
+state 2021,Dadra and Nagar Haveli and Daman and Diu,acf_diagnosed_s2,2021,32,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,1,printed,panel value is 2021 ACF diagnosed
+state 2021,Dadra and Nagar Haveli and Daman and Diu,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,948,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Dadra and Nagar Haveli and Daman and Diu,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,0.1,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Delhi,screened,2021,286859,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,94911,printed,
+state 2021,Delhi,tested,2021,5857,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,2344,printed,
+state 2021,Delhi,diagnosed,2021,1256,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,445,printed,
+state 2021,Delhi,population,2021,19300000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,14768333,printed,panel value is the ITR 2022 estimated population
+state 2021,Delhi,acf_diagnosed_s2,2021,1256,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,445,printed,panel value is 2021 ACF diagnosed
+state 2021,Delhi,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,67726,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Delhi,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,0.7,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Goa,screened,2021,127771,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,129059,printed,
+state 2021,Goa,tested,2021,576,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,760,printed,
+state 2021,Goa,diagnosed,2021,9,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,12,printed,
+state 2021,Goa,population,2021,1550000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,870632,printed,panel value is the ITR 2022 estimated population
+state 2021,Goa,acf_diagnosed_s2,2021,9,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,12,printed,panel value is 2021 ACF diagnosed
+state 2021,Goa,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,1648,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Goa,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,0.7,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Gujarat,screened,2021,30289260,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,24768417,printed,
+state 2021,Gujarat,tested,2021,288571,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,60350,printed,
+state 2021,Gujarat,diagnosed,2021,2716,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,2595,printed,
+state 2021,Gujarat,population,2021,70810000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,70805903,printed,panel value is the ITR 2022 estimated population
+state 2021,Gujarat,acf_diagnosed_s2,2021,2716,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,2595,printed,panel value is 2021 ACF diagnosed
+state 2021,Gujarat,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,92888,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Gujarat,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,2.8,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Haryana,screened,2021,10179622,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,4245206,printed,
+state 2021,Haryana,tested,2021,37449,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,22713,printed,
+state 2021,Haryana,diagnosed,2021,945,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,697,printed,
+state 2021,Haryana,population,2021,29910000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,29906244,printed,panel value is the ITR 2022 estimated population
+state 2021,Haryana,acf_diagnosed_s2,2021,945,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,1050,printed,panel value is 2021 ACF diagnosed
+state 2021,Haryana,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,45741,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Haryana,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,2.3,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Himachal Pradesh,screened,2021,5721350,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,467800,printed,
+state 2021,Himachal Pradesh,tested,2021,22270,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,1450,printed,
+state 2021,Himachal Pradesh,diagnosed,2021,1273,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,40,printed,
+state 2021,Himachal Pradesh,population,2021,7570000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,2601904,printed,panel value is the ITR 2022 estimated population
+state 2021,Himachal Pradesh,acf_diagnosed_s2,2021,1273,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,40,printed,panel value is 2021 ACF diagnosed
+state 2021,Himachal Pradesh,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,12997,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Himachal Pradesh,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,0.3,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Jammu and Kashmir (incl. Ladakh),screened,2021,2952861,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,2312138,summed over members: Jammu & Kashmir; Ladakh,
+state 2021,Jammu and Kashmir (incl. Ladakh),tested,2021,99679,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,78913,summed over members: Jammu & Kashmir; Ladakh,
+state 2021,Jammu and Kashmir (incl. Ladakh),diagnosed,2021,691,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,699,summed over members: Jammu & Kashmir; Ladakh,
+state 2021,Jammu and Kashmir (incl. Ladakh),population,2021,15100000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,15583815,summed over members: Jammu & Kashmir; Ladakh,panel value is the ITR 2022 estimated population
+state 2021,Jammu and Kashmir (incl. Ladakh),acf_diagnosed_s2,2021,691,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,699,summed over members: Jammu & Kashmir; Ladakh,panel value is 2021 ACF diagnosed
+state 2021,Jammu and Kashmir (incl. Ladakh),public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,9738,summed over members: Jammu & Kashmir; Ladakh,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Jammu and Kashmir (incl. Ladakh),acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,7.178065311152188,recomputed as 100 x summed S2 diagnosed / summed S2 public notified (merged unit),"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Jharkhand,screened,2021,11044041,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,112907,printed,
+state 2021,Jharkhand,tested,2021,13329,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,398,printed,
+state 2021,Jharkhand,diagnosed,2021,2005,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,73,printed,
+state 2021,Jharkhand,population,2021,40210000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,11295980,printed,panel value is the ITR 2022 estimated population
+state 2021,Jharkhand,acf_diagnosed_s2,2021,2005,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,73,printed,panel value is 2021 ACF diagnosed
+state 2021,Jharkhand,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,35146,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Jharkhand,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,0.2,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Karnataka,screened,2021,11092777,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,1068693,printed,
+state 2021,Karnataka,tested,2021,40358,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,6070,printed,
+state 2021,Karnataka,diagnosed,2021,689,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,183,printed,
+state 2021,Karnataka,population,2021,69330000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,52637107,printed,panel value is the ITR 2022 estimated population
+state 2021,Karnataka,acf_diagnosed_s2,2021,689,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,183,printed,panel value is 2021 ACF diagnosed
+state 2021,Karnataka,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,52922,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Karnataka,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,0.3,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Kerala,screened,2021,525907,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,250433,printed,
+state 2021,Kerala,tested,2021,18512,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,14249,printed,
+state 2021,Kerala,diagnosed,2021,435,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,307,printed,
+state 2021,Kerala,population,2021,34560000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,34559927,printed,panel value is the ITR 2022 estimated population
+state 2021,Kerala,acf_diagnosed_s2,2021,435,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,307,printed,panel value is 2021 ACF diagnosed
+state 2021,Kerala,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,15364,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Kerala,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,2.0,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Lakshadweep,screened,2021,971,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,957,printed,
+state 2021,Lakshadweep,tested,2021,495,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,504,printed,
+state 2021,Lakshadweep,diagnosed,2021,0,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,1,printed,
+state 2021,Lakshadweep,population,2021,70000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,66480,printed,panel value is the ITR 2022 estimated population
+state 2021,Lakshadweep,acf_diagnosed_s2,2021,0,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,1,printed,panel value is 2021 ACF diagnosed
+state 2021,Lakshadweep,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,12,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Lakshadweep,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,8.3,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Madhya Pradesh,screened,2021,6084648,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,3597418,printed,
+state 2021,Madhya Pradesh,tested,2021,91797,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,66488,printed,
+state 2021,Madhya Pradesh,diagnosed,2021,9732,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,4817,printed,
+state 2021,Madhya Pradesh,population,2021,85670000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,85670503,printed,panel value is the ITR 2022 estimated population
+state 2021,Madhya Pradesh,acf_diagnosed_s2,2021,9732,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,4817,printed,panel value is 2021 ACF diagnosed
+state 2021,Madhya Pradesh,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,110814,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Madhya Pradesh,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,4.3,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Maharashtra,screened,2021,16246964,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,16246964,printed,
+state 2021,Maharashtra,tested,2021,210575,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,217681,printed,
+state 2021,Maharashtra,diagnosed,2021,5443,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,5443,printed,
+state 2021,Maharashtra,population,2021,127230000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,127228338,printed,panel value is the ITR 2022 estimated population
+state 2021,Maharashtra,acf_diagnosed_s2,2021,5443,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,5443,printed,panel value is 2021 ACF diagnosed
+state 2021,Maharashtra,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,110136,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Maharashtra,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,4.9,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Manipur,screened,2021,142693,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,128199,printed,
+state 2021,Manipur,tested,2021,4365,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,5003,printed,
+state 2021,Manipur,diagnosed,2021,134,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,117,printed,
+state 2021,Manipur,population,2021,3170000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,3168531,printed,panel value is the ITR 2022 estimated population
+state 2021,Manipur,acf_diagnosed_s2,2021,134,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,117,printed,panel value is 2021 ACF diagnosed
+state 2021,Manipur,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,1251,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Manipur,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,9.4,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Meghalaya,screened,2021,977234,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,720901,printed,
+state 2021,Meghalaya,tested,2021,3662,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,4686,printed,
+state 2021,Meghalaya,diagnosed,2021,142,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,124,printed,
+state 2021,Meghalaya,population,2021,3740000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,3737760,printed,panel value is the ITR 2022 estimated population
+state 2021,Meghalaya,acf_diagnosed_s2,2021,142,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,124,printed,panel value is 2021 ACF diagnosed
+state 2021,Meghalaya,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,3281,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Meghalaya,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,3.8,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Mizoram,screened,2021,245261,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,236108,printed,
+state 2021,Mizoram,tested,2021,3504,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,3602,printed,
+state 2021,Mizoram,diagnosed,2021,36,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,35,printed,
+state 2021,Mizoram,population,2021,1280000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,1280292,printed,panel value is the ITR 2022 estimated population
+state 2021,Mizoram,acf_diagnosed_s2,2021,36,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,35,printed,panel value is 2021 ACF diagnosed
+state 2021,Mizoram,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,1480,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Mizoram,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,2.4,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Nagaland,screened,2021,34381,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,33235,printed,
+state 2021,Nagaland,tested,2021,2145,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,2025,printed,
+state 2021,Nagaland,diagnosed,2021,75,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,64,printed,
+state 2021,Nagaland,population,2021,2080000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,1816817,printed,panel value is the ITR 2022 estimated population
+state 2021,Nagaland,acf_diagnosed_s2,2021,75,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,64,printed,panel value is 2021 ACF diagnosed
+state 2021,Nagaland,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,2924,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Nagaland,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,2.2,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Odisha,screened,2021,4617869,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,49486,printed,
+state 2021,Odisha,tested,2021,122314,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,4564,printed,
+state 2021,Odisha,diagnosed,2021,5259,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,102,printed,
+state 2021,Odisha,population,2021,46810000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,9566816,printed,panel value is the ITR 2022 estimated population
+state 2021,Odisha,acf_diagnosed_s2,2021,5259,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,102,printed,panel value is 2021 ACF diagnosed
+state 2021,Odisha,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,45047,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Odisha,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,0.2,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Puducherry,screened,2021,202,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,,no row in the study table,
+state 2021,Puducherry,tested,2021,30,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,,no row in the study table,
+state 2021,Puducherry,diagnosed,2021,0,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,,no row in the study table,
+state 2021,Puducherry,population,2021,1520000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,,not printed (No ACF data available),panel value is the ITR 2022 estimated population
+state 2021,Puducherry,acf_diagnosed_s2,2021,0,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,,no row in the study table,panel value is 2021 ACF diagnosed
+state 2021,Puducherry,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,,not printed (No ACF data available),"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Puducherry,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,,no row in the study table,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Punjab,screened,2021,2533329,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,971570,printed,
+state 2021,Punjab,tested,2021,10981,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,1852,printed,
+state 2021,Punjab,diagnosed,2021,513,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,163,printed,
+state 2021,Punjab,population,2021,30990000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,16303082,printed,panel value is the ITR 2022 estimated population
+state 2021,Punjab,acf_diagnosed_s2,2021,513,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,163,printed,panel value is 2021 ACF diagnosed
+state 2021,Punjab,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,35870,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Punjab,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,0.5,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Rajasthan,screened,2021,6573206,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,7404754,printed,
+state 2021,Rajasthan,tested,2021,50601,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,47042,printed,
+state 2021,Rajasthan,diagnosed,2021,1771,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,1675,printed,
+state 2021,Rajasthan,population,2021,81170000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,79945990,printed,panel value is the ITR 2022 estimated population
+state 2021,Rajasthan,acf_diagnosed_s2,2021,1771,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,1675,printed,panel value is 2021 ACF diagnosed
+state 2021,Rajasthan,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,103011,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Rajasthan,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,1.6,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Sikkim,screened,2021,33412,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,31176,printed,
+state 2021,Sikkim,tested,2021,802,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,1107,printed,
+state 2021,Sikkim,diagnosed,2021,10,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,12,printed,
+state 2021,Sikkim,population,2021,670000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,667721,printed,panel value is the ITR 2022 estimated population
+state 2021,Sikkim,acf_diagnosed_s2,2021,10,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,12,printed,panel value is 2021 ACF diagnosed
+state 2021,Sikkim,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,1272,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Sikkim,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,0.9,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Tamil Nadu,screened,2021,1397431,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,909603,printed,
+state 2021,Tamil Nadu,tested,2021,55852,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,48564,printed,
+state 2021,Tamil Nadu,diagnosed,2021,1887,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,2033,printed,
+state 2021,Tamil Nadu,population,2021,82430000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,82430313,printed,panel value is the ITR 2022 estimated population
+state 2021,Tamil Nadu,acf_diagnosed_s2,2021,1887,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,2033,printed,panel value is 2021 ACF diagnosed
+state 2021,Tamil Nadu,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,64456,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Tamil Nadu,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,3.2,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Telangana,screened,2021,698133,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,531277,printed,
+state 2021,Telangana,tested,2021,63700,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,53118,printed,
+state 2021,Telangana,diagnosed,2021,2665,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,2058,printed,
+state 2021,Telangana,population,2021,38190000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,38191252,printed,panel value is the ITR 2022 estimated population
+state 2021,Telangana,acf_diagnosed_s2,2021,2665,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,2058,printed,panel value is 2021 ACF diagnosed
+state 2021,Telangana,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,41484,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Telangana,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,5.0,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Tripura,screened,2021,254856,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,249625,printed,
+state 2021,Tripura,tested,2021,3041,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,3058,printed,
+state 2021,Tripura,diagnosed,2021,39,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,262,printed,
+state 2021,Tripura,population,2021,3990000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,3988666,printed,panel value is the ITR 2022 estimated population
+state 2021,Tripura,acf_diagnosed_s2,2021,39,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,262,printed,panel value is 2021 ACF diagnosed
+state 2021,Tripura,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,2433,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Tripura,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,10.8,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Uttar Pradesh,screened,2021,67589474,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,38917120,printed,
+state 2021,Uttar Pradesh,tested,2021,232920,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,168335,printed,
+state 2021,Uttar Pradesh,diagnosed,2021,25080,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,10979,printed,
+state 2021,Uttar Pradesh,population,2021,236090000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,220006486,printed,panel value is the ITR 2022 estimated population
+state 2021,Uttar Pradesh,acf_diagnosed_s2,2021,25080,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,10979,printed,panel value is 2021 ACF diagnosed
+state 2021,Uttar Pradesh,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,314042,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Uttar Pradesh,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,3.5,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Uttarakhand,screened,2021,301447,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,303745,printed,
+state 2021,Uttarakhand,tested,2021,3612,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,4136,printed,
+state 2021,Uttarakhand,diagnosed,2021,278,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,285,printed,
+state 2021,Uttarakhand,population,2021,11800000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,10849621,printed,panel value is the ITR 2022 estimated population
+state 2021,Uttarakhand,acf_diagnosed_s2,2021,278,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,285,printed,panel value is 2021 ACF diagnosed
+state 2021,Uttarakhand,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,17290,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,Uttarakhand,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,1.6,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,West Bengal,screened,2021,10842545,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,6990818,printed,
+state 2021,West Bengal,tested,2021,187606,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,160416,printed,
+state 2021,West Bengal,diagnosed,2021,1855,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,1736,printed,
+state 2021,West Bengal,population,2021,100860000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,97550337,printed,panel value is the ITR 2022 estimated population
+state 2021,West Bengal,acf_diagnosed_s2,2021,1855,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,1736,printed,panel value is 2021 ACF diagnosed
+state 2021,West Bengal,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,69352,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,West Bengal,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,2.5,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,India,screened,2021,223879862,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,116649087,printed,panel value is the sum of the 35 panel units with a value (of 35); the study row is the printed India row
+state 2021,India,tested,2021,1752903,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,1110301,printed,panel value is the sum of the 35 panel units with a value (of 35); the study row is the printed India row
+state 2021,India,diagnosed,2021,73772,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,41306,printed,panel value is the sum of the 35 panel units with a value (of 35); the study row is the printed India row
+state 2021,India,population,2021,1396170000,ITR 2022 Annexure 6,GHA2023SM,S1 Annex,first ACF cycle 2021,1253043766,printed,panel value is the sum of the 35 panel units with a value (of 35); the study row is the printed India row; panel value is the ITR 2022 estimated population
+state 2021,India,acf_diagnosed_s2,2021,73772,ITR 2022 Annexure 6,GHA2023SM,S2 Annex,first ACF cycle 2021,41659,printed,panel value is the sum of the 35 panel units with a value (of 35); the study row is the printed India row; panel value is 2021 ACF diagnosed
+state 2021,India,public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,1443305,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+state 2021,India,acf_pct_of_public_notified,2021,,,GHA2023SM,S2 Annex,first ACF cycle 2021,2.9,printed,"the panel has no 2021 notifications (no ITR Annexure 1.2 for data year 2021 in the panel, plan section 3.1); study value shown alone"
+national cascade,India,screened,2018,189363887,"sum of 31 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",581633,printed,
+national cascade,India,tested,2018,1543810,"sum of 31 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",7527,printed,
+national cascade,India,diagnosed,2018,47307,"sum of 31 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",117,printed,
+national cascade,India,pct_tested_of_screened,2018,0.8152610428830076,"sum of 31 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",1.2941150175454281,computed from the printed counts,
+national cascade,India,pct_diagnosed_of_tested,2018,3.064301954256029,"sum of 31 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",1.5544041450777202,computed from the printed counts,
+national cascade,India,diagnosed_per_100k_screened,2018,24.982060069352084,"sum of 31 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",20.1157774747994,computed from the printed counts,
+national cascade,India,screened,2019,277358984,"sum of 31 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",581633,printed,
+national cascade,India,tested,2019,2046453,"sum of 31 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",7527,printed,
+national cascade,India,diagnosed,2019,62958,"sum of 31 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",117,printed,
+national cascade,India,pct_tested_of_screened,2019,0.7378354832739076,"sum of 31 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",1.2941150175454281,computed from the printed counts,
+national cascade,India,pct_diagnosed_of_tested,2019,3.076444951337754,"sum of 31 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",1.5544041450777202,computed from the printed counts,
+national cascade,India,diagnosed_per_100k_screened,2019,22.699102474358646,"sum of 31 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",20.1157774747994,computed from the printed counts,
+national cascade,India,screened,2021,223878689,"sum of 33 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",581633,printed,
+national cascade,India,tested,2021,1752378,"sum of 33 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",7527,printed,
+national cascade,India,diagnosed,2021,73772,"sum of 33 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",117,printed,
+national cascade,India,pct_tested_of_screened,2021,0.7827355108373,"sum of 33 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",1.2941150175454281,computed from the printed counts,
+national cascade,India,pct_diagnosed_of_tested,2021,4.209822310026718,"sum of 33 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",1.5544041450777202,computed from the printed counts,
+national cascade,India,diagnosed_per_100k_screened,2021,32.95177416373025,"sum of 33 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",20.1157774747994,computed from the printed counts,
+national cascade,India,screened,2022,221232074,"sum of 32 units with S, T and D present and positive (as d1_decomposition.csv); tested column: examined",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",581633,printed,2022 'tested' counts people examined (sensitivity only)
+national cascade,India,tested,2022,1945472,"sum of 32 units with S, T and D present and positive (as d1_decomposition.csv); tested column: examined",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",7527,printed,2022 'tested' counts people examined (sensitivity only)
+national cascade,India,diagnosed,2022,48278,"sum of 32 units with S, T and D present and positive (as d1_decomposition.csv); tested column: examined",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",117,printed,2022 'tested' counts people examined (sensitivity only)
+national cascade,India,pct_tested_of_screened,2022,0.8793806272412381,"sum of 32 units with S, T and D present and positive (as d1_decomposition.csv); tested column: examined",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",1.2941150175454281,computed from the printed counts,2022 'tested' counts people examined (sensitivity only)
+national cascade,India,pct_diagnosed_of_tested,2022,2.4815571748141325,"sum of 32 units with S, T and D present and positive (as d1_decomposition.csv); tested column: examined",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",1.5544041450777202,computed from the printed counts,2022 'tested' counts people examined (sensitivity only)
+national cascade,India,diagnosed_per_100k_screened,2022,21.822333049230465,"sum of 32 units with S, T and D present and positive (as d1_decomposition.csv); tested column: examined",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",20.1157774747994,computed from the printed counts,2022 'tested' counts people examined (sensitivity only)
+national cascade,India,screened,2023,205243097,"sum of 31 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",581633,printed,
+national cascade,India,tested,2023,2174513,"sum of 31 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",7527,printed,
+national cascade,India,diagnosed,2023,35438,"sum of 31 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",117,printed,
+national cascade,India,pct_tested_of_screened,2023,1.0594816740657542,"sum of 31 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",1.2941150175454281,computed from the printed counts,
+national cascade,India,pct_diagnosed_of_tested,2023,1.6296982358808616,"sum of 31 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",1.5544041450777202,computed from the printed counts,
+national cascade,India,diagnosed_per_100k_screened,2023,17.266354151730617,"sum of 31 units with S, T and D present and positive (as d1_decomposition.csv); tested column: tested",PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",20.1157774747994,computed from the printed counts,
+national cascade,India,presumptive,,,,PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",11357,printed,the panel has no presumptive-TB step
+national cascade,India,pct_tested_of_presumptive,,,,PGPH2025,"Table 2, row Total","January-September 2023, 30 sampled districts",66.2763053623316,computed from the printed counts,the panel has no presumptive-TB step
