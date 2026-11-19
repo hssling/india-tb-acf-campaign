@@ -3,11 +3,12 @@
 
 Run as: python -I verification/check_deviations.py
 
-- A line of an outputs/ file containing "exploratory" (any case) is logged if a dated
-  section 13 entry that says "exploratory" names the file, or names a question number
-  the line also names (Q420, AU1900, RSQ420 ...). A line naming no question is logged
-  if the file belongs to an analysis (q1_, q2_ ...) that such an entry names, or is the
-  outputs README.
+- A line of an outputs/ file containing "exploratory" (any case) is logged if one dated
+  section 13 entry that says "exploratory" names the file, or names a question number the
+  line also names (Q420, AU1900, RSQ420 ...) and the file's analysis (q2_ -> Q2) in the
+  same entry. The only exception: a line naming no question, in the outputs README, in
+  a summary file or the header line of a table, is logged if an exploratory entry names
+  the file's analysis (any, for the README).
 - A file whose name or text carries "corrected", "reconstructed" or "deviation"
   (outputs/ and data/extracted/*_reconstructed*) needs a dated entry containing that
   stem and naming the file or the file's analysis (q1_ -> Q1, ...).
@@ -60,7 +61,7 @@ def problems(root: Path = ROOT) -> tuple[list[str], list[str]]:
     entries = section13_entries(plan)
     texts = [t for _, t in entries]
     expl = [t for t in texts if "exploratory" in t.lower()]
-    expl_q = {n for t in expl for n in QNUM.findall(t)}
+    expl_q = [(t, set(QNUM.findall(t))) for t in expl]
     bad: list[str] = []
     ok: list[str] = []
     for f in _files(root):
@@ -70,15 +71,15 @@ def problems(root: Path = ROOT) -> tuple[list[str], list[str]]:
         area = _area(f.name)
         named = any(f.name in t or rel in t for t in expl)
         n_lines = unlogged = 0
-        for ln in text.splitlines():
+        for k, ln in enumerate(text.splitlines()):
             if "exploratory" not in ln.lower():
                 continue
             n_lines += 1
             qs = set(QNUM.findall(ln))
-            if named or (qs & expl_q):
+            if named or any(qs & nums and _mentions_area(t, area) for t, nums in expl_q):
                 continue
-            if not qs and (rel == "outputs/README.md" or (
-                    area and any(_mentions_area(t, area) for t in expl))):
+            summary_like = (rel == "outputs/README.md" or "summary" in f.name or k == 0)
+            if not qs and summary_like and any(_mentions_area(t, area) for t in expl):
                 continue
             unlogged += 1
         if unlogged:

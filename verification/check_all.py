@@ -1,5 +1,6 @@
 # Copied from hssling/india-state-tb-score (MIT), verification/check_all.py, commit 05bcaa7; modified: steps are pytest and the four checks of this repository (no analysis re-run, no manuscript checks); PASS/FAIL/SKIP labels
-"""Run the whole verification: pytest and the checks.
+"""Run the whole verification: pytest and the checks (plan order, deviations, extraction totals, inventory
+trace, recomputed Q3/Q4 outputs).
 
 Run as: python -I verification/check_all.py   (steps run from the repo root)
 
@@ -20,6 +21,7 @@ STEPS = [
     ("check_deviations", PY + ["verification/check_deviations.py"]),
     ("check_extraction_totals", PY + ["verification/check_extraction_totals.py"]),
     ("check_inventory", PY + ["verification/check_inventory.py"]),
+    ("check_outputs", PY + ["verification/check_outputs.py"]),
 ]
 
 

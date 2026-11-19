@@ -9,11 +9,13 @@ Run as: python -I verification/check_plan_order.py
    touching outputs/ or a Q computation module (src/q1_consistency.py,
    src/q2_reconcile.py, src/q3_yield.py, src/q4_dose_response.py).
 3. The LGD-deviation commit (0ebcca1, plan section 13) is a strict ancestor of every
-   commit that touched outcome data: data/extracted/pq_*.csv or itr20*_a1_2.csv.
+   commit that touched outcome data: data/extracted/**/pq_*.csv or itr20*_a1_2.csv (file
+   names matched at any depth over the full history, deletions and renames included).
 
 In a copy without .git (a release archive) the history cannot be checked: this prints
 "SKIPPED: not a git checkout ..." and exits 0; check_all counts the step as skipped.
 """
+import fnmatch
 import json
 import subprocess
 import sys
@@ -23,7 +25,8 @@ ROOT = Path(__file__).resolve().parents[1]
 LGD_DEVIATION = "0ebcca1"
 GUARDED = ("outputs", "src/q1_consistency.py", "src/q2_reconcile.py", "src/q3_yield.py",
            "src/q4_dose_response.py")
-OUTCOME_DATA = (":(glob)data/extracted/pq_*.csv", ":(glob)data/extracted/itr20*_a1_2.csv")
+OUTCOME_DIR = "data/extracted"
+OUTCOME_DATA = ("pq_*.csv", "itr20*_a1_2.csv")   # file-name patterns, at any depth
 PLAN = "docs/analysis_plan.md"
 HEADING = b"## 13. Deviations"
 
@@ -55,6 +58,20 @@ def plan_above_section13(repo: Path, rev: str) -> bytes:
     return data[:found[0]]
 
 
+def commits_touching_names(repo: Path, directory: str, patterns: tuple[str, ...]) -> list[str]:
+    """Commits (full history, no simplification) that touch a file under `directory`
+    whose base name matches a pattern, at any depth; deletions and renames included."""
+    out = git(repo, "log", "--full-history", "--name-only", "--format=%x00%H", "--",
+              directory).stdout
+    hits = []
+    for block in out.split("\x00")[1:]:
+        sha, *names = block.split("\n")
+        if any(fnmatch.fnmatchcase(n.rsplit("/", 1)[-1], pat) for n in names if n.strip()
+               for pat in patterns):
+            hits.append(sha.strip())
+    return hits
+
+
 def registered_commit(repo: Path) -> str:
     return json.loads((repo / "docs" / "registration_event.json")
                       .read_text(encoding="utf-8"))["registered_commit"]
@@ -68,7 +85,7 @@ def problems(repo: Path = ROOT, registration: str | None = None,
     reg = git(repo, "rev-parse", "--verify", f"{registration}^{{commit}}").stdout.strip()
     if not is_ancestor(repo, reg, "HEAD"):
         return [f"registration commit {registration[:7]} is not an ancestor of HEAD"]
-    for c in git(repo, "log", "--format=%H", "--", *guarded).stdout.split():
+    for c in git(repo, "log", "--full-history", "--format=%H", "--", *guarded).stdout.split():
         if c == reg or not is_ancestor(repo, reg, c):
             out.append(f"commit {c[:7]} touches outputs/ or a Q computation module but is "
                        f"not a descendant of the registration commit {registration[:7]}")
@@ -77,7 +94,7 @@ def problems(repo: Path = ROOT, registration: str | None = None,
                    f"commit {registration[:7]}")
     if lgd:
         lg = git(repo, "rev-parse", "--verify", f"{lgd}^{{commit}}").stdout.strip()
-        for c in git(repo, "log", "--format=%H", "--", *outcome).stdout.split():
+        for c in commits_touching_names(repo, OUTCOME_DIR, outcome):
             if c == lg or not is_ancestor(repo, lg, c):
                 out.append(f"commit {c[:7]} touches outcome data (pq_*.csv, itr20*_a1_2.csv) "
                            f"but the LGD-deviation commit {lgd} is not its strict ancestor")

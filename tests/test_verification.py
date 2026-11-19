@@ -1,13 +1,14 @@
 """Unit tests of the verification checks, on temporary fixtures (never the real repository)."""
 import csv
 import json
+import statistics
 import subprocess
 from pathlib import Path
 
 import pytest
 
 from verification import (check_all, check_deviations, check_extraction_totals,
-                          check_inventory, check_plan_order)
+                          check_inventory, check_outputs, check_plan_order)
 
 PLAN = "# Plan\n\nBefore.\n\n## 13. Deviations\n\n**18 November 2026.** None.\n"
 
@@ -81,6 +82,26 @@ def test_outcome_data_before_lgd_commit_is_flagged(repo):
     assert len(bad) == 1 and "outcome data" in bad[0]
 
 
+def test_outcome_file_in_a_subfolder_before_the_lgd_commit_is_flagged(repo):
+    reg = commit(repo, {"docs/analysis_plan.md": PLAN}, "plan")
+    commit(repo, {"data/extracted/sub/dir/pq_q9.csv": "a\n"}, "nested outcome data first")
+    lgd = commit(repo, {"docs/lgd.txt": "lgd\n"}, "lgd deviation")
+    bad = check_plan_order.problems(repo, reg, lgd=lgd)
+    assert len(bad) == 1 and "outcome data" in bad[0]
+
+
+def test_outcome_data_on_a_merged_side_branch_is_found_over_the_full_history(repo):
+    """History simplification would hide a side-branch commit whose change a merge drops."""
+    reg = commit(repo, {"docs/analysis_plan.md": PLAN}, "plan")
+    git(repo, "checkout", "-q", "-b", "side")
+    commit(repo, {"data/extracted/itr2023_a1_2.csv": "a\n"}, "outcome data on a side branch")
+    git(repo, "checkout", "-q", "-")
+    lgd = commit(repo, {"docs/lgd.txt": "lgd\n"}, "lgd deviation")
+    git(repo, "merge", "-q", "-s", "ours", "side", "-m", "merge, keeping our tree")
+    bad = check_plan_order.problems(repo, reg, lgd=lgd)
+    assert len(bad) == 1 and "outcome data" in bad[0]
+
+
 def test_registration_not_ancestor_is_flagged(repo):
     reg = commit(repo, {"docs/analysis_plan.md": PLAN}, "plan")
     git(repo, "checkout", "-q", "--orphan", "other")
@@ -135,7 +156,7 @@ def test_unlogged_exploratory_label_is_flagged_any_case(tmp_path):
 
 
 def test_exploratory_line_naming_a_logged_question_is_accepted(tmp_path):
-    _tree(tmp_path, LOGGED, {"q2_discrepancies.csv": "RSQ420.p003.x,exploratory\n"})
+    _tree(tmp_path, LOGGED, {"q2_discrepancies.csv": "h,analysis\nRSQ420.p003.x,exploratory\n"})
     assert check_deviations.problems(tmp_path)[0] == []
 
 
@@ -145,8 +166,29 @@ def test_exploratory_line_naming_an_unlogged_question_is_flagged(tmp_path):
 
 
 def test_exploratory_without_any_entry_is_flagged_even_for_a_logged_question(tmp_path):
-    _tree(tmp_path, PLAN, {"q2_discrepancies.csv": "RSQ420.p003.x,exploratory\n"})
+    _tree(tmp_path, PLAN, {"q2_discrepancies.csv": "h,analysis\nRSQ420.p003.x,exploratory\n"})
     assert len(check_deviations.problems(tmp_path)[0]) == 1
+
+
+def test_new_unlogged_q2_exploratory_line_is_flagged(tmp_path):
+    """A Q2 file is not blanket-covered by the Q420/Q1900 entry: a line naming no logged
+    question, or a logged question in an entry that does not name the analysis, fails."""
+    _tree(tmp_path / "a", LOGGED, {"q2_discrepancies.csv": "h,analysis\ng01,new check,exploratory\n"})
+    assert len(check_deviations.problems(tmp_path / "a")[0]) == 1
+    other = LOGGED.replace("exploratory Q2 cross-check", "exploratory cross-check")
+    _tree(tmp_path / "b", other, {"q2_discrepancies.csv": "h,analysis\nRSQ420.p003.x,exploratory\n"})
+    assert len(check_deviations.problems(tmp_path / "b")[0]) == 1
+    _tree(tmp_path / "c", LOGGED, {"q2_discrepancies.csv": "h,analysis\nRSQ420.p003.x,exploratory\n"})
+    assert check_deviations.problems(tmp_path / "c")[0] == []
+
+
+def test_summary_readme_and_header_lines_keep_the_fallback(tmp_path):
+    _tree(tmp_path, LOGGED, {"q2_summary.csv": "Q2 exploratory: agree,36\n",
+                             "q2_groups.csv": "key,n_entry_pairs_exploratory\n1,2\n",
+                             "README.md": "exploratory entry pairs.\n"})
+    assert check_deviations.problems(tmp_path)[0] == []
+    _tree(tmp_path / "x", LOGGED, {"q3_summary.csv": "Q3 exploratory: agree,36\n"})
+    assert len(check_deviations.problems(tmp_path / "x")[0]) == 1
 
 
 def test_corrected_set_needs_a_dated_entry(tmp_path):
@@ -269,12 +311,25 @@ def test_q4_source_check_recorded_result_must_match(tmp_path):
     assert any("column_check" in b for b in bad)
 
 
-# ------------------------------------------------------------------ inventory
+# ------------------------------------------------------------------ inventory (keyed)
 
 Q3_HEAD = ["state", "year", "indicator", "source_id", "numerator", "denominator", "status"]
 Q4_HEAD = ["denominator_set", "contrast", "unit", "a", "b", "n2019", "n2022", "n2023",
-           "n2024", "q261_2023", "itr2024_2023"]
+           "n2024", "q261_2023", "itr2024_2023", "computable"]
 MAN_HEAD = ["file", "url", "bytes", "sha256", "retrieved_utc", "note"]
+COL_HEAD = ["column", "canonical", "coarse_unit", "is_total", "value"]
+FULL, JANOCT, PLACEBO = (check_inventory.FULL, check_inventory.JANOCT,
+                         check_inventory.PLACEBO)
+
+
+def _col(path, column, values):
+    """An extracted table with one column: unit -> value (units 'U1', 'U2' ...)."""
+    rows = [{"column": column, "canonical": u, "coarse_unit": u, "is_total": "no",
+             "value": v} for u, v in values.items()]
+    if path.exists():  # several columns of one table
+        with open(path, newline="", encoding="utf-8") as f:
+            rows = list(csv.DictReader(f)) + rows
+    _csv(path, COL_HEAD, rows)
 
 
 def _inv_tree(root, inv_rows, q3_rows, q4_rows, online=("https://x.org/p",)):
@@ -284,21 +339,34 @@ def _inv_tree(root, inv_rows, q3_rows, q4_rows, online=("https://x.org/p",)):
     _csv(d / "transcribed" / "online_pages.csv", ["page_key", "url"],
          [{"page_key": "1", "url": u} for u in online])
     _csv(d / "transcribed" / "quality_studies_tables.csv", ["study", "url"], [])
-    _csv(d / "extracted" / "pq_q1.csv", EXTRACT_HEAD,
-         _extracted_rows(["10", "20"], "30", col="2024_notified"))
+    ex = d / "extracted"
+    # two figures of the same unit in the same table family: the trap of value-only matching
+    _col(ex / "pq_q1216.csv", "2024_notified", {"U1": "534", "U2": "20"})
+    _col(ex / "itr2020_a6_acf.csv", "diagnosed", {"U1": "10", "U2": "561"})
+    _col(ex / "itr2020_a6_acf.csv", "screened", {"U1": "5", "U2": "7"})
+    # the other Q4 source columns, with the same values as the first
+    for name, column in (("pq_q1216.csv", "2025_notified"), ("pq_q1216.csv", "2023_notified"),
+                         ("pq_q261.csv", "2024_jan_oct_reported"),
+                         ("pq_q261.csv", "2023_reported"),
+                         ("pq_q1093.csv", "2025_jan_oct_reported"),
+                         ("itr2020_a1_2.csv", "notified_total"),
+                         ("itr2023_a1_2.csv", "notified_total"),
+                         ("itr2024_a1_2.csv", "notified_total")):
+        _col(ex / name, column, {"U1": "534", "U2": "20"})
     _csv(root / "outputs" / "q3_yield.csv", Q3_HEAD, q3_rows)
     _csv(root / "outputs" / "q4_states.csv", Q4_HEAD, q4_rows)
 
 
 def _good():
-    inv = [{"fig_id": "A", "value": "5", "geography": "S0", "source_file": "data_raw/x.pdf"},
-           {"fig_id": "B", "value": "6", "geography": "S0", "source_file": "https://x.org/p"}]
-    q3 = [{"state": "S0", "year": 2024, "indicator": "nns", "source_id": "X",
+    inv = [{"fig_id": "A", "value": "5", "geography": "U1", "source_file": "data_raw/x.pdf"},
+           {"fig_id": "B", "value": "6", "geography": "U1", "source_file": "https://x.org/p"}]
+    q3 = [{"state": "U1", "year": 2019, "indicator": "nns", "source_id": "ITR2020-A6",
            "numerator": "10", "denominator": "5", "status": "computed"},
-          {"state": "S1", "year": 2024, "indicator": "nns", "source_id": "X",
+          {"state": "U2", "year": 2019, "indicator": "nns", "source_id": "ITR2020-A6",
            "numerator": "", "denominator": "", "status": "not_available"}]
-    q4 = [{"denominator_set": "R", "contrast": "c", "unit": "S1", "a": "20", "b": "20",
-           "n2024": "20"}]
+    q4 = [{"denominator_set": "R", "contrast": FULL, "unit": "U1", "a": "534", "b": "534",
+           "n2019": "534", "n2022": "534", "n2023": "534", "n2024": "534",
+           "computable": "yes"}]
     return inv, q3, q4
 
 
@@ -322,7 +390,7 @@ def test_inventory_online_page_must_be_transcribed(tmp_path):
     assert len(check_inventory.problems(tmp_path)[0]) == 1
 
 
-def test_q3_input_without_a_source_value_is_flagged(tmp_path):
+def test_q3_input_with_no_source_value_is_flagged(tmp_path):
     inv, q3, q4 = _good()
     q3[0]["denominator"] = "99"
     _inv_tree(tmp_path, inv, q3, q4)
@@ -330,12 +398,225 @@ def test_q3_input_without_a_source_value_is_flagged(tmp_path):
     assert len(bad) == 1 and "denominator" in bad[0]
 
 
-def test_q4_value_without_a_source_value_is_flagged(tmp_path):
+def test_q3_value_of_another_figure_of_the_state_is_flagged(tmp_path):
+    """U2's diagnosed count (561) exists in the table, but U1's numerator is 10."""
+    inv, q3, q4 = _good()
+    q3[0]["numerator"] = "561"
+    _inv_tree(tmp_path, inv, q3, q4)
+    bad = check_inventory.problems(tmp_path)[0]
+    assert len(bad) == 1 and "numerator" in bad[0]
+
+
+def test_q3_value_from_the_wrong_column_is_flagged(tmp_path):
+    """The numerator must be the diagnosed column, not the screened one."""
+    inv, q3, q4 = _good()
+    q3[0]["numerator"] = "5"
+    _inv_tree(tmp_path, inv, q3, q4)
+    assert len(check_inventory.problems(tmp_path)[0]) == 1
+
+
+def test_q4_value_with_no_source_value_is_flagged(tmp_path):
     inv, q3, q4 = _good()
     q4[0]["b"] = "21"
     _inv_tree(tmp_path, inv, q3, q4)
     bad = check_inventory.problems(tmp_path)[0]
-    assert len(bad) == 1 and "b=21" in bad[0]
+    assert len(bad) == 1 and " b:" in bad[0]
+
+
+def test_q4_a_taken_from_another_figure_of_the_same_unit_is_flagged(tmp_path):
+    """The 534 -> 561 mutation: 561 is a real figure of the unit (U2's value in another
+    table), but a must be the unit's 2024 notified count."""
+    inv, q3, q4 = _good()
+    q4[0]["a"] = "561"
+    _inv_tree(tmp_path, inv, q3, q4)
+    _col(tmp_path / "data" / "extracted" / "pq_q1093.csv", "2025_jan_oct_reported",
+         {"U1": "561"})  # 561 exists for U1 elsewhere
+    bad = check_inventory.problems(tmp_path)[0]
+    assert len(bad) == 1 and " a:" in bad[0]
+
+
+def test_q4_trend_value_must_come_from_its_own_year_table(tmp_path):
+    inv, q3, q4 = _good()
+    q4[0]["n2019"] = "534"      # ITR2020 A1.2 holds 400 for U1 below
+    _inv_tree(tmp_path, inv, q3, q4)
+    _col(tmp_path / "data" / "extracted" / "itr2020_a1_2.csv", "notified_total", {"U1": "400"})
+    bad = check_inventory.problems(tmp_path)[0]
+    assert len(bad) == 1 and "n2019" in bad[0]
+
+
+def test_q4_jan_oct_a_comes_from_q261_not_q1216(tmp_path):
+    inv, q3, q4 = _good()
+    q4[0].update(contrast=JANOCT, a="534", b="534")
+    _inv_tree(tmp_path, inv, q3, q4)
+    _col(tmp_path / "data" / "extracted" / "pq_q261.csv", "2024_jan_oct_reported",
+         {"U1": "445"})
+    bad = check_inventory.problems(tmp_path)[0]
+    assert any(" a:" in b and "pq_q261.csv" in b for b in bad)
+
+
+# ------------------------------------------------------------------ derived outputs
+
+Z975 = statistics.NormalDist().inv_cdf(0.975)
+Q4_FULL_HEAD = ["denominator_set", "contrast", "unit", "a", "b", "y", "y_poisson_lo",
+                "y_poisson_hi", "trend_points_used", "n2019", "n2022", "n2023", "n2024",
+                "beta", "x", "E", "w", "computable"]
+SUMMARY_HEAD = ["analysis", "denominator_set", "contrast", "n", "t_df", "gamma0",
+                "gamma0_model_lo", "gamma0_model_hi", "gamma1", "se_gamma1", "t_0975",
+                "gamma1_model_lo", "gamma1_model_hi", "exp_gamma1"]
+UNITS = {"U1": (2, 10, 1000, 990, 1010, 1040, 1100, 1120),
+         "U2": (3, 10, 500, 520, 530, 550, 640, 600),
+         "U3": (5, 10, 800, 805, 790, 810, 860, 880),
+         "U4": (7, 10, 300, 330, 345, 360, 380, 420),
+         "U5": (10, 10, 2000, 2100, 2150, 2300, 2400, 2350)}  # c, L, n19, n22, n23, n24, a, b
+
+
+def _f6(v):
+    return "" if v is None else f"{v:.6f}"
+
+
+def _outputs_tree(root):
+    ex = root / "data" / "extracted"
+    for dset, name in check_outputs.EXPOSURE.items():
+        _csv(ex / name, ["unit", "campaign_count", "lgd_count", "computable"],
+             [{"unit": u, "campaign_count": v[0], "lgd_count": v[1], "computable": "yes"}
+              for u, v in UNITS.items()])
+    _csv(ex / "guard_result.csv", ["item", "value"],
+         [{"item": "primary contrast", "value": FULL}])
+    expo = check_outputs.exposure(root, "R")
+    rows, recs = [], {}
+    for dset in ("R", "D"):
+        for contrast in (FULL, JANOCT, PLACEBO):
+            for u, (c, L, n19, n22, n23, n24, a, b) in UNITS.items():
+                if contrast == PLACEBO:
+                    a, b, n24 = n22, n23, None
+                if contrast == JANOCT:
+                    a, b = a - 40, b - 30
+                r = {"denominator_set": dset, "contrast": contrast, "unit": u, "a": a,
+                     "b": b, "n2019": n19, "n2022": n22, "n2023": n23, "n2024": n24 or ""}
+                e = check_outputs.recompute_row({k: str(v) for k, v in r.items()}, expo)
+                r.update(y=_f6(e["y"]), y_poisson_lo=_f6(e["lo"]), y_poisson_hi=_f6(e["hi"]),
+                         trend_points_used=e["used"], beta=_f6(e["beta"]), x=_f6(e["x"]),
+                         E=_f6(e["E"]), w=_f6(e["w"]), computable=e["computable"])
+                rows.append(r)
+                recs.setdefault((dset, contrast), []).append(
+                    {"x": e["x"], "E": e["E"], "w": e["w"]})
+    _csv(root / "outputs" / "q4_states.csv", Q4_FULL_HEAD, rows)
+    summ = []
+    for analysis, contrast in check_outputs.MODELS.items():
+        for dset in ("R", "D"):
+            rs = recs[(dset, contrast)]
+            fit = check_outputs.wls([r["E"] for r in rs], [r["x"] for r in rs],
+                                    [r["w"] for r in rs])
+            row = {"analysis": analysis, "denominator_set": dset, "contrast": contrast,
+                   "n": fit["n"], "t_df": fit["df"]}
+            row.update({k: _f6(fit[k]) for k in SUMMARY_HEAD[5:]})
+            summ.append(row)
+    _csv(root / "outputs" / "q4_summary.csv", SUMMARY_HEAD, summ)
+    q3 = []
+    for ind, x, d in (("yield_diagnosed_per_100000", 47, 1200), ("nns", 47, 1200),
+                      ("nns", 0, 953), ("acf_share_of_public_sector_notifications_pct",
+                                         20, 400)):
+        lo, hi = check_outputs.wilson(x, d)
+        if ind == "yield_diagnosed_per_100000":
+            v = (1e5 * x / d, 1e5 * lo, 1e5 * hi)
+        elif ind == "nns":
+            v = (d / x if x else None, 1 / hi, 1 / lo if lo else "unbounded")
+        else:
+            v = (100 * x / d, 100 * lo, 100 * hi)
+        q3.append({"state": "U1", "year": 2019, "indicator": ind, "source_id": "S",
+                   "numerator": x, "denominator": d,
+                   "value": _f6(v[0]), "lower": _f6(v[1]),
+                   "upper": v[2] if v[2] == "unbounded" else _f6(v[2]),
+                   "status": "computed" if x else "not_computable"})
+    _csv(root / "outputs" / "q3_yield.csv", ["state", "year", "indicator", "source_id",
+                                              "numerator", "denominator", "value", "lower",
+                                              "upper", "status"], q3)
+
+
+def _edit(path, fn):
+    rows = list(csv.DictReader(open(path, encoding="utf-8")))
+    head = list(rows[0])
+    fn(rows)
+    _csv(Path(path), head, rows)
+
+
+def test_outputs_clean_fixture_passes(tmp_path):
+    _outputs_tree(tmp_path)
+    assert check_outputs.problems(tmp_path)[0] == []
+
+
+def test_beta_edit_in_q4_states_is_caught(tmp_path):
+    _outputs_tree(tmp_path)
+    _edit(tmp_path / "outputs" / "q4_states.csv",
+          lambda rows: rows[0].update(beta=f"{float(rows[0]['beta']) + 0.01:.6f}"))
+    bad = check_outputs.problems(tmp_path)[0]
+    assert any("beta is" in b and "U1" in b for b in bad)
+
+
+def test_gamma1_edit_in_q4_summary_is_caught(tmp_path):
+    _outputs_tree(tmp_path)
+    _edit(tmp_path / "outputs" / "q4_summary.csv",
+          lambda rows: rows[0].update(gamma1=f"{float(rows[0]['gamma1']) + 0.01:.6f}"))
+    bad = check_outputs.problems(tmp_path)[0]
+    assert len(bad) == 1 and "gamma1 is" in bad[0] and "primary (R)" in bad[0]
+
+
+def test_placebo_summary_edit_is_caught_under_the_d_denominator(tmp_path):
+    _outputs_tree(tmp_path)
+
+    def edit(rows):
+        for r in rows:
+            if r["analysis"] == "placebo" and r["denominator_set"] == "D":
+                r["se_gamma1"] = f"{float(r['se_gamma1']) * 2:.6f}"
+    _edit(tmp_path / "outputs" / "q4_summary.csv", edit)
+    assert any("placebo (D)" in b for b in check_outputs.problems(tmp_path)[0])
+
+
+def test_edited_exposure_or_weight_is_caught(tmp_path):
+    _outputs_tree(tmp_path)
+    _edit(tmp_path / "outputs" / "q4_states.csv",
+          lambda rows: rows[1].update(w=f"{float(rows[1]['w']) + 1:.6f}"))
+    assert any("w is" in b for b in check_outputs.problems(tmp_path)[0])
+    _outputs_tree(tmp_path)
+    _edit(tmp_path / "outputs" / "q4_states.csv", lambda rows: rows[1].update(E="0.900000"))
+    assert any("E is" in b for b in check_outputs.problems(tmp_path)[0])
+
+
+def test_q3_value_and_wilson_bound_edits_are_caught(tmp_path):
+    _outputs_tree(tmp_path)
+    _edit(tmp_path / "outputs" / "q3_yield.csv",
+          lambda rows: rows[0].update(value=f"{float(rows[0]['value']) + 1:.6f}"))
+    assert any("value is" in b for b in check_outputs.problems(tmp_path)[0])
+    _outputs_tree(tmp_path)
+    _edit(tmp_path / "outputs" / "q3_yield.csv",
+          lambda rows: rows[3].update(upper=f"{float(rows[3]['upper']) + 0.01:.6f}"))
+    assert any("upper is" in b for b in check_outputs.problems(tmp_path)[0])
+    _outputs_tree(tmp_path)
+    _edit(tmp_path / "outputs" / "q3_yield.csv", lambda rows: rows[2].update(upper="5.0"))
+    assert any("unbounded" in b for b in check_outputs.problems(tmp_path)[0])
+
+
+def test_independent_wls_and_t_quantile_agree_with_the_analysis_code():
+    """The check's own WLS and t quantile against src/q4_dose_response.py."""
+    import random
+
+    from src import q4_dose_response as q4
+    rng = random.Random(7)
+    E = [rng.random() for _ in range(12)]
+    x = [0.3 * e + rng.gauss(0, 0.05) for e in E]
+    w = [rng.uniform(1e3, 5e4) for _ in E]
+    mine, theirs = check_outputs.wls(E, x, w), q4.wls_fit(E, x, w)
+    for a, b in (("gamma0", "gamma0"), ("gamma1", "gamma1"), ("se_gamma1", "se"),
+                 ("t_0975", "t"), ("gamma1_model_lo", "lo"), ("gamma1_model_hi", "hi"),
+                 ("gamma0_model_lo", "lo0"), ("gamma0_model_hi", "hi0")):
+        assert mine[a] == pytest.approx(theirs[b], abs=1e-9)
+    assert check_outputs.t_quantile(0.975, 14) == pytest.approx(2.144787, abs=1e-6)
+    assert check_outputs.wilson(47, 1200) == pytest.approx(q3_wilson(47, 1200), abs=1e-12)
+
+
+def q3_wilson(x, n):
+    from src import q3_yield
+    return q3_yield.wilson(x, n)
 
 
 # ------------------------------------------------------------------ check_all
@@ -343,11 +624,11 @@ def test_q4_value_without_a_source_value_is_flagged(tmp_path):
 def test_check_all_runs_every_check_and_pytest():
     names = [n for n, _ in check_all.STEPS]
     assert names == ["pytest -q", "check_plan_order", "check_deviations",
-                     "check_extraction_totals", "check_inventory"]
+                     "check_extraction_totals", "check_inventory", "check_outputs"]
 
 
-def test_every_check_script_runs_in_isolated_mode():
-    """Each script has a main(root) entry and the repository root as its default."""
-    for mod in (check_plan_order, check_deviations, check_extraction_totals, check_inventory):
+def test_every_check_script_has_main_and_the_repository_root():
+    for mod in (check_plan_order, check_deviations, check_extraction_totals,
+                check_inventory, check_outputs):
         assert mod.ROOT == Path(__file__).resolve().parents[1]
         assert callable(mod.main)
