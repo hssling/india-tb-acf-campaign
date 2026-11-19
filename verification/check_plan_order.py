@@ -15,6 +15,13 @@ Run as: python -I verification/check_plan_order.py
    names matched at any depth over the full history, deletions included; --no-renames, so a
    rename is listed as a deletion and an addition and both names are matched).
 
+4. Extension (v1.1.0), when docs/registration_event_ext.json exists: its registration commit
+   is an ancestor of HEAD and a strict ancestor of every commit touching outputs/ext/ (any
+   file) or src/ext/d1_*.py, d2_*.py, d3_*.py or robustness.py (name-based, any depth,
+   full history, deletions and renames included); src/ext/panel.py may come after
+   registration. The text of docs/extension_plan.md above "## 10. Deviations" is
+   byte-identical at the registration commit and at every commit in registration..HEAD.
+
 In a copy without .git (a release archive) the history cannot be checked: this prints
 "SKIPPED: not a git checkout ..." and exits 0; check_all counts the step as skipped.
 """
@@ -32,6 +39,11 @@ OUTCOME_DIR = "data/extracted"
 OUTCOME_DATA = ("pq_*.csv", "itr20*_a1_2.csv")   # file-name patterns, at any depth
 PLAN = "docs/analysis_plan.md"
 HEADING = b"## 13. Deviations"
+EXT_PLAN = "docs/extension_plan.md"
+EXT_HEADING = b"## 10. Deviations"
+EXT_OUTPUTS = "outputs/ext"
+EXT_MODULE_DIR = "src/ext"
+EXT_MODULES = ("d1_*.py", "d2_*.py", "d3_*.py", "robustness.py")
 
 
 def git(repo: Path, *args: str, ok=(0,), text=True) -> subprocess.CompletedProcess:
@@ -47,16 +59,18 @@ def is_ancestor(repo: Path, a: str, b: str) -> bool:
     return git(repo, "merge-base", "--is-ancestor", a, b, ok=(0, 1)).returncode == 0
 
 
-def plan_above_section13(repo: Path, rev: str) -> bytes:
-    """The bytes of the plan above the line '## 13. Deviations' (exactly one such line)."""
-    data = git(repo, "show", f"{rev}:{PLAN}", text=False).stdout
+def plan_above_section13(repo: Path, rev: str, plan: str = PLAN,
+                         heading: bytes = HEADING) -> bytes:
+    """The bytes of the plan above its deviations heading (exactly one such line):
+    '## 13. Deviations' for the original plan, '## 10. Deviations' for the extension."""
+    data = git(repo, "show", f"{rev}:{plan}", text=False).stdout
     pos, found = 0, []
     for line in data.split(b"\n"):
-        if line.rstrip(b"\r") == HEADING:
+        if line.rstrip(b"\r") == heading:
             found.append(pos)
         pos += len(line) + 1
     if len(found) != 1:
-        raise RuntimeError(f"{PLAN} at {rev}: expected one {HEADING.decode()!r} heading, "
+        raise RuntimeError(f"{plan} at {rev}: expected one {heading.decode()!r} heading, "
                            f"found {len(found)}")
     return data[:found[0]]
 
@@ -80,9 +94,45 @@ def registered_commit(repo: Path) -> str:
                       .read_text(encoding="utf-8"))["registered_commit"]
 
 
+def ext_registered_commit(repo: Path) -> str | None:
+    """The extension registration commit, or None if the repository has no
+    docs/registration_event_ext.json (a v1.0.0 fixture)."""
+    f = repo / "docs" / "registration_event_ext.json"
+    if not f.exists():
+        return None
+    return json.loads(f.read_text(encoding="utf-8"))["registered_commit"]
+
+
+def ext_problems(repo: Path, registration: str) -> list[str]:
+    out: list[str] = []
+    short = registration[:7]
+    reg = git(repo, "rev-parse", "--verify", f"{registration}^{{commit}}").stdout.strip()
+    if not is_ancestor(repo, reg, "HEAD"):
+        return [f"extension registration commit {short} is not an ancestor of HEAD"]
+    guarded = set(commits_touching_names(repo, EXT_OUTPUTS, ("*",)))
+    guarded |= set(commits_touching_names(repo, EXT_MODULE_DIR, EXT_MODULES))
+    for c in sorted(guarded):
+        if c == reg or not is_ancestor(repo, reg, c):
+            out.append(f"commit {c[:7]} touches outputs/ext/ or a src/ext analysis module "
+                       f"(d1_*, d2_*, d3_*, robustness) but is not a descendant of the "
+                       f"extension registration commit {short}")
+    frozen = plan_above_section13(repo, reg, EXT_PLAN, EXT_HEADING)
+    for c in git(repo, "rev-list", f"{reg}..HEAD").stdout.split():
+        try:
+            same = plan_above_section13(repo, c, EXT_PLAN, EXT_HEADING) == frozen
+        except RuntimeError as e:
+            out.append(f"commit {c[:7]}: {EXT_PLAN} above section 10 cannot be read ({e})")
+            continue
+        if not same:
+            out.append(f"commit {c[:7]}: {EXT_PLAN} above section 10 differs from its "
+                       f"content at the extension registration commit {short}")
+    return out
+
+
 def problems(repo: Path = ROOT, registration: str | None = None,
              guarded: tuple[str, ...] = GUARDED, lgd: str | None = LGD_DEVIATION,
-             outcome: tuple[str, ...] = OUTCOME_DATA) -> list[str]:
+             outcome: tuple[str, ...] = OUTCOME_DATA,
+             ext_registration: str | None = None) -> list[str]:
     out: list[str] = []
     registration = registration or registered_commit(repo)
     reg = git(repo, "rev-parse", "--verify", f"{registration}^{{commit}}").stdout.strip()
@@ -108,6 +158,9 @@ def problems(repo: Path = ROOT, registration: str | None = None,
             if c == lg or not is_ancestor(repo, lg, c):
                 out.append(f"commit {c[:7]} touches outcome data (pq_*.csv, itr20*_a1_2.csv) "
                            f"but the LGD-deviation commit {lgd} is not its strict ancestor")
+    ext_registration = ext_registration or ext_registered_commit(repo)
+    if ext_registration:
+        out += ext_problems(repo, ext_registration)
     return out
 
 
@@ -126,9 +179,16 @@ def main(root: Path = ROOT) -> int:
         return 1
     reg = registered_commit(root)
     n = len(git(root, "rev-list", f"{reg}..HEAD").stdout.split())
+    ext = ext_registered_commit(root)
+    note = ""
+    if ext:
+        n_ext = len(git(root, "rev-list", f"{ext}..HEAD").stdout.split())
+        note = (f"; extension {ext[:7]} is an ancestor, no outputs/ext or d1/d2/d3/robustness "
+                f"commit precedes it, and the extension plan above section 10 is "
+                f"byte-identical across {n_ext} later commits")
     print(f"OK: {reg[:7]} is an ancestor of HEAD; plan text above section 13 is "
           f"byte-identical across {n} later commits; no output or Q module commit precedes "
-          f"it; {LGD_DEVIATION} precedes every outcome-data commit")
+          f"it; {LGD_DEVIATION} precedes every outcome-data commit{note}")
     return 0
 
 

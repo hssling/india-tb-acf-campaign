@@ -20,6 +20,10 @@ the checks reads it).
 | 7 | check_outputs | `beta` edited in `q4_states.csv` (first row, +0.01) | caught (FAIL, exit 1) |
 | 8 | check_outputs | `gamma1` edited in `q4_summary.csv` (primary, R, +0.01) | caught (FAIL, exit 1) |
 | 9 | check_deviations | a new unlogged `exploratory` line appended to `outputs/q2_discrepancies.csv` (no question number) | caught (FAIL, exit 1) |
+| 10 | check_ext_outputs | the `label` of the rho row in `outputs/ext/headline.csv` changed from "not established" to "supported" | caught (FAIL, exit 1) |
+| 11 | check_ext_outputs | `estimate` of the main row of `outputs/ext/d3.csv` (theta) edited by +1e-4 | caught (FAIL, exit 1) |
+| 12 | check_plan_order | one line above section 10 of `docs/extension_plan.md` edited and committed | caught (FAIL, exit 1) |
+| 13 | check_plan_order | a commit adding a file under `outputs/ext/`, branched from the commit before the extension registration commit and merged | caught (FAIL, exit 1) |
 
 Mutation 1 is also visible to check_extraction_totals through the recorded-versus-recomputed
 sum; check_inventory does not flag it, because the unedited value is still held by the
@@ -160,6 +164,69 @@ python -I verification/check_deviations.py
 FAIL: outputs/q2_discrepancies.csv: 1 line(s) labelled 'exploratory' with no dated section 13 entry that names the file or the question
 exit 1
 ```
+
+## 10. Extension headline label edited
+
+Added on 20 November 2026 (extension v1.1.0), in a scratch clone of this repository's
+commit 445cd86 with the new check copied in.
+
+```
+sed -i 's/^rho,\(.*\),not established,/rho,\1,supported,/' outputs/ext/headline.csv
+python -I verification/check_ext_outputs.py
+```
+
+```
+FAIL: headline rho: label printed 'supported' but section 8 gives 'not established' (23/24 entries agree; interval [-0.930911, 0.022103], null 0.0)
+exit 1
+```
+
+## 11. Extension theta edited
+
+```
+# main row of outputs/ext/d3.csv, estimate + 1e-4
+python -I verification/check_ext_outputs.py
+```
+
+```
+FAIL: d3 main theta: printed -0.17183620979274733 but recomputed -0.17193620979274732
+exit 1
+```
+
+## 12. Extension plan edited above section 10 and committed
+
+```
+sed -i '3s/$/ x/' docs/extension_plan.md
+git commit -am "mutation: edit above section 10"
+python -I verification/check_plan_order.py
+```
+
+```
+FAIL: commit 4876b88: docs/extension_plan.md above section 10 differs from its content at the extension registration commit 6a98549
+exit 1
+```
+
+## 13. outputs/ext commit before the extension registration commit
+
+```
+git checkout -b early 6a98549~1; mkdir -p outputs/ext; echo a > outputs/ext/x.csv
+git add -f outputs/ext/x.csv; git commit -m "early ext output"
+git checkout main; git merge early
+python -I verification/check_plan_order.py
+```
+
+```
+FAIL: commit 78515c0 touches outputs/ext/ or a src/ext analysis module (d1_*, d2_*, d3_*, robustness) but is not a descendant of the extension registration commit 6a98549
+FAIL: commit 78515c0: docs/extension_plan.md above section 10 differs from its content at the extension registration commit 6a98549
+exit 1
+```
+
+Mutations 10 to 13 are also fixed in `tests/test_verification.py` (on temporary fixtures:
+`test_mutated_headline_label_fails`, `test_mutated_theta_fails`,
+`test_edit_above_section10_of_extension_plan_fails`,
+`test_ext_output_before_ext_registration_fails`). `check_ext_outputs.py` does not
+re-derive the bootstrap and permutation intervals of `outputs/ext/`; those are reproduced by
+the seeded build, so an edit of an interval alone is caught by `tests/test_ext_*.py`
+(`test_build_reproduces_committed_outputs`), not by this check.
 
 ## Not exercised on the real repository
 

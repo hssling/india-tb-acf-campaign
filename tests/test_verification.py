@@ -1,14 +1,16 @@
 """Unit tests of the verification checks, on temporary fixtures (never the real repository)."""
 import csv
 import json
+import shutil
 import statistics
 import subprocess
 from pathlib import Path
 
 import pytest
 
-from verification import (check_all, check_deviations, check_extraction_totals,
-                          check_inventory, check_outputs, check_plan_order)
+from verification import (check_all, check_deviations, check_ext_outputs,
+                          check_extraction_totals, check_inventory, check_outputs,
+                          check_plan_order)
 
 PLAN = "# Plan\n\nBefore.\n\n## 13. Deviations\n\n**18 November 2026.** None.\n"
 
@@ -625,12 +627,12 @@ def test_check_all_runs_every_check_and_pytest():
     names = [n for n, _ in check_all.STEPS]
     assert names == ["pytest -q", "check_plan_order", "check_deviations",
                      "check_extraction_totals", "check_inventory", "check_outputs",
-                     "check_manuscript_numbers", "check_docx_tie"]
+                     "check_ext_outputs", "check_manuscript_numbers", "check_docx_tie"]
 
 
 def test_every_check_script_has_main_and_the_repository_root():
     for mod in (check_plan_order, check_deviations, check_extraction_totals,
-                check_inventory, check_outputs):
+                check_inventory, check_outputs, check_ext_outputs):
         assert mod.ROOT == Path(__file__).resolve().parents[1]
         assert callable(mod.main)
 
@@ -651,3 +653,174 @@ def test_renamed_outcome_file_is_matched_under_both_names(repo):
     lgd = commit(repo, {"docs/analysis_plan.md": PLAN + "\n**19 November 2026.** LGD.\n"}, "lgd")
     bad = check_plan_order.problems(repo, reg, lgd=lgd)
     assert len(bad) == 1 and "outcome data" in bad[0]
+
+
+# ------------------------------------------------------------------ extension outputs
+
+REAL = Path(__file__).resolve().parents[1]
+EXT_FILES = ("data/ext/panel.csv", "outputs/q3_yield_summary.csv",
+             "outputs/ext/d1_pooled.csv", "outputs/ext/d1_elasticity.csv",
+             "outputs/ext/d2_alignment.csv", "outputs/ext/d3.csv",
+             "outputs/ext/headline.csv", "outputs/ext/spec_curve.csv")
+
+
+@pytest.fixture
+def ext_tree(tmp_path):
+    """A copy of the (small) files the extension check reads, in a temporary tree."""
+    for rel in EXT_FILES:
+        dst = tmp_path / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(REAL / rel, dst)
+    return tmp_path
+
+
+def _ext_edit(root, rel, fn):
+    p = root / rel
+    with open(p, encoding="utf-8", newline="") as f:
+        rows = list(csv.DictReader(f))
+    head = list(rows[0])
+    fn(rows)
+    with open(p, "w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, head, lineterminator="\n")
+        w.writeheader()
+        w.writerows(rows)
+
+
+def test_ext_clean_fixture_passes(ext_tree):
+    bad, n = check_ext_outputs.problems(ext_tree)
+    assert bad == [] and n["labels"] == 3 and n["pooled"] == 6
+
+
+def test_mutated_headline_label_fails(ext_tree):
+    def flip(rows):
+        for r in rows:
+            if r["estimate"] == "rho":
+                r["label"] = "supported"
+    _ext_edit(ext_tree, "outputs/ext/headline.csv", flip)
+    bad = check_ext_outputs.problems(ext_tree)[0]
+    assert len(bad) == 1 and "headline rho: label printed 'supported'" in bad[0]
+
+
+def test_headline_labels_follow_the_section8_rule_on_the_grid(ext_tree):
+    labels = {r["estimate"]: r["label"] for r in check_ext_outputs.read(
+        ext_tree / "outputs" / "ext" / "headline.csv")}
+    assert labels == {"epsilon": "supported", "rho": "not established",
+                      "theta": "not established"}
+
+    def disagree(rows):  # six non-main epsilon entries move to the other side of the null
+        k = 0
+        for r in rows:
+            if r["estimate"] == "epsilon" and r["main"] == "no" and k < 6:
+                r["value"] = "1.5"
+                k += 1
+    _ext_edit(ext_tree, "outputs/ext/spec_curve.csv", disagree)
+    bad = check_ext_outputs.problems(ext_tree)[0]
+    assert any("headline epsilon: label printed 'supported'" in b for b in bad)
+
+
+def test_section8_rule_exact_null_and_noncomputable_do_not_agree():
+    f = check_ext_outputs.label_of
+    assert f(0.5, 0.1, 0.9, 1.0, [0.5] * 8 + [None] * 2) == ("supported", 8)   # 8/10
+    assert f(0.5, 0.1, 0.9, 1.0, [0.5] * 7 + [1.0, None, None]) == ("not established", 7)
+    assert f(0.5, 0.1, 1.2, 1.0, [0.5] * 10) == ("not established", 10)        # CI spans
+
+
+def test_mutated_theta_fails(ext_tree):
+    def edit(rows):
+        for r in rows:
+            if r["analysis"] == "main":
+                r["estimate"] = repr(float(r["estimate"]) + 1e-4)
+    _ext_edit(ext_tree, "outputs/ext/d3.csv", edit)
+    bad = check_ext_outputs.problems(ext_tree)[0]
+    assert len(bad) == 1 and "d3 main theta" in bad[0]
+
+
+def test_mutated_elasticity_rho_and_pooling_fail(ext_tree):
+    for rel, key, name, what in (
+            ("outputs/ext/d1_elasticity.csv", "estimate", "main", "d1_elasticity main"),
+            ("outputs/ext/d2_alignment.csv", "estimate", "main", "d2_alignment main"),
+            ("outputs/ext/d1_pooled.csv", "tau2", "2021", "d1_pooled 2021 tau2")):
+        def edit(rows, key=key, name=name):
+            for r in rows:
+                if r["analysis"] == name:
+                    r[key] = repr(float(r[key]) + 1e-4)
+        _ext_edit(ext_tree, rel, edit)
+        assert any(what in b for b in check_ext_outputs.problems(ext_tree)[0]), rel
+        shutil.copyfile(REAL / rel, ext_tree / rel)
+    assert check_ext_outputs.problems(ext_tree)[0] == []
+
+
+def test_panel_total_gap_is_tolerated_only_when_flagged_in_2022(ext_tree):
+    def edit(rows):
+        for r in rows:
+            if r["unit"] == "Bihar" and r["year"] == "2023":
+                r["diagnosed"] = str(int(r["diagnosed"]) + 1)
+    _ext_edit(ext_tree, "data/ext/panel.csv", edit)
+    assert any(b.startswith("2023: panel totals")
+               for b in check_ext_outputs.problems(ext_tree)[0])
+    shutil.copyfile(REAL / "data/ext/panel.csv", ext_tree / "data/ext/panel.csv")
+
+    def unflag(rows):
+        for r in rows:
+            if r["year"] == "2022":
+                r["flags"] = ""
+    _ext_edit(ext_tree, "data/ext/panel.csv", unflag)
+    assert any(b.startswith("2022: panel totals")
+               for b in check_ext_outputs.problems(ext_tree)[0])
+
+
+# ------------------------------------------------------------------ extension registration order
+
+EXT_PLAN_TEXT = ("# Extension\n\nBefore.\n\n## 10. Deviations\n\n"
+                 "**19 November 2026.** None.\n")
+
+
+def test_ext_clean_history_passes(repo):
+    ereg = commit(repo, {"docs/extension_plan.md": EXT_PLAN_TEXT}, "ext plan")
+    commit(repo, {"docs/extension_plan.md": EXT_PLAN_TEXT + "\nA later entry.\n"}, "dev")
+    commit(repo, {"src/ext/panel.py": "x = 1\n"}, "panel after registration is allowed")
+    commit(repo, {"src/ext/d1_yield.py": "x\n", "src/ext/robustness.py": "x\n",
+                  "outputs/ext/headline.csv": "a\n"}, "work")
+    assert check_plan_order.ext_problems(repo, ereg) == []
+
+
+def test_ext_output_before_ext_registration_fails(repo):
+    commit(repo, {"outputs/ext/d3.csv": "a\n"}, "ext output first")
+    ereg = commit(repo, {"docs/extension_plan.md": EXT_PLAN_TEXT}, "ext plan")
+    bad = check_plan_order.ext_problems(repo, ereg)
+    assert len(bad) == 1 and "not a descendant" in bad[0]
+
+
+def test_ext_analysis_modules_before_registration_fail_but_panel_does_not(repo):
+    commit(repo, {"src/ext/panel.py": "x\n"}, "panel first is fine")
+    for name in ("d1_yield.py", "d2_targeting.py", "d3_additionality.py", "robustness.py"):
+        commit(repo, {f"src/ext/{name}": "x\n"}, f"early {name}")
+    ereg = commit(repo, {"docs/extension_plan.md": EXT_PLAN_TEXT}, "ext plan")
+    assert len(check_plan_order.ext_problems(repo, ereg)) == 4
+
+
+def test_ext_module_in_the_registration_commit_fails(repo):
+    ereg = commit(repo, {"docs/extension_plan.md": EXT_PLAN_TEXT, "src/ext/d2_x.py": "x\n"},
+                  "plan + code")
+    assert len(check_plan_order.ext_problems(repo, ereg)) == 1
+
+
+def test_edit_above_section10_of_extension_plan_fails(repo):
+    ereg = commit(repo, {"docs/extension_plan.md": EXT_PLAN_TEXT}, "ext plan")
+    mid = commit(repo, {"docs/extension_plan.md": EXT_PLAN_TEXT.replace("Before.", "Changed.")},
+                 "edit")
+    commit(repo, {"docs/extension_plan.md": EXT_PLAN_TEXT}, "revert")  # reverted: still caught
+    bad = check_plan_order.ext_problems(repo, ereg)
+    assert len(bad) == 1 and bad[0].startswith(f"commit {mid[:7]}")
+    assert "above section 10" in bad[0]
+
+
+def test_ext_registration_is_read_from_its_json_and_wired_into_problems(repo):
+    reg = commit(repo, {"docs/analysis_plan.md": PLAN}, "plan")
+    commit(repo, {"outputs/ext/d3.csv": "a\n"}, "ext output before its registration")
+    ereg = commit(repo, {"docs/extension_plan.md": EXT_PLAN_TEXT}, "ext plan")
+    commit(repo, {"docs/registration_event_ext.json": json.dumps({"registered_commit": ereg})},
+           "event")
+    assert check_plan_order.ext_registered_commit(repo) == ereg
+    bad = check_plan_order.problems(repo, reg, lgd=None)
+    assert len(bad) == 1 and "extension registration commit" in bad[0]

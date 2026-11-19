@@ -1,16 +1,23 @@
 cff-version: 1.2.0
 message: "If you use this code or the analysis plan, please cite it as below."
-title: "India's active case-finding figures and the 100-day TB Mukt Bharat Abhiyaan: analysis code and pre-registered plan"
+title: "Where does active case finding for TB still pay in India? Code, data and pre-registered plans"
 abstract: >-
-  Pre-registered analysis plan, code, data and outputs of a study
-  of India's published active case-finding (ACF) and TB Mukt Bharat Abhiyaan
-  campaign figures: whether they are internally and mutually consistent,
-  whether differences in definition, window or cut-off date explain their
-  disagreements, what State-level ACF yields are, and whether TB
-  notifications rose more, against each State's own trend, in States with a
-  larger share of districts in phase 1 of the campaign.
+  Code, data, outputs and two pre-registered analysis plans for a study of
+  India's published active case-finding (ACF) figures for tuberculosis. The
+  v1.0.0 audit checks whether the published ACF and TB Mukt Bharat Abhiyaan
+  figures are internally and mutually consistent, whether differences in
+  definition, window or cut-off date explain their disagreements, what
+  State-level ACF yields are, and whether TB notifications rose more, against
+  each State's own trend, in States with a larger share of districts in phase 1
+  of the campaign. The v1.1.0 extension, registered separately, asks three
+  policy questions of State-level data (observational associations, not
+  causal estimates): whether diagnoses rise less than proportionally with
+  screening volume within States, whether campaign screening was aimed at
+  States with higher prior yield, and whether State notifications move with ACF
+  diagnoses.
 type: software
-version: "1.0.0"
+version: "1.1.0"
+# date-released: placeholder (the v1.0.0 date); the release step sets the v1.1.0 date
 date-released: 2026-11-19
 authors:
   - family-names: "Siddalingaiah"
@@ -29,3 +36,5 @@ keywords:
   - TB Mukt Bharat Abhiyaan
   - data consistency
   - pre-registration
+  - diminishing returns
+  - screening yield

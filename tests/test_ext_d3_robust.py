@@ -286,18 +286,37 @@ def test_spec_curve_main_matches_earlier_outputs():
 
 @needs_data
 def test_outputs_reproducible():
-    a, b = R.build(draws=60), R.build(draws=60)
+    D3._MEMO.clear()
+    a = R.build(draws=60)
+    D3._MEMO.clear()
+    b = R.build(draws=60)
     assert set(a) == set(NEW_FILES)
     for name in a:
         assert a[name] == b[name], name
         assert "\r" not in a[name]
-    c, d = D3.build(draws=60), D3.build(draws=60)
+    D3._MEMO.clear()
+    c = D3.build(draws=60)
+    D3._MEMO.clear()
+    d = D3.build(draws=60)
     assert c == d and set(c) == {"d3.csv"} and "\r" not in c["d3.csv"]
 
 
 @needs_data
 def test_build_reproduces_committed_outputs():
+    D3._MEMO.clear()
     built = {**D3.build(), **R.build()}
     assert set(built) == {"d3.csv", *NEW_FILES}
     for name, text in built.items():
         assert (OUT / name).read_bytes() == text.encode("utf-8"), name
+
+
+def test_loo_rows_tie_goes_to_the_first_in_sorted_order():
+    """Two units with equal absolute deviation (-0.5 and +0.5 around main 1.0, exact in binary): the first
+    in sorted order is the most influential, whichever order they are given in."""
+    items = [("A", 0.5, 10, 2, ""), ("B", 1.5, 10, 2, ""), ("C", 1.25, 10, 2, "")]
+    rows = R._loo_rows("epsilon", "state", items, 1.0)
+    assert [r["omitted"] for r in rows if r["most_influential"]] == ["A"]
+    assert [r["omitted"] for r in rows if r["is_min"]] == ["A"]
+    assert [r["omitted"] for r in rows if r["is_max"]] == ["B"]
+    swapped = R._loo_rows("epsilon", "state", [items[1], items[0], items[2]], 1.0)
+    assert [r["omitted"] for r in swapped if r["most_influential"]] == ["B"]

@@ -1,6 +1,6 @@
 # Copied from hssling/india-state-tb-score (MIT), verification/check_all.py, commit 05bcaa7; modified: steps are pytest and the checks of this repository (no analysis re-run; the manuscript number check and the docx tie check skip when manuscript/ or its submission folder is absent); PASS/FAIL/SKIP labels
 """Run the whole verification: pytest and the checks (plan order, deviations, extraction totals, inventory
-trace, recomputed Q3/Q4 outputs, and, when the private manuscript is present, its numbers and the
+trace, recomputed Q3/Q4 outputs, recomputed extension headline values and labels, and, when the private manuscript is present, its numbers and the
 tie of the submission .docx files to it).
 
 Run as: python -I verification/check_all.py   (steps run from the repo root)
@@ -24,6 +24,7 @@ STEPS = [
     ("check_extraction_totals", PY + ["verification/check_extraction_totals.py"]),
     ("check_inventory", PY + ["verification/check_inventory.py"]),
     ("check_outputs", PY + ["verification/check_outputs.py"]),
+    ("check_ext_outputs", PY + ["verification/check_ext_outputs.py"]),
     ("check_manuscript_numbers", PY + ["verification/check_manuscript_numbers.py"]),
     ("check_docx_tie", PY + ["verification/check_docx_tie.py"]),
 ]

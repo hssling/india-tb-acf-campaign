@@ -6,10 +6,26 @@ The outputs of this study are to be produced with:
 - pdfplumber 0.11.8
 - pytest 9.0.0
 
-The analysis uses the Python standard library only. pdfplumber is used for
-PDF table extraction only, and pytest for the tests. Every script is run as
+The v1.0.0 analysis uses the Python standard library only. pdfplumber is used
+for PDF table extraction only, and pytest for the tests. Every script is run as
 `python -I <script>` from the repository root. The analysis pipeline
 (`tools/fetch_sources.py`, `src/`, `verification/`) is cross-platform.
+
+## Extension only
+
+- numpy 2.3.5
+- scipy 1.16.3
+
+These are needed only for `src/ext/` and `verification/check_ext_outputs.py`
+(the extension of v1.1.0). The v1.0.0 pipeline and its checks stay
+standard-library only. The full extension build (`src/ext/` scripts, seeded
+bootstraps) takes several minutes.
+
+## Test-suite runtime
+
+The full test suite (`python -I -m pytest -q`, run by
+`python -I verification/check_all.py`) takes about 6 minutes, most of it in the
+extension's bootstrap tests.
 
 ## Exhibits and the submission build only
 

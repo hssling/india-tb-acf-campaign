@@ -388,7 +388,7 @@ Written by `python -I src/ext/d3_additionality.py` (plan §3.3, §6, §7.1, §9)
   more ACF diagnosis. It is an observational association. Were it causal, θ = 1 would
   correspond to full addition and θ = 0 to full substitution; these are reference values only.
   The null is 0. On the log scale θ is the proportional difference in notifications per
-  proportional difference in ACF diagnoses. Only three years overlap, so θ rests on
+  proportional difference in ACF diagnoses. The reference values 0 and 1 apply to the absolute scale only. Only three years overlap, so θ rests on
   within-State change across three years.
 
 ### d3.csv (one row per specification: the main row, then the §7.1 grid order)
