@@ -1,0 +1,28 @@
+analysis,unit,year,reason
+2018,Madhya Pradesh,2018,no row in this year's ACF table (unbalanced panel)
+2018,Manipur,2018,no row in this year's ACF table (unbalanced panel)
+2018,Puducherry,2018,zero diagnoses as printed; excluded from log-scale analyses (section 3.3)
+2018,Tripura,2018,no row in this year's ACF table (unbalanced panel)
+2019,Chandigarh,2019,no row in this year's ACF table (unbalanced panel)
+2019,Lakshadweep,2019,"diagnosed NA in the source; not imputed; zero screened as printed (inconsistent row, S = 0)"
+2019,Madhya Pradesh,2019,no row in this year's ACF table (unbalanced panel)
+2019,Manipur,2019,no row in this year's ACF table (unbalanced panel)
+2021,Lakshadweep,2021,zero diagnoses as printed; excluded from log-scale analyses (section 3.3)
+2021,Puducherry,2021,zero diagnoses as printed; excluded from log-scale analyses (section 3.3)
+2022,Arunachal Pradesh,2022,zero diagnoses as printed; excluded from log-scale analyses (section 3.3)
+2022,Lakshadweep,2022,zero diagnoses as printed; excluded from log-scale analyses (section 3.3)
+2022,Puducherry,2022,"diagnosed NA in the source; not imputed; zero screened as printed (inconsistent row, S = 0)"
+2023,Andaman and Nicobar Islands,2023,zero diagnoses as printed; excluded from log-scale analyses (section 3.3)
+2023,Goa,2023,zero diagnoses as printed; excluded from log-scale analyses (section 3.3)
+2023,Lakshadweep,2023,zero diagnoses as printed; excluded from log-scale analyses (section 3.3)
+2023,Manipur,2023,diagnosed NA in the source; not imputed
+2021-2023,Andaman and Nicobar Islands,2023,zero diagnoses as printed; excluded from log-scale analyses (section 3.3)
+2021-2023,Arunachal Pradesh,2022,zero diagnoses as printed; excluded from log-scale analyses (section 3.3)
+2021-2023,Goa,2023,zero diagnoses as printed; excluded from log-scale analyses (section 3.3)
+2021-2023,Lakshadweep,2021,zero diagnoses as printed; excluded from log-scale analyses (section 3.3)
+2021-2023,Lakshadweep,2022,zero diagnoses as printed; excluded from log-scale analyses (section 3.3)
+2021-2023,Lakshadweep,2023,zero diagnoses as printed; excluded from log-scale analyses (section 3.3)
+2021-2023,Lakshadweep,,no unit-year in 2021;2022;2023 passes section 3.3; unit has no pooled value
+2021-2023,Manipur,2023,diagnosed NA in the source; not imputed
+2021-2023,Puducherry,2021,zero diagnoses as printed; excluded from log-scale analyses (section 3.3)
+2021-2023,Puducherry,2022,"diagnosed NA in the source; not imputed; zero screened as printed (inconsistent row, S = 0)"
