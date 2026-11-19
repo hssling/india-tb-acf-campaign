@@ -85,7 +85,7 @@ SPEC: dict[str, list[tuple]] = {
         ("builder", "Declaration of interests"),
         ("first", "first_page_src.md", "**Title:**"),
         ("first", "first_page_src.md", "**Author:**"),
-        ("first", "first_page_src.md", "**Competing interests:**"),
+        ("first", "first_page_src.md", "**Declarations of interest:**"),
     ],
 }
 
@@ -114,6 +114,15 @@ def md_slice(text: str, start: str | None, end: str | None) -> str:
     return "\n".join(lines[i:j])
 
 
+def row_unit(cells) -> str:
+    """A table row as its cells joined by ' | ', trailing empty cells dropped (a spanning row
+    is one merged cell in Word and a row of empty cells after the first in Markdown)."""
+    cells = list(cells)
+    while len(cells) > 1 and not cells[-1]:
+        cells.pop()
+    return " | ".join(cells)
+
+
 def md_units(text: str) -> list[str]:
     """Headings, paragraphs, list items and table rows of a Markdown text, normalised."""
     units: list[str] = []
@@ -137,7 +146,7 @@ def md_units(text: str) -> list[str]:
             cells = re.split(r"(?<!\\)\|", body)  # an escaped \| stays inside its cell
             if all(re.fullmatch(r"\s*:?-{3,}:?\s*", c) for c in cells):
                 continue
-            units.append(" | ".join(norm(c) for c in cells))
+            units.append(row_unit(norm(c) for c in cells))
         elif re.match(r"[-*+] ", s):
             flush()
             para.append(s[2:])
@@ -178,7 +187,7 @@ def docx_units(path: Path) -> list[str]:
         elif el.tag == f"{W}tbl":
             for tr in el.iter(f"{W}tr"):
                 cells = [" ".join(para_text(p) for p in tc.iter(f"{W}p")) for tc in tr.findall(f"{W}tc")]
-                units.append(" | ".join(norm(c) for c in cells))
+                units.append(row_unit(norm(c) for c in cells))
     return units
 
 

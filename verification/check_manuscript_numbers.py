@@ -201,6 +201,9 @@ def catalogue(root: Path) -> dict[str, tuple[str, str]]:
         "data/search_log.csv: include = yes")
     put("plan.magnitudes", plan_has(root, "1 lakh = 100,000; 1 crore = 10,000,000", "§5.2"),
         "docs/analysis_plan.md §5.2")
+    lakh, crore = 100_000 / 1e6, 10_000_000 / 1e6  # the plan's magnitudes in millions (figure axes)
+    put("plan.magnitudes_million", f"1 lakh = {lakh:g} million; 1 crore = {crore:g} million",
+        "docs/analysis_plan.md §5.2, converted to millions")
     lb = [r for r in disc_rows(root) for s in "ab" if r[f"{s}_value_printed"] == "25 crore"
           and r[f"{s}_qualifier"] == "at_least"]
     if not lb:
@@ -248,6 +251,11 @@ def catalogue(root: Path) -> dict[str, tuple[str, str]]:
         "outputs/q1_other_descriptive.csv: check 2 pass = yes")
     put("q1.pct_n", count(sum(r["pass"] in ("yes", "no") for r in pct)),
         "outputs/q1_other_descriptive.csv: check 2 pass = yes or no")
+    tot = [r for r in other if r["check"].startswith("3")]
+    put("q1.other_totals_pass", count(sum(r["pass"] == "yes" for r in tot)),
+        "outputs/q1_other_descriptive.csv: check 3 pass = yes")
+    put("q1.other_totals_n", count(sum(r["pass"] in ("yes", "no") for r in tot)),
+        "outputs/q1_other_descriptive.csv: check 3 pass = yes or no")
     fem = one([r for r in pct if r["pass"] == "no"], "the failing percentage")
     if "Female" not in fem["inputs"]:
         raise ValueError("the failing percentage is not the Female row")

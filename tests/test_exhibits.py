@@ -64,7 +64,14 @@ def test_every_numeric_cell_is_traced(built):
     untraced = []
     for name, e in ex.items():
         for header, rows in e["panels"]:
+            span = False
             for r in rows:
+                if span:  # the heading row of a block below a spanning row
+                    header, span = [c.strip("*") for c in r], False
+                    continue
+                if r[0].startswith("**") and not any(c.strip() for c in r[1:]):
+                    span = True  # a spanning row: the next row heads the block below it
+                    continue
                 for j, c in enumerate(r):
                     c = c.strip()
                     if not c or not any(ch.isdigit() for ch in c) or header[j] in PLAIN or c in traced:
@@ -133,7 +140,37 @@ def test_supplementary_data_has_every_pair():
 
 def test_table_2_evidence_is_short(built):
     ex, _ = built
-    assert all(len(r[-1]) <= 40 for r in ex["Table 2"]["panels"][1][1])
+    rows = ex["Table 2"]["panels"][0][1]
+    i = next(k for k, r in enumerate(rows) if r[0] == f"**{mt.SPAN_T2}**")
+    pairs = rows[i + 2:]
+    assert pairs and all(r[0][0] in "12" and len(r[-1]) <= 40 for r in pairs)
+
+
+def test_table_2_is_one_grid(built):
+    ex, _ = built
+    (header, rows), = ex["Table 2"]["panels"]
+    assert all(len(r) == len(header) for r in rows)
+    i = next(k for k, r in enumerate(rows) if r[0] == f"**{mt.SPAN_T2}**")
+    assert not any(c.strip() for c in rows[i][1:]) and rows[i + 1][0] == "**Class**"
+
+
+def test_table_1_rows_sum_to_the_inventory(built):
+    ex, _ = built
+    rows = ex["Table 1"]["panels"][0][1]
+    total = int(rows[0][1].replace(",", ""))
+    parts = [int(r[1].replace(",", "")) for r in rows[1:] if r[0].startswith("  ") and not r[0].strip().startswith("Check")]
+    assert sum(parts) == total
+    labels = [r[0].strip() for r in rows]
+    assert "ACF share of notifications" in labels and "People with presumptive TB" in labels
+
+
+def test_table_3_footnotes_in_reading_order(built):
+    ex, _ = built
+    (header, rows), = ex["Table 3"]["panels"]
+    marks = [ch for cell in header + [c for r in rows for c in r] for ch in cell if ch in mt.SUP]
+    assert list(dict.fromkeys(marks)) == list(mt.SUP[:3])
+    notes = ex["Table 3"]["notes"]
+    assert [n[0] for n in notes] == list(mt.SUP[:3]) and "per cent" not in " ".join(notes)
 
 
 def test_make_figures_without_matplotlib_exits_1(tmp_path):

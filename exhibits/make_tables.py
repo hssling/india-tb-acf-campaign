@@ -192,9 +192,10 @@ def itr_table(code: str) -> str:
 # --------------------------------------------------------------------------------------
 # Table 1: inventory and Q1 consistency checks
 # --------------------------------------------------------------------------------------
-NAMED = [("tb_cases", "TB cases (notified or diagnosed)"), ("screened", "Screened"), ("tested", "Tested"),
-         ("nns", "Number needed to screen"), ("districts_selected", "Districts selected"),
-         ("population_targeted", "Population targeted")]
+NAMED = [("tb_cases", "TB cases (notified or diagnosed)"), ("screened", "Screened"),
+         ("presumptive", "People with presumptive TB"), ("tested", "Tested"),
+         ("nns", "Number needed to screen"), ("acf_share_notifications", "ACF share of notifications"),
+         ("districts_selected", "Districts selected"), ("population_targeted", "Population targeted")]
 INV = "data/figures_inventory.csv"
 
 
@@ -214,6 +215,8 @@ def table1(tr: Trace):
     tr.entries.append({"kind": "prefix_count_distinct", "file": INV, "column": "quantity",
                        "prefix": "other:", "distinct": "source_file", "text": f"{n_other_docs:,}"})
     rows.append(["  Other campaign figures (kept out of the checks)ᵃ", f"{n_other:,}", f"{n_other_docs:,}", "", "", ""])
+    if sum(len([r for r in inv if r["quantity"] == q]) for q, _ in NAMED) + n_other != len(inv):
+        raise ValueError("Table 1: the named quantities and the other figures do not sum to the inventory")
     for label, f in (("Registered rules", "outputs/q1_checks.csv"), ("Corrected rules (post hoc)ᵇ", "outputs/q1_checks_corrected.csv")):
         q1 = read(f)
         rows.append([f"Q1 consistency checks: {label}", "", "", "", "", ""])
@@ -249,6 +252,9 @@ def evidence(r: dict) -> str:
     raise ValueError(f"unexpected evidence for class {r['class']}: {ev[:60]!r}")
 
 
+SPAN_T2 = "Class 1 and 2 entry pairs (corrected set)"
+
+
 def table2(tr: Trace):
     s = read(Q2S)
     header = ["Class of entry pair", "Registered, pre-specified", "Registered, all", "Corrected, pre-specified", "Corrected, all"]
@@ -281,21 +287,28 @@ def table2(tr: Trace):
 
     f = "outputs/q2_discrepancies_corrected.csv"
     d = read(f)
-    headerB = ["Class", "Quantity, geography and scope", "Value in A (as printed)", "Source of A",
-               "Value in B (as printed)", "Source of B", "Evidence"]
+    headerB = ["Class", "Quantity, geography and scope", "Value in A (as printed)" + SUP[1], "Source of A",
+               "Value in B (as printed)" + SUP[1], "Source of B", "Evidence"]
     rowsB = []
     for i, r in enumerate(d):
         if r["class"] in ("1", "2"):
-            rowsB.append([r["class"] + (SUP[1] if r["class"] == "1" else ""),
+            rowsB.append([r["class"] + (SUP[2] if r["class"] == "1" else ""),
                           f"{QUANTITY[r['quantity']]}, {r['geography']}, {SCOPE[r['scope']]}",
                           tr.value(f, d, i, "a_value_printed", "printed"), doc_name(r["a_source"]),
                           tr.value(f, d, i, "b_value_printed", "printed"), doc_name(r["b_source"]),
                           evidence(r).replace("|", ";")])
-    notesA.append(f"{SUP[1]} Both class 1 rows pair national India TB Report 2024 counts of people screened (20.5 crore; 205,331,541) "
-                  "with the total of the 2025 quality study (581,633) for 30 sampled districts, January–September 2023. "
+    notesA.append(f"{SUP[1]} Values as printed; 1 lakh = 100,000 and 1 crore = 10,000,000.")
+    notesA.append(f"{SUP[2]} Both class 1 rows pair national India TB Report 2024 counts of people screened (20.5 crore; 205,331,541) "
+                  "with the total of the 2025 quality study (581,633) for 30 sampled districts, January to September 2023. "
                   "The class reflects a failed sum check within that study's total (parts 579,073; difference −2,560), "
                   "not a difference in national totals; the difference in scope is not tested in this class.")
-    return header, rows, notesA, headerB, rowsB
+    # one grid: the class-count rows padded to the pair columns, a spanning row, the pairs' heading row
+    width = len(headerB)
+    grid = [r + [""] * (width - len(r)) for r in rows]
+    grid.append([f"**{SPAN_T2}**"] + [""] * (width - 1))
+    grid.append([f"**{h}**" for h in headerB])
+    grid += rowsB
+    return header + [""] * (width - len(header)), grid, notesA
 
 
 # --------------------------------------------------------------------------------------
@@ -308,7 +321,7 @@ Q3 = "outputs/q3_yield.csv"
 def table3(tr: Trace):
     s = read(Q3S)
     full = read(Q3)
-    header = ["Data year", "Source table", "Screened (n)", "Diagnosed (n)", "Yield per 100,000 screened (95% CI)" + SUP[2], "Number needed to screen (95% CI)" + SUP[2]]
+    header = ["Data year", "Source table", "Screened (n)", "Diagnosed (n)", "Yield per 100,000 screened (95% CI)" + SUP[0], "Number needed to screen (95% CI)" + SUP[0]]
     years = sorted({r["year"] for r in full})
     rows, notes = [], []
     for y in years:
@@ -318,19 +331,20 @@ def table3(tr: Trace):
             rows.append([y, "No table published", "", "", "", ""])
             continue
         iy, inn = i_y[0], i_n[0]
-        mark = SUP[0] if y == "2022" else (SUP[1] if y == "2021" else "")
+        mark = SUP[2] if y == "2022" else (SUP[1] if y == "2021" else "")
         rows.append([y, itr_table(s[iy]["chosen_source"]) + mark, tr.value(Q3S, s, iy, "denominator", "int"),
                      tr.value(Q3S, s, iy, "numerator", "int"),
                      tr.interval(Q3S, s, iy, "value", "lower", "upper", "dec1"),
                      tr.interval(Q3S, s, inn, "value", "lower", "upper", "dec0")])
     i = row_index(s, state="India", year="2021", indicator="acf_share_of_public_sector_notifications_pct")
-    share = tr.interval(Q3S, s, i, "value", "lower", "upper", "dec2")
-    notes.append(f"{SUP[0]} Printed national row. In this annexure the State rows do not sum to the India row "
-                 "(people screened, examined and diagnosed); the India row is used as printed.")
-    notes.append(f"{SUP[1]} For 2021, ACF diagnoses were {share} per cent of public-sector notifications "
+    share = (f"{tr.value(Q3S, s, i, 'value', 'dec2')}% (95% CI {tr.value(Q3S, s, i, 'lower', 'dec2')} to "
+             f"{tr.value(Q3S, s, i, 'upper', 'dec2')})")
+    notes.append(f"{SUP[0]} Yield is diagnosed per 100,000 screened with a Wilson interval; the number needed to screen is the reciprocal, with the reciprocal Wilson bounds.")
+    notes.append(f"{SUP[1]} For 2021, ACF diagnoses were {share} of public-sector notifications "
                  f"({itr_table(s[i]['chosen_source'])}); the denominator is public-sector notifications only, "
                  "so this is not a share of all notifications.")
-    notes.append(f"{SUP[2]} Yield is diagnosed per 100,000 screened with a Wilson interval; the number needed to screen is the reciprocal, with the reciprocal Wilson bounds.")
+    notes.append(f"{SUP[2]} Printed national row. In this annexure the State rows do not sum to the India row "
+                 "(people screened, examined and diagnosed); the India row is used as printed.")
     return header, rows, notes
 
 
@@ -368,7 +382,8 @@ def supp_q4(tr: Trace):
     rows = []
     for i, r in enumerate(s):
         name = (r["analysis"].replace(" x0.", " ×0.").replace("with ln r", "with lag proxy")
-                .replace("without ln r", "without lag proxy"))
+                .replace("without ln r", "without lag proxy").replace("2022-2024", "2022–2024")
+                .replace("January-October", "January to October"))
         if r["status"] == "fitted":
             g = tr.interval(Q4, s, i, "gamma1", "gamma1_model_lo", "gamma1_model_hi", "dec3")
             bs = (f"{tr.value(Q4, s, i, 'gamma1_boot_lo', 'dec3')} to {tr.value(Q4, s, i, 'gamma1_boot_hi', 'dec3')}"
@@ -384,7 +399,7 @@ def supp_q4(tr: Trace):
         "Denominator R is the registered district count; D is the count reconstructed from official notices "
         "(the main analysis, a deviation from the registered plan). For leaving out one unit at a time (S2), "
         "n is the number of units in each refit and the γ1 column gives the range over the refits. "
-        "S8(a) multiplies the January–October 2025 counts by 0.98 or 0.95; S8(b) adds a State lag proxy, "
+        "S8(a) multiplies the January to October 2025 counts by 0.98 or 0.95; S8(b) adds a State lag proxy, "
         "the log ratio of two 2023 counts. No P values are reported."]
 
 
@@ -526,7 +541,7 @@ def data_dictionary_md() -> str:
 
 
 STUDY = {"GHA2023": "Shewade et al. 2023 (national, first ACF cycle of 2021)",
-         "PGPH2025": "Shewade et al. 2025 (30 districts, January–September 2023)"}
+         "PGPH2025": "Shewade et al. 2025 (30 districts, January to September 2023)"}
 
 
 def supp_quality(tr: Trace):
@@ -551,9 +566,9 @@ def build() -> tuple[dict, Trace]:
     ex: dict[str, dict] = {}
     h, r, n = table1(tr)
     ex["Table 1"] = {"title": "Inventory of published campaign figures and Q1 consistency checks", "panels": [(h, r)], "notes": n, "main": True}
-    h, r, n, hb, rb = table2(tr)
+    h, r, n = table2(tr)
     ex["Table 2"] = {"title": "Discrepancy classes among published figures, registered and corrected rules, with the class 1 and 2 pairs (corrected set)",
-                     "panels": [(h, r), (hb, rb)], "notes": n, "main": True}
+                     "panels": [(h, r)], "notes": n, "main": True}
     h, r, n = table3(tr)
     ex["Table 3"] = {"title": "National yield and number needed to screen by data year", "panels": [(h, r)], "notes": n, "main": True}
     h, r, n = supp_q2_groups(tr)
@@ -564,7 +579,7 @@ def build() -> tuple[dict, Trace]:
     h, r, n = supp_q3_states(tr)
     ex["Table S3"] = {"title": "State-level yield and number needed to screen by data year", "panels": [(h, r)], "notes": n, "main": False}
     h, r, n = supp_q4(tr)
-    ex["Table S4"] = {"title": "Dose-response analysis: primary analysis, sensitivity analyses and placebo under both district denominators", "panels": [(h, r)], "notes": n, "main": False}
+    ex["Table S4"] = {"title": "Dose–response analysis: primary analysis, sensitivity analyses and placebo under both district denominators", "panels": [(h, r)], "notes": n, "main": False}
     return ex, tr
 
 def main() -> int:

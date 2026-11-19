@@ -114,7 +114,7 @@ def figure2_points() -> tuple[list[dict], dict, dict]:
 
 def setup() -> None:
     plt.rcParams.update({"font.size": 9, "font.family": "DejaVu Sans", "axes.linewidth": 0.6,
-                         "pdf.fonttype": 42, "svg.hashsalt": "acf", "axes.unicode_minus": False})
+                         "pdf.fonttype": 42, "svg.hashsalt": "acf", "axes.unicode_minus": True})
 
 
 def save(fig, name: str) -> None:
@@ -208,7 +208,7 @@ def main() -> int:
         "Caption: the 48.64 lakh point (PIB release of 12 November 2026) is plotted as diagnosed: the release calls it "
         "\"new TB cases identified\" and also \"TB Cases Detected\". The 27.28 lakh point of the 2026 campaign document "
         "states no definition.\n",
-        "## Figure 2\nThe dose-response analysis under the reconstructed district denominator (the main analysis, a "
+        "## Figure 2\nThe dose–response analysis under the reconstructed district denominator (the main analysis, a "
         "deviation from the registered denominator). Panel A: excess change x in log notifications, 2025 against 2024, against the exposure share E, one point "
         "per State or Union Territory; point area proportional to the weight; line = weighted least-squares fit on all units. "
         "Panel A's y-axis is clipped to " + f"{YLIM_A[0]} to {YLIM_A[1]}".replace("-", MINUS) + "; " + clipped + " "

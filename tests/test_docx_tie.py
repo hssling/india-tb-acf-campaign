@@ -120,7 +120,7 @@ SOURCES = {
                            "| 1 | 2 |\n"),
     "first_page_src.md": ("# Title page\n\n**Title:** A study title\n\n**Author:** An Author\n\n"
                           "**Word count (Microsoft Word):** main text (Introduction to Discussion) 1,234 "
-                          "words; abstract 210 words.\n\n**Competing interests:** None declared.\n\n"
+                          "words; abstract 210 words.\n\n**Declarations of interest:** none.\n\n"
                           "**Data:** DOI: 10.5281/zenodo.XXXXXXX\n"),
     "cover_letter.md": "# Cover letter\n\nDear Editors,\n\nThe Editors\nPublic Health\n",
     "record_checklist.md": "# RECORD checklist\n\n| Item | Where |\n|---|---|\n| 1 | Title |\n",
@@ -172,7 +172,7 @@ def test_spec_parts(ms_dir):
     assert want[0] == "Dear Editors,"  # the '# Cover letter' heading is not part of the letter
     want, _ = tie.expected(ms_dir, "08_declaration_of_interests.docx")
     assert want == ["Declaration of interests", "Title: A study title", "Author: An Author",
-                    "Competing interests: None declared."]
+                    "Declarations of interest: none."]
 
 
 def test_fixture_folder_catches_changes(ms_dir):
@@ -263,3 +263,11 @@ def test_journal_italics(tmp_path):
     d.paragraphs[1].runs[1].italic = False
     d.save(str(f))
     assert tie.italics_problems(f, ms)
+
+
+def test_spanning_row_ties_to_one_merged_cell():
+    """A spanning row is '| **Label** | | |' in Markdown and one merged cell in Word."""
+    assert tie.row_unit(["Label", "", ""]) == "Label"
+    assert tie.row_unit(["A", "", "B", ""]) == "A |  | B"
+    assert tie.md_units("| **Class 1 and 2 entry pairs (corrected set)** |  |  |\n") == [
+        "Class 1 and 2 entry pairs (corrected set)"]

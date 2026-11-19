@@ -196,10 +196,10 @@ def cover_letter_md() -> str:
 
 def declaration_md(doi: str | None) -> str:
     """Elsevier's separate declaration of interests: the title, the author and the title
-    page's competing-interests statement, word for word."""
+    page's declarations-of-interest statement, word for word."""
     fp = title_page_md(doi)
     keep = []
-    for key in ("**Title:**", "**Author:**", "**Competing interests:**"):
+    for key in ("**Title:**", "**Author:**", "**Declarations of interest:**"):
         hit = [ln for ln in fp.splitlines() if ln.startswith(key)]
         if len(hit) != 1:
             raise SystemExit(f"first_page_src.md: expected one line starting {key}")
@@ -380,9 +380,66 @@ def col_widths(t, total: int, size: float) -> list[int]:
     return widths
 
 
+def is_bold_run(r) -> bool:
+    rpr = r.find(qn("w:rPr"))
+    b = rpr.find(qn("w:b")) if rpr is not None else None
+    return b is not None and b.get(qn("w:val")) not in ("0", "false")
+
+
+def spanning_rows(tbl) -> list[int]:
+    """Rows after the header whose first cell is wholly bold and whose other cells are empty
+    (tables.md writes '| **Label** | | ... |'): each becomes one cell spanning the table, and
+    the row after it heads the block below."""
+    out = []
+    for i, tr in enumerate(tbl.findall(qn("w:tr"))):
+        tcs = tr.findall(qn("w:tc"))
+        if i == 0 or len(tcs) < 2:
+            continue
+        texts = ["".join(x.text or "" for x in tc.iter(qn("w:t"))) for tc in tcs]
+        runs = [r for r in tcs[0].iter(qn("w:r")) if "".join(x.text or "" for x in r.iter(qn("w:t"))).strip()]
+        if texts[0].strip() and not any(x.strip() for x in texts[1:]) and runs and all(map(is_bold_run, runs)):
+            out.append(i)
+    return out
+
+
+def set_cell_border(tc, edge: str, val: str, sz: int = 6) -> None:
+    tb = tc.get_or_add_tcPr().find(qn("w:tcBorders"))
+    old = tb.find(qn(f"w:{edge}"))
+    new = border(edge, val, sz)
+    if old is not None:
+        old.addprevious(new)
+        tb.remove(old)
+    else:
+        tb.append(new)
+
+
+def merge_spanning_rows(tbl, total: int) -> None:
+    """One cell across the table for each spanning row, with a rule above it; a rule below the
+    heading row that follows it."""
+    rows = tbl.findall(qn("w:tr"))
+    ncols = len(tbl.tblGrid.findall(qn("w:gridCol")))
+    for i in spanning_rows(tbl):
+        tcs = rows[i].findall(qn("w:tc"))
+        for tc in tcs[1:]:
+            rows[i].remove(tc)
+        tcPr = tcs[0].get_or_add_tcPr()
+        tcPr.find(qn("w:tcW")).set(qn("w:w"), str(total))
+        for e in tcPr.findall(qn("w:gridSpan")):
+            tcPr.remove(e)
+        gs = OxmlElement("w:gridSpan")
+        gs.set(qn("w:val"), str(ncols))
+        tcPr.append(gs)
+        reorder(tcPr, TCPR_ORDER)
+        set_cell_border(tcs[0], "top", "single")
+        if i + 1 < len(rows):
+            for tc in rows[i + 1].findall(qn("w:tc")):
+                set_cell_border(tc, "bottom", "single")
+
+
 def format_table(t, total: int, size: float) -> None:
-    """Top, header and bottom rules only (no vertical rules); fixed widths over the text
-    block; the header row repeated on each page; single-spaced cells at `size` pt."""
+    """Top, header and bottom rules only (no vertical rules), and a rule above a spanning row
+    and below the heading row under it; fixed widths over the text block; the header row
+    repeated on each page; single-spaced cells at `size` pt."""
     tbl = t._tbl
     pr = tbl.tblPr
     for tag in ("tblW", "tblInd", "tblLayout", "jc", "tblBorders"):
@@ -430,6 +487,7 @@ def format_table(t, total: int, size: float) -> None:
             tb.append(border("right", "nil"))
             tcPr.append(tb)
             reorder(tcPr, TCPR_ORDER)
+    merge_spanning_rows(tbl, total)
     for i, row in enumerate(t.rows):
         for c in row.cells:
             for p in c.paragraphs:
@@ -494,7 +552,10 @@ def postprocess(path: Path, *, landscape: bool = False, line_numbers: bool = Fal
     page_setup(doc, landscape=landscape, line_numbers=line_numbers)
     total = (16838 if landscape else 11906) - 2 * 1417
     for t in doc.tables:
-        format_table(t, total, table_pt)
+        # a wide table on a portrait page (Table 2: seven columns) one point smaller, so that it
+        # keeps to one page
+        wide = not landscape and len(t.columns) >= 7
+        format_table(t, total, table_pt - 1 if wide else table_pt)
     if placeholder:
         highlight(doc, re.compile("(" + re.escape(DOI_PLACEHOLDER) + ")"))
     cp = doc.core_properties

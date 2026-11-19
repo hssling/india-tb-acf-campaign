@@ -5,7 +5,8 @@
 # Abstract: the paragraphs between the "Abstract" heading and the Keywords line (its run-in
 # headings Objectives ... Conclusions included, Keywords excluded).
 # Main text: Introduction to Discussion, headings excluded, run-in bold subheadings included;
-# it ends at the first heading after Discussion (Ethical approval). Tables are not counted.
+# it ends at the first heading after Discussion (Acknowledgements). Tables and the placement
+# markers ("[Table 1 about here]") are not counted.
 param([string]$Docx, [string]$Out)
 $word = New-Object -ComObject Word.Application
 $word.Visible = $false
@@ -23,6 +24,7 @@ try {
       continue
     }
     if ($t -like "Keywords:*") { $state = "" ; continue }
+    if ($t -match '^\[(Table|Figure) \d+ about here\]$') { continue }   # placement markers are not counted
     if ($p.Range.Information(12)) { continue }          # inside a table
     $n = $p.Range.ComputeStatistics(0)
     if ($state -eq "abs") { $abs += $n }
