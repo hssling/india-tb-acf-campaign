@@ -12,7 +12,7 @@ Run as `python -I src/ext/d1_yield.py` to write, under outputs/ext/ (UTF-8, LF):
 Columns are documented in outputs/ext/README.md.
 
 The intensity-stratum repeat of the 2021-2023 tiers (section 4.2, last bullet) needs the
-strata of section 4.5, which Task 4 builds (`d1_saturation.intensity_strata`); it is run
+strata of section 4.5, which `d1_saturation.intensity_strata` builds; it is run
 there or later through `analyse_pooled(units=...)`, not here.
 """
 from __future__ import annotations

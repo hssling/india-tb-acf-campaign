@@ -10,7 +10,10 @@ Run as `python -I src/ext/d1_saturation.py` to write, under outputs/ext/ (UTF-8,
   d1_tiers_by_intensity.csv  the section 4.2 intensity sensitivity: 2021-2023 pooling,
                              shrinkage, ranks and tiers within each stratum, against that
                              stratum's own mean (via d1_yield.analyse_pooled(units=...));
-  d1_intensity_strata.csv    each unit's intensity and stratum (section 4.5 listing).
+  d1_intensity_strata.csv    each unit's intensity and stratum (section 4.5 listing);
+  d1_elasticity_samedef.csv  POST HOC sensitivity (plan section 10, 20 November 2026): the
+                             main elasticity on the data years whose screened column has
+                             the same printed heading (2019 and 2021).
 Columns are documented in outputs/ext/README.md.
 
 Random numbers: `numpy.random.default_rng(20261119)` is reset at the start of every
@@ -25,6 +28,15 @@ printed (ITR 2020 PDF page 255, printed page 231; e.g. Maharashtra 0.7 lakh, Lak
 343.3 lakh, Mizoram 1241.3 lakh). The main intensity therefore does not use the 2019
 population: it is the mean of S_t / P_2021 over 2021-2023 (P_2021 is present for every
 unit). The registered rule is still computed (`population_2019=True`) and written beside it.
+
+Post hoc (plan section 10, 20 November 2026; added after every registered estimate was seen):
+the screened heading differs between editions (section 3.1), and State-specific shifts in the
+screened count that the year effects do not absorb act as measurement error in ln S, which
+would most likely bias the elasticity towards 0. `elasticity_same_definition` refits the main
+model, with its own reset generator, on the two data years whose screened column has the same
+printed heading, "Population screened amongst mapped vulnerable population" (2019, ITR 2020;
+2021, ITR 2022). 2018 (ITR 2019, "Persons screened out of the mapped population") is listed
+under a different heading in section 3.1 and is not included. No registered estimate changes.
 """
 from __future__ import annotations
 
@@ -209,7 +221,8 @@ def elasticity(rows=None, weights="D", zero="exclude", years=None, units=None,
     (unit-years failing section 3.3, each {unit, year, reason}).
 
     With return_draws=True, `draws` is the array of all bootstrap slopes in draw order,
-    length n_draws, NaN at degenerate draws (Task 5 pairs stratum draws by index)."""
+    length n_draws, NaN at degenerate draws (the stratum scenario of
+    d2_targeting pairs stratum draws by index)."""
     if zero not in ("exclude", "+0.5"):
         raise ValueError(zero)
     wmode = "none" if weights in (None, "none") else weights
@@ -268,6 +281,20 @@ def elasticity(rows=None, weights="D", zero="exclude", years=None, units=None,
     if return_draws:
         out["draws"] = bd
     return out
+
+
+# ---------------------------------------------------------------- post hoc: same heading
+
+SAME_DEFINITION_YEARS = (2019, 2021)
+SAME_DEFINITION_HEADING = "Population screened amongst mapped vulnerable population"
+
+
+def elasticity_same_definition(rows=None, draws: int = DRAWS) -> dict:
+    """POST HOC (plan section 10, 20 November 2026): the main elasticity (section 4.3:
+    weights D, zeros excluded, singletons dropped, CR1 model interval, cluster bootstrap with
+    the generator reset) on the data years whose screened column has the same printed
+    heading, SAME_DEFINITION_YEARS."""
+    return elasticity(rows, years=SAME_DEFINITION_YEARS, draws=draws)
 
 
 # ---------------------------------------------------------------- Poisson FE (4.3)
@@ -562,6 +589,7 @@ DECOMP_FIELDS = ("analysis", "status", "testing_definition", "years", "quantity"
 STRATA_FIELDS = ("unit", "small_ut", "intensity", "intensity_years", "stratum", "median",
                  "intensity_registered_rule", "intensity_registered_years",
                  "stratum_registered_rule", "median_registered_rule", "note")
+SAMEDEF_FIELDS = ELAST_FIELDS[:1] + ("status", "screened_heading") + ELAST_FIELDS[1:24]
 TIER_FIELDS = ("stratum", "analysis", "unit", "small_ut", "intensity", "years", "n_years",
                "diagnosed", "screened", "y_log", "v_log", "post_mean_log", "post_sd_log",
                "post_lo_log", "post_hi_log", "post_per_100k", "post_lo_per_100k",
@@ -616,6 +644,7 @@ def build_results() -> dict:
     rows = panel.load_panel()
     res = {"main": elasticity(rows), "high": elasticity(rows, stratum="high"),
            "low": elasticity(rows, stratum="low"), "poisson": poisson_fe_elasticity(rows),
+           "samedef": elasticity_same_definition(rows),
            "change": decompose_change(rows, 2021, 2023),
            "levels": {y: decompose_level(rows, y) for y in MAIN_DECOMP_YEARS},
            "variance": {y: decompose_variance(rows, y) for y in MAIN_DECOMP_YEARS},
@@ -692,7 +721,12 @@ def build() -> dict:
                         "tier_agrees": st["tier"] == tier_all[st["unit"]]})
             tiers_out.append(row)
 
+    same = _elast_row("same screened definition (post hoc)", "fe_wls", "all", R["samedef"])
+    same.update({"status": "post hoc sensitivity",
+                 "screened_heading": SAME_DEFINITION_HEADING})
+
     return {"d1_elasticity.csv": Y.render(ELAST_FIELDS, elast),
+            "d1_elasticity_samedef.csv": Y.render(SAMEDEF_FIELDS, [same]),
             "d1_decomposition.csv": Y.render(DECOMP_FIELDS, dec),
             "d1_intensity_strata.csv": Y.render(STRATA_FIELDS, strata_out),
             "d1_tiers_by_intensity.csv": Y.render(TIER_FIELDS, tiers_out)}

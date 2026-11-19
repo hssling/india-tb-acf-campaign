@@ -215,6 +215,26 @@ Leave-one-out and the specification curve are in `leave_one_out.csv` and `spec_c
 | n_all_zero_units, all_zero_units | Poisson only: units with D = 0 in every year, listed and excluded |
 | converged, iterations | Poisson only: IRLS convergence (maximum coefficient change < 10⁻¹⁰) and the iterations used |
 
+### POST HOC: d1_elasticity_samedef.csv (one row)
+
+Added 20 November 2026, after registration and after every registered estimate was seen
+(extension plan §10). Label it post hoc. Written by the same script.
+
+- **Why.** The printed screened heading differs between editions (§3.1). State-specific shifts
+  in the screened count that the year effects do not absorb act as measurement error in ln S,
+  which would most likely bias ε towards 0, the direction of the registered finding. No entry
+  of the §7.1 grid holds the heading constant.
+- **Method.** The `main` model of `d1_elasticity.csv` (weights D, zeros excluded, units with one
+  row dropped, CR1 model interval, cluster bootstrap with the generator reset) on the two data
+  years whose screened column has the same printed heading, "Population screened amongst
+  mapped vulnerable population": 2019 (ITR 2020) and 2021 (ITR 2022). The 2018 heading
+  ("Persons screened out of the mapped population") differs, so 2018 is left out.
+- **Columns.** Those of `d1_elasticity.csv` up to `excluded`, with `analysis` `same screened
+  definition (post hoc)`, plus `status` (`post hoc sensitivity`) and `screened_heading` (the
+  shared heading).
+- **Reading.** With two years, ε rests on one change per State. The estimate is below 1, as in
+  the main model, but less precise.
+
 ### d1_decomposition.csv (one row per quantity)
 
 The identity is ln(D/S) = ln(T/S) + ln(D/T): the testing rate plus the positivity.

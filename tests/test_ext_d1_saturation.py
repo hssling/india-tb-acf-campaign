@@ -319,6 +319,34 @@ def test_elasticity_output_rows():
 def test_build_reproduces_committed_outputs():
     built = S.build()
     assert set(built) == {"d1_elasticity.csv", "d1_decomposition.csv",
-                          "d1_tiers_by_intensity.csv", "d1_intensity_strata.csv"}
+                          "d1_tiers_by_intensity.csv", "d1_intensity_strata.csv",
+                          "d1_elasticity_samedef.csv"}
     for name, text in built.items():
         assert (OUT / name).read_bytes() == text.encode("utf-8"), name
+
+
+def test_same_definition_elasticity_is_the_main_model_on_2019_and_2021():
+    """POST HOC (plan section 10, 20 November 2026): the main estimator, bootstrap and seed,
+    restricted to the two data years whose screened column has the same printed heading."""
+    rows = _rows(slope=0.6)
+    got = S.elasticity_same_definition(rows, draws=200)
+    want = S.elasticity(rows, years=(2019, 2021), draws=200)
+    assert S.SAME_DEFINITION_YEARS == (2019, 2021)
+    assert got["years"] == [2019, 2021]
+    for k in ("beta", "se", "model_ci", "boot_ci", "n_units", "n_obs", "p"):
+        assert got[k] == want[k], k
+    # two years: one dummy per unit plus one year dummy beside ln S
+    assert got["p"] == 1 + got["n_units"] + 1
+
+
+@needs_data
+def test_same_definition_output_row():
+    (r,) = _csv("d1_elasticity_samedef.csv")
+    assert r["analysis"] == "same screened definition (post hoc)"
+    assert r["status"] == "post hoc sensitivity" and r["years"] == "2019;2021"
+    assert r["screened_heading"] == S.SAME_DEFINITION_HEADING
+    assert r["weights"] == "D" and r["zero"] == "exclude" and r["null"] == "1"
+    assert float(r["model_ci_lo"]) <= float(r["estimate"]) <= float(r["model_ci_hi"])
+    assert int(r["n_valid"]) + int(r["degenerate"]) == int(r["draws"]) == 10000
+    main = {x["analysis"]: x for x in _csv("d1_elasticity.csv")}["main"]
+    assert int(r["n_obs"]) < int(main["n_obs"])
