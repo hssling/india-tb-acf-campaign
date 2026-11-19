@@ -21,6 +21,8 @@ Run as: python -I verification/check_plan_order.py
    full history, deletions and renames included); src/ext/panel.py may come after
    registration. The text of docs/extension_plan.md above "## 10. Deviations" is
    byte-identical at the registration commit and at every commit in registration..HEAD.
+   If src/ext/ or outputs/ext/ exists but docs/registration_event_ext.json does not, the
+   check FAILS: a missing registration record never switches the extension checks off.
 
 In a copy without .git (a release archive) the history cannot be checked: this prints
 "SKIPPED: not a git checkout ..." and exits 0; check_all counts the step as skipped.
@@ -161,6 +163,10 @@ def problems(repo: Path = ROOT, registration: str | None = None,
     ext_registration = ext_registration or ext_registered_commit(repo)
     if ext_registration:
         out += ext_problems(repo, ext_registration)
+    elif any((repo / d).exists() for d in (EXT_MODULE_DIR, EXT_OUTPUTS)):
+        out.append(f"{EXT_MODULE_DIR}/ or {EXT_OUTPUTS}/ exists but "
+                   f"docs/registration_event_ext.json is missing, so the extension "
+                   f"registration order cannot be checked")
     return out
 
 

@@ -660,6 +660,7 @@ def test_renamed_outcome_file_is_matched_under_both_names(repo):
 REAL = Path(__file__).resolve().parents[1]
 EXT_FILES = ("data/ext/panel.csv", "outputs/q3_yield_summary.csv",
              "outputs/ext/d1_pooled.csv", "outputs/ext/d1_elasticity.csv",
+             "outputs/ext/d1_elasticity_samedef.csv",
              "outputs/ext/d2_alignment.csv", "outputs/ext/d3.csv",
              "outputs/ext/headline.csv", "outputs/ext/spec_curve.csv")
 
@@ -718,6 +719,20 @@ def test_headline_labels_follow_the_section8_rule_on_the_grid(ext_tree):
     assert any("headline epsilon: label printed 'supported'" in b for b in bad)
 
 
+def test_headline_interval_and_label_edited_together_fail(ext_tree):
+    def edit(rows):  # a coherent edit: rho's interval made to exclude 0, label to match
+        for r in rows:
+            if r["estimate"] == "rho":
+                r["ci_hi"] = "-0.01"
+                r["interval_excludes_null"] = "yes"
+                r["label"] = "supported"
+    _ext_edit(ext_tree, "outputs/ext/headline.csv", edit)
+    assert check_ext_outputs.label_problems(ext_tree)[0] == []  # the label check alone passes
+    bad = check_ext_outputs.problems(ext_tree)[0]
+    assert len(bad) == 1
+    assert bad[0].startswith("headline rho ci_hi vs d2_alignment.csv main boot_hi: printed -0.01")
+
+
 def test_section8_rule_exact_null_and_noncomputable_do_not_agree():
     f = check_ext_outputs.label_of
     assert f(0.5, 0.1, 0.9, 1.0, [0.5] * 8 + [None] * 2) == ("supported", 8)   # 8/10
@@ -732,12 +747,16 @@ def test_mutated_theta_fails(ext_tree):
                 r["estimate"] = repr(float(r["estimate"]) + 1e-4)
     _ext_edit(ext_tree, "outputs/ext/d3.csv", edit)
     bad = check_ext_outputs.problems(ext_tree)[0]
-    assert len(bad) == 1 and "d3 main theta" in bad[0]
+    # caught twice: the recomputed theta, and headline.csv no longer equals its source row
+    assert len(bad) == 2 and "d3 main theta" in bad[0]
+    assert bad[1].startswith("headline theta main_value vs d3.csv main estimate")
 
 
 def test_mutated_elasticity_rho_and_pooling_fail(ext_tree):
     for rel, key, name, what in (
             ("outputs/ext/d1_elasticity.csv", "estimate", "main", "d1_elasticity main"),
+            ("outputs/ext/d1_elasticity_samedef.csv", "estimate",
+             "same screened definition (post hoc)", "d1_elasticity_samedef estimate"),
             ("outputs/ext/d2_alignment.csv", "estimate", "main", "d2_alignment main"),
             ("outputs/ext/d1_pooled.csv", "tau2", "2021", "d1_pooled 2021 tau2")):
         def edit(rows, key=key, name=name):
@@ -824,3 +843,14 @@ def test_ext_registration_is_read_from_its_json_and_wired_into_problems(repo):
     assert check_plan_order.ext_registered_commit(repo) == ereg
     bad = check_plan_order.problems(repo, reg, lgd=None)
     assert len(bad) == 1 and "extension registration commit" in bad[0]
+
+
+def test_ext_files_without_their_registration_record_fail(repo):
+    reg = commit(repo, {"docs/analysis_plan.md": PLAN}, "plan")
+    assert check_plan_order.problems(repo, reg, lgd=None) == []   # no extension at all
+    for path in ("src/ext/d1_yield.py", "outputs/ext/headline.csv"):
+        commit(repo, {path: "x\n"}, f"add {path}")
+        bad = check_plan_order.problems(repo, reg, lgd=None)
+        assert len(bad) == 1 and "registration_event_ext.json is missing" in bad[0], path
+        git(repo, "rm", "-q", "-r", path.split("/")[0] + "/ext")
+        git(repo, "commit", "-q", "-m", f"remove {path}")

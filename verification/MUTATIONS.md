@@ -24,6 +24,8 @@ the checks reads it).
 | 11 | check_ext_outputs | `estimate` of the main row of `outputs/ext/d3.csv` (theta) edited by +1e-4 | caught (FAIL, exit 1) |
 | 12 | check_plan_order | one line above section 10 of `docs/extension_plan.md` edited and committed | caught (FAIL, exit 1) |
 | 13 | check_plan_order | a commit adding a file under `outputs/ext/`, branched from the commit before the extension registration commit and merged | caught (FAIL, exit 1) |
+| 14 | check_ext_outputs | a coherent edit of `outputs/ext/headline.csv` alone: the rho interval's upper end set to −0.01 and its label to "supported" (consistent with section 8) | caught (FAIL, exit 1); passed before the headline-source check was added |
+| 15 | check_plan_order | `docs/registration_event_ext.json` deleted and the deletion committed (src/ext/ and outputs/ext/ still present) | caught (FAIL, exit 1); passed (extension checks silently off) before |
 
 Mutation 1 is also visible to check_extraction_totals through the recorded-versus-recomputed
 sum; check_inventory does not flag it, because the unedited value is still held by the
@@ -227,6 +229,43 @@ Mutations 10 to 13 are also fixed in `tests/test_verification.py` (on temporary 
 re-derive the bootstrap and permutation intervals of `outputs/ext/`; those are reproduced by
 the seeded build, so an edit of an interval alone is caught by `tests/test_ext_*.py`
 (`test_build_reproduces_committed_outputs`), not by this check.
+
+## 14. Headline interval and label edited together
+
+Added on 20 November 2026, in a scratch clone of commit a58722f with the revised checks
+copied in. Before this check, the labels were recomputed from the interval printed in
+`headline.csv` itself, so a coherent edit of the interval and the label passed (the same edit
+run with the committed check of a58722f printed `OK` and exited 0).
+
+```
+# headline.csv, row rho: ci_hi -0.01, interval_excludes_null yes, label supported
+python -I verification/check_ext_outputs.py
+```
+
+```
+FAIL: headline rho ci_hi vs d2_alignment.csv main boot_hi: printed -0.01 but recomputed 0.022102703007464454
+exit 1
+```
+
+Since this check, mutation 11 (theta edited in `d3.csv`) is caught twice: by the recomputed
+theta and by `headline theta main_value vs d3.csv main estimate`.
+
+## 15. Extension registration record deleted
+
+```
+git rm docs/registration_event_ext.json
+git commit -m "mutation: remove the extension registration record"
+python -I verification/check_plan_order.py
+```
+
+```
+FAIL: src/ext/ or outputs/ext/ exists but docs/registration_event_ext.json is missing, so the extension registration order cannot be checked
+exit 1
+```
+
+Mutations 14 and 15 are also fixed in `tests/test_verification.py`
+(`test_headline_interval_and_label_edited_together_fail`,
+`test_ext_files_without_their_registration_record_fail`).
 
 ## Not exercised on the real repository
 

@@ -24,6 +24,12 @@ Tolerance 1e-6. What is recomputed, from data/ext/panel.csv:
     whole grid lies strictly on the main estimate's side of the null (an entry exactly at
     the null does not agree; one that cannot be computed counts as not agreeing). The
     agreement counts and the headline main values are also compared with the grid.
+(g) outputs/ext/headline.csv against its source rows: the main value and interval of each
+    headline equal the estimate and bootstrap interval of the main row of
+    d1_elasticity.csv (epsilon), d2_alignment.csv (rho) and d3.csv (theta), so an interval
+    and its label cannot be edited together in headline.csv alone.
+(h) outputs/ext/d1_elasticity_samedef.csv (post hoc, plan section 10, 20 November 2026): the
+    model of (c) on the data years 2019 and 2021 only (the same printed screened heading).
 
 NOT re-derived here: every bootstrap and permutation interval and band. They are
 reproduced by the seeded build (src/ext/d1_saturation.py, d2_targeting.py,
@@ -46,6 +52,7 @@ NULLS = {"epsilon": 1.0, "rho": 0.0, "theta": 0.0}
 GRID = {"epsilon": 24, "rho": 24, "theta": 16}
 THRESHOLD = 0.8
 GAP_FLAG = "itr2023_states_not_india"
+SAME_DEFINITION_YEARS = (2019, 2021)  # post hoc (plan section 10, 20 November 2026)
 
 
 # ------------------------------------------------------------------ input
@@ -192,8 +199,8 @@ def fe_slope(units, years, x, y, w) -> tuple[float, int]:
     return float(coef[0]), int(len(names))
 
 
-def elasticity_main(panel: list) -> tuple[float, int]:
-    use = [r for r in panel if _passes(r)]
+def elasticity_main(panel: list, years: tuple | None = None) -> tuple[float, int]:
+    use = [r for r in panel if _passes(r) and (years is None or r["year"] in years)]
     return fe_slope([r["unit"] for r in use], [r["year"] for r in use],
                     [math.log(r["S"]) for r in use], [math.log(r["D"]) for r in use],
                     [r["D"] for r in use])
@@ -278,6 +285,27 @@ def label_problems(root: Path) -> tuple[list[str], int]:
     return bad, n
 
 
+# ------------------------------------------------------------------ (g) headline sources
+
+HEADLINE_SOURCES = {"epsilon": "d1_elasticity.csv", "rho": "d2_alignment.csv",
+                    "theta": "d3.csv"}
+
+
+def headline_source_problems(root: Path) -> list[str]:
+    bad: list[str] = []
+    out = root / "outputs" / "ext"
+    head = {r["estimate"]: r for r in read(out / "headline.csv")}
+    for est, name in HEADLINE_SOURCES.items():
+        if est not in head:
+            continue  # reported by label_problems
+        src = next(r for r in read(out / name) if r["analysis"] == "main")
+        for hcol, scol in (("main_value", "estimate"), ("ci_lo", "boot_lo"),
+                           ("ci_hi", "boot_hi")):
+            _close(_flt(head[est][hcol]), _flt(src[scol]),
+                   f"headline {est} {hcol} vs {name} main {scol}", bad)
+    return bad
+
+
 # ------------------------------------------------------------------ driver
 
 def problems(root: Path = ROOT) -> tuple[list[str], dict]:
@@ -291,6 +319,13 @@ def problems(root: Path = ROOT) -> tuple[list[str], dict]:
     _close(float(row["estimate"]), eps, "d1_elasticity main estimate", bad)
     if int(row["n_units"]) != g:
         bad.append(f"d1_elasticity main: n_units {row['n_units']} but recomputed {g}")
+    eps2, g2 = elasticity_main(panel, SAME_DEFINITION_YEARS)
+    row = next(r for r in read(out / "d1_elasticity_samedef.csv")
+               if r["analysis"] == "same screened definition (post hoc)")
+    _close(float(row["estimate"]), eps2, "d1_elasticity_samedef estimate", bad)
+    if int(row["n_units"]) != g2 or row["years"] != ";".join(map(str, SAME_DEFINITION_YEARS)):
+        bad.append(f"d1_elasticity_samedef: n_units {row['n_units']}, years {row['years']} but "
+                   f"recomputed {g2} units over {SAME_DEFINITION_YEARS}")
     rho, n_rho = rho_main(panel)
     row = next(r for r in read(out / "d2_alignment.csv") if r["analysis"] == "main")
     _close(float(row["estimate"]), rho, "d2_alignment main rho", bad)
@@ -302,8 +337,9 @@ def problems(root: Path = ROOT) -> tuple[list[str], dict]:
     if int(row["n_units"]) != g3:
         bad.append(f"d3 main: n_units {row['n_units']} but recomputed {g3}")
     b, n_lab = label_problems(root)
+    b += headline_source_problems(root)
     return bad + b, {"pooled": n_pool, "labels": n_lab, "epsilon": eps, "rho": rho,
-                     "theta": theta}
+                     "theta": theta, "epsilon_samedef": eps2}
 
 
 def main(root: Path = ROOT) -> int:
@@ -313,10 +349,11 @@ def main(root: Path = ROOT) -> int:
             print(f"FAIL: {b}")
         return 1
     print(f"OK: panel totals match the India rows (2022 ITR 2023 gap flagged); "
-          f"{n['pooled']} DL poolings (mu, tau2, I2), epsilon {n['epsilon']:.6f}, "
-          f"rho {n['rho']:.6f}, theta {n['theta']:.6f} reproduced; {n['labels']} headline "
-          f"labels recomputed from the grid by section 8 (bootstrap and permutation "
-          f"intervals not re-derived: reproduced by the seeded build)")
+          f"{n['pooled']} DL poolings (mu, tau2, I2), epsilon {n['epsilon']:.6f} "
+          f"(post hoc same heading {n['epsilon_samedef']:.6f}), rho {n['rho']:.6f}, theta {n['theta']:.6f} reproduced; {n['labels']} headline "
+          f"labels recomputed from the grid by section 8; headline values and intervals "
+          f"equal their source rows (bootstrap and permutation intervals not re-derived: "
+          f"reproduced by the seeded build)")
     return 0
 
 
