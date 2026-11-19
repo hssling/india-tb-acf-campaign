@@ -17,8 +17,7 @@ abstract: >-
   diagnoses.
 type: software
 version: "1.1.0"
-# date-released: placeholder (the v1.0.0 date); the release step sets the v1.1.0 date
-date-released: 2026-11-19
+date-released: 2026-11-20
 authors:
   - family-names: "Siddalingaiah"
     given-names: "H S"

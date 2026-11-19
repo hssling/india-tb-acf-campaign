@@ -46,8 +46,9 @@ Flags:
 - `est_population_misaligned_itr2020`: on every 2019 row. The India TB Report 2020
   estimated-population column is misaligned with its State rows as printed (plan §10,
   19 November 2026; for example, Maharashtra 2019 reads 70,000 people). The values are kept as
-  printed so that the extraction can be checked against the source. No analysis uses them,
-  and nothing is realigned or imputed.
+  printed so that the extraction can be checked against the source. No reported analysis uses
+  them; only the registered-rule comparison columns of `d1_intensity_strata.csv` do. Nothing is
+  realigned or imputed.
 - `member_zero_diagnosed:<members>`: a merged unit whose member is printed with zero diagnoses
   while the unit's sum is positive. The only case is Jammu and Kashmir in 2021, where Ladakh
   is printed 0; the unit enters with its summed count.

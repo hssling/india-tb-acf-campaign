@@ -397,7 +397,7 @@ commit adding this section.
 | 9e | caveat, Markdown | Figure 3 legend: "not a forecast" removed | check_manuscript_numbers and check_docx_tie |
 | 9f | caveat, docx only | 02 Discussion: "it is not a forecast" removed | check_docx_tie |
 | 9g | caveat, docx only | 07 Table S2 title: "(post hoc)" removed | check_docx_tie |
-| 9h | caveat, Markdown | Discussion: "(post hoc)" removed from the same-definition elasticity | check_manuscript_numbers and check_docx_tie |
+| 9h | caveat, Markdown | Limitations: "(post hoc)" removed from the same-definition elasticity | check_manuscript_numbers and check_docx_tie |
 | 9i | caveat, docx only | 07 Table S3: "(post hoc)" removed from the same-definition row | check_docx_tie |
 | 10a | AMA italics, docx only | 02 References: italics removed from the first journal title | check_docx_tie (ITALICS) |
 
