@@ -816,3 +816,5 @@ Deviations from this plan are logged here, each with its date. Anything explorat
 **19 November 2026 (after registration; factual).** Rajya Sabha Question 2511 prints its 2024 column as "Notification in 2024 (Jan- Oct)" with "*As on 19th Nov 2024". §7.4 and §9.5.5 assumed a year-to-date window. The inventory records what is printed. Q2511 remains outside Q4, so Q4 is unchanged.
 
 **19 November 2026 (after registration; clarification of §5.2).** India TB Report State annexures print no year. Their window is taken from the data year fixed for each edition in §3.1.1 and §3.2, with a note on each row. This clarifies §5.2's "as stated".
+
+**19 November 2026 (after registration; factual).** The guard (§9.5.2) was computed and recorded in data/source_choices.csv on 19 November 2026, before any other Q computation.

@@ -1,0 +1,14 @@
+item,value
+status,pass
+median ratio 2023,1.040139
+median ratio 2024,1.022980
+n States 2023,35
+n States 2024,35
+"States outside [0.95, 1.05] in 2023",17
+"States outside [0.95, 1.05] in 2024",12
+2024 rows labelled late-report-consistent,11
+extraction checks,RS Q1216: pass; RS Q3467: pass
+primary contrast,full-year 2025 vs 2024
+full-year contrast role,primary
+trend sources,2019: ITR 2020 (in use); 2022: ITR 2023 (in use); 2023: RS Q1216 (in use); 2024: RS Q1216 (in use)
+labels not computable,none
