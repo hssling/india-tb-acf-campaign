@@ -358,6 +358,10 @@ MUTATIONS_EXT: list[Mutation] = [
      swap(edit_docx, MS_02, "9f")),
     ("9g", "caveat, docx only", "07 Table S2 title: '(post hoc)' removed",
      swap(edit_docx, SUP_07, "9g")),
+    ("9h", "caveat, markdown", "manuscript_src.md Discussion: '(post hoc)' removed from the same-definition elasticity",
+     swap(edit_text, cmn.MS_NAME, "9h")),
+    ("9i", "caveat, docx only", "07 Table S3: '(post hoc)' removed from the same-definition row",
+     swap(edit_docx, SUP_07, "9i")),
     ("10a", "AMA italics, docx only", "02 References: italics removed from the first journal title",
      lambda d: drop_italic(d / MS_02)),
 ]

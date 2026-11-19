@@ -397,6 +397,8 @@ commit adding this section.
 | 9e | caveat, Markdown | Figure 3 legend: "not a forecast" removed | check_manuscript_numbers and check_docx_tie |
 | 9f | caveat, docx only | 02 Discussion: "it is not a forecast" removed | check_docx_tie |
 | 9g | caveat, docx only | 07 Table S2 title: "(post hoc)" removed | check_docx_tie |
+| 9h | caveat, Markdown | Discussion: "(post hoc)" removed from the same-definition elasticity | check_manuscript_numbers and check_docx_tie |
+| 9i | caveat, docx only | 07 Table S3: "(post hoc)" removed from the same-definition row | check_docx_tie |
 | 10a | AMA italics, docx only | 02 References: italics removed from the first journal title | check_docx_tie (ITALICS) |
 
 ```
@@ -409,3 +411,19 @@ The same day, `python -I verification/mutate_manuscript.py --manuscript-dir manu
 gave `named mutations [v1]: 24 of 24 caught`, on the existing v1 set and on a copy rebuilt with
 the revised builder. The harness now copies the folder under its own name, so a folder without a
 "profile" key (v1_audit) keeps its profile in the copy.
+
+Rerun on 20 November 2026 after the final-review fixes (the post hoc same-definition elasticity,
+the registered stratum-elasticity scenario in the text, the wording fixes), with mutations 9h and
+9i added for the new post hoc label:
+
+```
+named mutations [ext]: 36 of 36 caught
+sweep, manuscript_src.md number tokens (check_manuscript_numbers): caught 380 of 380
+sweep, 02_manuscript_anonymised.docx number tokens (check_docx_tie): caught 772 of 772
+named mutations [v1]: 24 of 24 caught
+sweep, manuscript_src.md number tokens (check_manuscript_numbers): caught 427 of 427
+sweep, 02_manuscript_anonymised.docx number tokens (check_docx_tie): caught 983 of 983
+```
+
+(The sweeps of the ext set were run with the 34 named mutations, before 9h and 9i were added;
+the named set was then rerun alone.)
