@@ -531,6 +531,11 @@ def word_count_problems(ms_dir: Path, title_units: list[str]) -> list[str]:
 # --------------------------------------------------------------------------------------
 # Driver
 # --------------------------------------------------------------------------------------
+# Optional uploads the journal accepts as separate files (Public Health: graphical abstract,
+# "optional, its use is encouraged"); allowed in submission/ but never required.
+OPTIONAL_FILES = {"11_graphical_abstract.tif", "11_graphical_abstract.pdf"}
+
+
 def problems(ms_dir: Path | None = None, root: Path = ROOT) -> list[str]:
     ms_dir = ms_dir or root / cmn.DEFAULT_MS_DIR
     sub = ms_dir / "submission"
@@ -538,7 +543,7 @@ def problems(ms_dir: Path | None = None, root: Path = ROOT) -> list[str]:
     out: list[str] = []
     marks = markers(ms_dir, root)
     units_of: dict[str, list[str]] = {}
-    known = set(lay.files())
+    known = set(lay.files()) | OPTIONAL_FILES
     out += [f"EXTRA: {p.name} is not part of the {cmn.profile_for(ms_dir)} submission set"
             for p in sorted(sub.iterdir()) if p.is_file() and p.name not in known]
     for name in lay.spec:

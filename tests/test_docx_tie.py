@@ -221,6 +221,15 @@ def test_extra_file_is_a_problem(ms_dir):
         f"EXTRA: 05_supplementary_material_old.docx is not part of the {cmn.profile_for(ms_dir)} submission set"]
 
 
+
+def test_optional_graphical_abstract_is_allowed_but_other_extras_are_not(ms_dir):
+    sub = ms_dir / "submission"
+    for name in sorted(tie.OPTIONAL_FILES):
+        (sub / name).write_bytes(b"x")
+    (sub / "11_graphical_abstract.png").write_bytes(b"x")
+    assert tie.problems(ms_dir, ROOT) == [
+        f"EXTRA: 11_graphical_abstract.png is not part of the {cmn.profile_for(ms_dir)} submission set"]
+
 def test_ext_tables_must_be_complete_as_their_csv(ext_dir):
     ex = ext_dir / "exhibits"
     (ex / "tables1.csv").write_text("A,B\n1,2\n3,4\n", encoding="utf-8")  # a row the table lacks
