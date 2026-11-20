@@ -534,6 +534,8 @@ def word_count_problems(ms_dir: Path, title_units: list[str]) -> list[str]:
 # Optional uploads the journal accepts as separate files (Public Health: graphical abstract,
 # "optional, its use is encouraged"); allowed in submission/ but never required.
 OPTIONAL_FILES = {"11_graphical_abstract.tif", "11_graphical_abstract.pdf"}
+# The record written when a set is submitted (file list and SHA-256), e.g. SUBMITTED_2026-11-20.txt.
+SUBMITTED_MANIFEST = re.compile(r"SUBMITTED_\d{4}-\d{2}-\d{2}\.txt")
 
 
 def problems(ms_dir: Path | None = None, root: Path = ROOT) -> list[str]:
@@ -545,7 +547,8 @@ def problems(ms_dir: Path | None = None, root: Path = ROOT) -> list[str]:
     units_of: dict[str, list[str]] = {}
     known = set(lay.files()) | OPTIONAL_FILES
     out += [f"EXTRA: {p.name} is not part of the {cmn.profile_for(ms_dir)} submission set"
-            for p in sorted(sub.iterdir()) if p.is_file() and p.name not in known]
+            for p in sorted(sub.iterdir()) if p.is_file() and p.name not in known
+            and not SUBMITTED_MANIFEST.fullmatch(p.name)]
     for name in lay.spec:
         path = sub / name
         if not path.exists():

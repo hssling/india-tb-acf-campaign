@@ -247,7 +247,7 @@ manuscript is not in this repository.
 
 ### Status
 
-A manuscript based on the extension is being submitted; the v1.0.0 audit has
+A manuscript based on the extension is under peer review; the v1.0.0 audit has
 not been published as an article. The manuscript is not included in this
 repository.
 

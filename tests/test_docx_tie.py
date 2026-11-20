@@ -227,8 +227,11 @@ def test_optional_graphical_abstract_is_allowed_but_other_extras_are_not(ms_dir)
     for name in sorted(tie.OPTIONAL_FILES):
         (sub / name).write_bytes(b"x")
     (sub / "11_graphical_abstract.png").write_bytes(b"x")
+    (sub / "SUBMITTED_2026-11-20.txt").write_text("manifest", encoding="utf-8")
+    (sub / "SUBMITTED_notes.txt").write_text("x", encoding="utf-8")
     assert tie.problems(ms_dir, ROOT) == [
-        f"EXTRA: 11_graphical_abstract.png is not part of the {cmn.profile_for(ms_dir)} submission set"]
+        f"EXTRA: 11_graphical_abstract.png is not part of the {cmn.profile_for(ms_dir)} submission set",
+        f"EXTRA: SUBMITTED_notes.txt is not part of the {cmn.profile_for(ms_dir)} submission set"]
 
 def test_ext_tables_must_be_complete_as_their_csv(ext_dir):
     ex = ext_dir / "exhibits"
