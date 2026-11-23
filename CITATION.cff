@@ -16,8 +16,8 @@ abstract: >-
   States with higher prior yield, and whether State notifications move with ACF
   diagnoses.
 type: software
-version: "1.1.0"
-date-released: 2026-11-20
+version: "1.2.0"
+date-released: 2026-11-23
 authors:
   - family-names: "Siddalingaiah"
     given-names: "H S"
