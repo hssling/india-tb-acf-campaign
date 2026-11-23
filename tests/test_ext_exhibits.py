@@ -121,6 +121,10 @@ def check_entry(e: dict, cache: dict) -> None:
     elif e["kind"] == "count":
         sel = [r for r in rows if all(r[k] == v for k, v in e["filters"].items())]
         assert f"{len(sel):,}" == e["text"], e
+    elif e["kind"] == "stat":
+        vals = [float(r[e["column"]]) for r in rows if all(r[k] == v for k, v in e["filters"].items())]
+        assert repr(et.STATS[e["op"]](vals)) == e["raw"], e
+        assert et.FORMATTERS[e["fmt"]](e["raw"]) == e["text"], e
     else:
         raise AssertionError(f"unknown trace kind {e['kind']}")
 
@@ -321,3 +325,48 @@ def test_tiff_is_greyscale_at_least_300_dpi(ef, rendered):
     for i in range(1, 5):
         im = Image.open(out / f"figure{i}.tif")
         assert im.mode == "L" and min(im.info["dpi"]) >= 300 and im.info.get("compression") == "tiff_lzw"
+
+
+# ------------------------------------------------------------------ the "ijtb" set (Indian Journal of Tuberculosis)
+
+@pytest.fixture(scope="module")
+def built_ijtb():
+    return et.build("ijtb")
+
+
+def test_ijtb_set_adds_table2_and_s9_only(built, built_ijtb):
+    ex, _ = built
+    ij, _ = built_ijtb
+    assert list(ij) == ["Table 1", "Table 2"] + [f"Table S{i}" for i in range(1, 10)]
+    assert [k for k, v in ij.items() if v["main"]] == et.MAIN_TABLES_IJTB
+    for k in ex:  # the shared tables are identical in both sets
+        assert ij[k] == ex[k], k
+
+
+def test_ijtb_trace_matches_outputs(built_ijtb):
+    ex, tr = built_ijtb
+    cache: dict = {}
+    for e in tr.entries:
+        check_entry(e, cache)
+    traced: dict[str, set] = {}
+    for e in tr.entries:
+        traced.setdefault(e["exhibit"], set()).update(tokens(e["text"]))
+    untraced = [(n, h, c) for n, h, c in cells(ex) if h not in et.LABEL_COLUMNS
+                for t in tokens(c.replace("−", "")) if t not in traced.get(n, set())]
+    assert not untraced, untraced[:10]
+    files = {e["file"] for e in tr.entries}
+    assert all(f.startswith("outputs/") for f in files), files
+
+
+def test_table2_number_needed_to_screen_is_the_reciprocal_of_the_yield(built_ijtb):
+    ex, _ = built_ijtb
+    for r in ex["Table 2"]["panels"][0][1]:
+        y = float(r[3].split(" (")[0])
+        nns = int(r[4].split(" (")[0].replace(",", ""))
+        assert abs(nns - 100000 / y) <= 0.5 + 100000 / y * 0.002, r  # the yield cell is rounded
+
+
+def test_table_s9_has_every_state(built_ijtb):
+    ex, _ = built_ijtb
+    units = {r["unit"] for r in read("outputs/ext/d1_intensity_strata.csv")}
+    assert len(ex["Table S9"]["panels"][0][1]) == len(units)

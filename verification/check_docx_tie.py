@@ -17,6 +17,13 @@ selects its submission set (LAYOUTS):
        07 supplementary material (Tables S1-S8), 08 cover letter, 09 RECORD checklist,
        10 declaration of interests; no data files: every supplementary table is complete in 07
        (check 5)
+  ijtb the Indian Journal of Tuberculosis set (manuscript/ext_v2): 01 cover letter, 02 title page,
+       03 manuscript (unblinded: the source rendered with its blinding spans kept), 04 highlights,
+       05 figure captions, 06 declarations, 07 declaration of interests, 08 copyright transfer
+       (.docx and .pdf), 09 supplementary material (the supplementary text and Tables S1-S9),
+       10 RECORD checklist, 11-14 Figures 1-4 (600 dpi TIFF), 91 blinded manuscript (the blinded
+       rendering), 92-95 figure previews (PNG); 15_Graphical_Abstract.tif optional. 91 and 09 are
+       the blinded files; journal titles in italics in 03 and 91
 
 This check reads the .docx files with zipfile and ElementTree only and requires:
 
@@ -116,23 +123,56 @@ def figure_files(prefixes: list[str]) -> tuple[str, ...]:
 class Layout(NamedTuple):
     """One submission set: its text files and their sources (spec), the blinded files, the figure
     files, the data files (file name, the output it copies, its XLSX sheet), the XLSX, and
-    whether each table of tables.md must be complete as its CSV (the set has no data files)."""
+    whether each table of tables.md must be complete as its CSV (the set has no data files); the
+    title page and the manuscript(s) whose reference list is checked for italics (the first is the
+    one Word counts); other required files (previews, a PDF copy); optional files."""
     spec: dict[str, list[tuple]]
     blinded: tuple[str, ...]
     figures: tuple[str, ...]
     data: list[tuple[str, str, str]]
     xlsx: str | None
     complete_tables: bool
+    title: str = "01_title_page.docx"
+    manuscripts: tuple[str, ...] = ("02_manuscript_anonymised.docx",)
+    extras: tuple[str, ...] = ()
+    optional: tuple[str, ...] = ("11_graphical_abstract.tif", "11_graphical_abstract.pdf")
 
     def files(self) -> list[str]:
         """Every file of the set, in file-number order."""
-        names = list(self.spec) + list(self.figures) + [n for n, _, _ in self.data]
+        names = list(self.spec) + list(self.figures) + [n for n, _, _ in self.data] + list(self.extras)
         return sorted(names + ([self.xlsx] if self.xlsx else []))
 
     @property
     def supplement(self) -> str:
         return self.blinded[1]
 
+
+def make_spec_ijtb() -> dict[str, list[tuple]]:
+    """The IJTB set. ("render", file, start, end, blinded) is like "md" but on the source rendered
+    unblinded or blinded (check_manuscript_numbers.render)."""
+    tables = ("md", "exhibits/tables.md", "## Table 1.", "## Table S1.")
+    return {
+        "01_Cover_Letter.docx": [("md", "cover_letter.md", "# Cover letter", None, "drop-first")],
+        "02_Title_Page.docx": [("md", "first_page_src.md", None, None)],
+        "03_Manuscript.docx": [("render", "manuscript_src.md", None, "## Figure legends", False), tables,
+                               ("render", "manuscript_src.md", "## Figure legends", None, False)],
+        "04_Highlights.docx": [("md", "highlights.md", None, None)],
+        "05_Figure_Captions.docx": [("first", "manuscript_src.md", "# "),
+                                    ("md", "manuscript_src.md", "## Figure legends", None)],
+        "06_Declarations.docx": [("md", "declarations.md", None, None)],
+        "07_Declaration_of_Interests.docx": [("md", "declaration_of_interests.md", None, None)],
+        "08_Copyright_Transfer.docx": [("md", "copyright_transfer.md", None, None)],
+        "09_Supplementary_Material.docx": [("builder", "Supplementary material"), ("first", "manuscript_src.md", "# "),
+                                           ("md", "supplement_text.md", None, None),
+                                           ("md", "exhibits/tables.md", "## Table S1.", None)],
+        "10_RECORD_Checklist.docx": [("md", "record_checklist.md", None, None)],
+        "91_Manuscript_Blinded.docx": [("render", "manuscript_src.md", None, "## Figure legends", True), tables,
+                                       ("render", "manuscript_src.md", "## Figure legends", None, True)],
+    }
+
+
+IJTB_FIGURES = tuple(f"{10 + k}_Figure_{k}.tif" for k in range(1, 5))
+IJTB_PREVIEWS = tuple(f"{91 + k}_Figure_{k}_preview.png" for k in range(1, 5))
 
 LAYOUTS: dict[str, Layout] = {
     "v1": Layout(
@@ -152,6 +192,17 @@ LAYOUTS: dict[str, Layout] = {
         [],
         None,
         True),
+    "ijtb": Layout(
+        make_spec_ijtb(),
+        ("91_Manuscript_Blinded.docx", "09_Supplementary_Material.docx"),
+        IJTB_FIGURES,
+        [],
+        None,
+        True,
+        title="02_Title_Page.docx",
+        manuscripts=("03_Manuscript.docx", "91_Manuscript_Blinded.docx"),
+        extras=IJTB_PREVIEWS + ("08_Copyright_Transfer.pdf",),
+        optional=("15_Graphical_Abstract.tif",)),
 }
 
 
@@ -294,6 +345,9 @@ def expected(ms_dir: Path, name: str) -> tuple[list[str], set[str]]:
             if len(hits) != 1:
                 raise ValueError(f"{part[1]}: {len(hits)} units start with {part[2]!r}")
             out.append(hits[0])
+        elif part[0] == "render":
+            text = cmn.render((ms_dir / part[1]).read_text(encoding="utf-8"), blinded=part[4])
+            out += md_units(md_slice(text, part[2], part[3]))
         else:
             text = (ms_dir / part[1]).read_text(encoding="utf-8")
             units = md_units(md_slice(text, part[2], part[3]))
@@ -344,7 +398,7 @@ def blinding_problems(name: str, haystack: str, marks: list[str]) -> list[str]:
 
 def identifier_problems(name: str, units: list[str]) -> list[str]:
     text = "\n".join(units)
-    if name.startswith("02_"):
+    if name.startswith(("02_", "03_", "91_")):
         text = text.split("\nReferences\n", 1)[0]
     out = []
     for pat, what in cmn.BANNED:
@@ -499,7 +553,7 @@ def italics_problems(path: Path, ms_text: str) -> list[str]:
                     break
                 continue
             got[m.group(1)] = italic_text(p)
-    out = [f"ITALICS 02 reference {k}: journal title {want[k]!r} in italics expected, "
+    out = [f"ITALICS {path.name[:2]} reference {k}: journal title {want[k]!r} in italics expected, "
            f"italic text is {got.get(k, '')!r}" for k in want if got.get(k, "") != want[k]]
     return out
 
@@ -514,14 +568,15 @@ def word_count_problems(ms_dir: Path, title_units: list[str]) -> list[str]:
     w = json.loads(p.read_text(encoding="utf-8"))
     out = []
     md5 = hashlib.md5((ms_dir / "manuscript_src.md").read_text(encoding="utf-8").encode("utf-8")).hexdigest()
+    end = "Conclusions" if cmn.profile_for(ms_dir) == "ijtb" else "Discussion"
     if w.get("source_md5") != md5:
         out.append("WORDS: word_counts_word.json is stale (manuscript_src.md changed): rebuild")
     for k, lim in LIMITS.items():
         if w[k] > lim:
             out.append(f"WORDS: Word counts {w[k]} words in the {k}, over the limit of {lim}")
     flat = " ".join(title_units)
-    for want, pat in ((f"main text (Introduction to Discussion...) {w['main_text']:,} words",
-                       r"main text \(Introduction to Discussion[^)]*\) " + re.escape(f"{w['main_text']:,}") + r" words\b"),
+    for want, pat in ((f"main text (Introduction to {end}...) {w['main_text']:,} words",
+                       rf"main text \(Introduction to {end}[^)]*\) " + re.escape(f"{w['main_text']:,}") + r" words\b"),
                       (f"abstract {w['abstract']} words", r"\babstract " + re.escape(str(w["abstract"])) + r" words\b")):
         if not re.search(pat, flat):
             out.append(f"WORDS: the title page does not quote Word's count {want!r}")
@@ -536,6 +591,9 @@ def word_count_problems(ms_dir: Path, title_units: list[str]) -> list[str]:
 OPTIONAL_FILES = {"11_graphical_abstract.tif", "11_graphical_abstract.pdf"}
 # The record written when a set is submitted (file list and SHA-256), e.g. SUBMITTED_2026-11-20.txt.
 SUBMITTED_MANIFEST = re.compile(r"SUBMITTED_\d{4}-\d{2}-\d{2}\.txt")
+# The PDF the journal's portal builds from a submitted set (e.g. PUHE-S-26-07384.pdf), kept beside the
+# set after submission; allowed only in a folder that holds a SUBMITTED_ manifest.
+PORTAL_PDF = re.compile(r"[A-Z]{2,6}-[SD]-\d{2}-\d{4,6}(?: \(\d+\))?\.pdf")
 
 
 def problems(ms_dir: Path | None = None, root: Path = ROOT) -> list[str]:
@@ -545,10 +603,11 @@ def problems(ms_dir: Path | None = None, root: Path = ROOT) -> list[str]:
     out: list[str] = []
     marks = markers(ms_dir, root)
     units_of: dict[str, list[str]] = {}
-    known = set(lay.files()) | OPTIONAL_FILES
+    known = set(lay.files()) | set(lay.optional)
+    submitted = any(SUBMITTED_MANIFEST.fullmatch(p.name) for p in sub.iterdir() if p.is_file())
     out += [f"EXTRA: {p.name} is not part of the {cmn.profile_for(ms_dir)} submission set"
             for p in sorted(sub.iterdir()) if p.is_file() and p.name not in known
-            and not SUBMITTED_MANIFEST.fullmatch(p.name)]
+            and not SUBMITTED_MANIFEST.fullmatch(p.name) and not (submitted and PORTAL_PDF.fullmatch(p.name))]
     for name in lay.spec:
         path = sub / name
         if not path.exists():
@@ -561,15 +620,16 @@ def problems(ms_dir: Path | None = None, root: Path = ROOT) -> list[str]:
         if name in lay.blinded:
             out += blinding_problems(name, docx_all_text(path), marks)
             out += identifier_problems(name, got)
-    for name in lay.figures:
+    for name in lay.figures + lay.extras:
         path = sub / name
         if not path.exists():
             out.append(f"MISSING: {name}")
             continue
-        out += blinding_problems(name, path.read_bytes().decode("latin-1"), marks)
-    if "02_manuscript_anonymised.docx" in units_of:
-        out += italics_problems(sub / "02_manuscript_anonymised.docx",
-                                (ms_dir / "manuscript_src.md").read_text(encoding="utf-8"))
+        if not name.endswith(".pdf"):  # a figure or a preview; the PDF is the signed form's copy
+            out += blinding_problems(name, path.read_bytes().decode("latin-1"), marks)
+    for name in lay.manuscripts:
+        if name in units_of:
+            out += italics_problems(sub / name, (ms_dir / "manuscript_src.md").read_text(encoding="utf-8"))
     out += data_problems(sub, root, lay)
     if lay.complete_tables:
         out += complete_table_problems(ms_dir)
@@ -578,14 +638,39 @@ def problems(ms_dir: Path | None = None, root: Path = ROOT) -> list[str]:
         if path.exists():
             hay = docx_all_text(path) if name.endswith(".xlsx") else path.read_text(encoding="utf-8")
             out += blinding_problems(name, hay, marks)
-    if "01_title_page.docx" in units_of:
-        out += word_count_problems(ms_dir, units_of["01_title_page.docx"])
+    if lay.title in units_of:
+        out += word_count_problems(ms_dir, units_of[lay.title])
+    out += doi_problems(ms_dir)
+    return out
+
+
+RELEASE_DOI = "release_doi.txt"  # <folder>/release_doi.txt: the DOI the build filled in (--doi)
+
+
+def doi_file_problems(path: Path, want: str) -> list[str]:
+    """Every Zenodo DOI (or placeholder) in the .docx is `want`."""
+    return [f"DOI in {path.name}: {d} differs from {RELEASE_DOI} ({want})"
+            for d in sorted(set(DOI.findall(docx_all_text(path)))) if d != want]
+
+
+def doi_problems(ms_dir: Path) -> list[str]:
+    """When the folder records the release DOI the set was built with, every .docx of the set gives
+    that DOI and no other (the text tie reads a DOI as one token, so this check holds its digits)."""
+    rec = ms_dir / RELEASE_DOI
+    if not rec.exists():
+        return []
+    want = rec.read_text(encoding="utf-8").strip()
+    out = []
+    for name in layout(ms_dir).spec:
+        p = ms_dir / "submission" / name
+        if p.exists():
+            out += doi_file_problems(p, want)
     return out
 
 
 def notes(ms_dir: Path) -> list[str]:
     """Reminders that are not failures."""
-    p = ms_dir / "submission" / "01_title_page.docx"
+    p = ms_dir / "submission" / layout(ms_dir).title
     if p.exists() and "zenodo.XXXXXXX" in docx_all_text(p):
         return ["note: the title page still holds the Zenodo DOI placeholder (rebuild with --doi at release)"]
     return []

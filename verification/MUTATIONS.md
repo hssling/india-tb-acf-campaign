@@ -427,3 +427,18 @@ sweep, 02_manuscript_anonymised.docx number tokens (check_docx_tie): caught 983 
 
 (The sweeps of the ext set were run with the 34 named mutations, before 9h and 9i were added;
 the named set was then rerun alone.)
+
+## The Indian Journal of Tuberculosis set (profile ijtb, manuscript/ext_v2), 23 November 2026
+
+`python -I verification/mutate_manuscript.py --manuscript-dir manuscript/ext_v2 --sweep` on the
+set built with `--doi 10.5281/zenodo.24380936`. Besides the kinds above, the ijtb set mutates the
+blinded copy (91) and the unblinded manuscript (03) separately, the blinding spans of the source
+(an alternative removed; a span left unclosed), the author block (ORCID), the release DOI in 03
+(`release_doi.txt`), the highlights, Table 2, a banned wording ("pre-registered") and an example
+State named in the text:
+
+```
+named mutations [ijtb]: 49 of 49 caught
+sweep, manuscript_src.md number tokens (check_manuscript_numbers): caught 460 of 460
+sweep, 03_Manuscript.docx number tokens (check_docx_tie): caught 946 of 946
+```

@@ -1,7 +1,8 @@
 # Copied from hssling/india-state-tb-score (MIT), verification/check_all.py, commit 05bcaa7; modified: steps are pytest and the checks of this repository (no analysis re-run; the manuscript number check and the docx tie check skip when manuscript/ or its submission folder is absent); PASS/FAIL/SKIP labels
 """Run the whole verification: pytest and the checks (plan order, deviations, extraction totals, inventory
-trace, recomputed Q3/Q4 outputs, recomputed extension headline values and labels, and, when the private manuscript of the extension paper
-(manuscript/ext) is present, its numbers and the tie of the submission .docx files to it).
+trace, recomputed Q3/Q4 outputs, recomputed extension headline values and labels, and, when the private manuscripts of the extension paper
+are present, their numbers and the tie of the submission .docx files to them: manuscript/ext, the Public Health set, and
+manuscript/ext_v2, the Indian Journal of Tuberculosis set).
 
 Run as: python -I verification/check_all.py   (steps run from the repo root)
 
@@ -19,6 +20,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PY = [sys.executable, "-I"]
 MANUSCRIPT_DIR = "manuscript/ext"  # the extension paper (the v1.0.0 manuscript is manuscript/v1_audit)
+IJTB_DIR = "manuscript/ext_v2"  # the Indian Journal of Tuberculosis version of the extension paper
 
 STEPS = [
     ("pytest -q", PY + ["-m", "pytest", "-q"]),
@@ -30,6 +32,8 @@ STEPS = [
     ("check_ext_outputs", PY + ["verification/check_ext_outputs.py"]),
     ("check_manuscript_numbers", PY + ["verification/check_manuscript_numbers.py", "--manuscript-dir", MANUSCRIPT_DIR]),
     ("check_docx_tie", PY + ["verification/check_docx_tie.py", "--manuscript-dir", MANUSCRIPT_DIR]),
+    ("check_manuscript_numbers [ijtb]", PY + ["verification/check_manuscript_numbers.py", "--manuscript-dir", IJTB_DIR]),
+    ("check_docx_tie [ijtb]", PY + ["verification/check_docx_tie.py", "--manuscript-dir", IJTB_DIR]),
 ]
 
 

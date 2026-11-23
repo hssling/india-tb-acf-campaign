@@ -140,12 +140,44 @@ def test_build_submission_set_follows_the_profile(tmp_path):
         bs.configure(ROOT / bs.DEFAULT_MS_DIR)
 
 
+def test_build_submission_out_option_and_frozen_folder(tmp_path):
+    bs = pytest.importorskip("tools.build_submission")
+    try:
+        bs.configure(tmp_path / "m", tmp_path / "elsewhere")
+        assert bs.OUT == tmp_path / "elsewhere" and bs.MS == tmp_path / "m"
+        ms = tmp_path / "ms"
+        (ms / "submission").mkdir(parents=True)
+        (ms / "submission" / "SUBMITTED_2026-11-20.txt").write_text("manifest", encoding="utf-8")
+        assert bs.frozen(ms / "submission") == ["SUBMITTED_2026-11-20.txt"]
+        with pytest.raises(SystemExit, match="frozen"):
+            bs.main(["--manuscript-dir", str(ms), "--no-word"])
+        assert sorted(p.name for p in (ms / "submission").iterdir()) == ["SUBMITTED_2026-11-20.txt"]
+        assert bs.frozen(tmp_path / "missing") == []
+    finally:
+        bs.configure(ROOT / bs.DEFAULT_MS_DIR)
+
+
+def test_build_submission_ijtb_profile(tmp_path):
+    bs = pytest.importorskip("tools.build_submission")
+    d = tmp_path / "ext_v2"
+    d.mkdir()
+    (d / cmn.PHRASES).write_text(json.dumps({"profile": "ijtb", "sections": {"A": ["x"]}}), encoding="utf-8")
+    try:
+        bs.configure(d)
+        assert bs.LAY is bs.LAYOUTS["ijtb"] and bs.LAY.figures == ("11", "12", "13", "14")
+        assert bs.TIFF_DPI_IJTB == 600
+    finally:
+        bs.configure(ROOT / bs.DEFAULT_MS_DIR)
+
+
 # ------------------------------------------------------------------ check_all and the v1 builders
 
 def test_check_all_runs_the_manuscript_steps_on_ext():
     steps = dict(check_all.STEPS)
     for name in ("check_manuscript_numbers", "check_docx_tie"):
         assert steps[name][-2:] == ["--manuscript-dir", "manuscript/ext"]
+    for name in ("check_manuscript_numbers [ijtb]", "check_docx_tie [ijtb]"):
+        assert steps[name][-2:] == ["--manuscript-dir", "manuscript/ext_v2"]
 
 
 def test_v1_builders_write_into_the_v1_folder():

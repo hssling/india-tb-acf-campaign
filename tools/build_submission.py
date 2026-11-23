@@ -1,7 +1,7 @@
 # Adapted from hssling/india-state-tb-score (MIT), manuscript/build_docx.py, commit 05bcaa7; modified: Public Health (Elsevier) submission set; sources are the private manuscript_src.md, first_page_src.md, cover_letter.md, record_checklist.md and exhibits/tables.md; tables with top, header and bottom rules only; superscript letter footnotes; line numbers; TIFF from the vector PDF
 """Build the Public Health submission set into <manuscript folder>/submission/ (git-ignored, private).
 
-Run as: python -I tools/build_submission.py [--manuscript-dir DIR] [--doi 10.5281/zenodo.NNNNNNN] [--no-word]
+Run as: python -I tools/build_submission.py [--manuscript-dir DIR] [--out DIR] [--doi 10.5281/zenodo.NNNNNNN] [--no-word]
 
 The manuscript folder is DIR: default manuscript/ext (the extension paper); the audit-framed
 v1.0.0 manuscript is built with --manuscript-dir manuscript/v1_audit. A relative DIR is taken
@@ -12,7 +12,10 @@ PowerShell COM) for the word counts unless --no-word. Sources (in the folder, gi
 manuscript_src.md (blinded), first_page_src.md, cover_letter.md, record_checklist.md and
 exhibits/ (tables.md, figure1.pdf ... figureN.pdf). Nothing is written outside the folder.
 The folder's profile (verification/check_manuscript_numbers.profile_for: the "profile" key of
-its section_phrases.json) selects the submission set (LAYOUTS).
+its section_phrases.json) selects the submission set (LAYOUTS). --out DIR writes the set to DIR
+instead of <folder>/submission (a relative DIR is taken from the repository root). The build
+refuses to write into a folder that holds a SUBMITTED_YYYY-MM-DD.txt manifest: a submitted set is
+frozen.
 
 Output (docs/journal_rules.md; Elsevier generic style): A4, 2.5 cm margins, Times New Roman
 12 pt, double spacing, page numbers at the foot; continuous line numbers in the anonymised
@@ -31,6 +34,20 @@ Profile "ext" (manuscript/ext, the extension paper; 4 figures + Table 1 = 5 disp
   08_cover_letter.docx
   09_RECORD_checklist.docx
   10_declaration_of_interests.docx
+
+Profile "ijtb" (manuscript/ext_v2, the Indian Journal of Tuberculosis version; docs of the set in
+verification/check_docx_tie.py). Sources, besides those above: highlights.md, declarations.md,
+declaration_of_interests.md, copyright_transfer.md and supplement_text.md. manuscript_src.md is
+unblinded with blinding spans (check_manuscript_numbers.render); --doi fills the Zenodo DOI in every
+file that holds the placeholder.
+  01_Cover_Letter.docx, 02_Title_Page.docx, 03_Manuscript.docx (unblinded, line-numbered),
+  04_Highlights.docx, 05_Figure_Captions.docx (each legend under its PNG preview),
+  06_Declarations.docx, 07_Declaration_of_Interests.docx, 08_Copyright_Transfer.docx and .pdf
+  (through Word; not with --no-word), 09_Supplementary_Material.docx (the supplementary text and
+  Tables S1 to S9, landscape), 10_RECORD_Checklist.docx, 11_Figure_1.tif to 14_Figure_4.tif
+  (TIFF_DPI_IJTB, LZW, from the vector PDF), 91_Manuscript_Blinded.docx (the blinded rendering),
+  92_Figure_1_preview.png to 95_Figure_4_preview.png (copies of exhibits/figureN.png). Word counts
+  are taken on 03.
 
 Profile "v1" (manuscript/v1_audit, the audit-framed v1.0.0 manuscript):
   01, 02 (Tables 1-3), 03-04 Figures 1-2, 05_supplementary_material.docx (Tables S1 to S4 and
@@ -72,7 +89,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from verification.check_manuscript_numbers import profile_for  # noqa: E402
+from verification.check_manuscript_numbers import profile_for, render  # noqa: E402
 
 DEFAULT_MS_DIR = "manuscript/ext"  # the extension paper; v1.0.0 (audit framing) is manuscript/v1_audit
 MS = ROOT / DEFAULT_MS_DIR
@@ -96,14 +113,26 @@ LAYOUTS: dict[str, Layout] = {
     "ext": Layout(("03", "04", "05", "06"), "07_supplementary_material.docx", "08_cover_letter.docx",
                   "09_RECORD_checklist.docx", "10_declaration_of_interests.docx", False),
 }
+# The IJTB set (profile "ijtb"): the figure prefixes are those of 11_Figure_1.tif ... 14_Figure_4.tif;
+# its other files are named in build_ijtb (and in verification/check_docx_tie.LAYOUTS["ijtb"]).
+LAYOUTS["ijtb"] = Layout(("11", "12", "13", "14"), "09_Supplementary_Material.docx", "01_Cover_Letter.docx",
+                         "10_RECORD_Checklist.docx", "07_Declaration_of_Interests.docx", False)
 LAY = LAYOUTS["ext"]
+TIFF_DPI_IJTB = 600  # the journal's rule for the IJTB set: 600 dpi TIFF print masters
+SUBMITTED = re.compile(r"SUBMITTED_\d{4}-\d{2}-\d{2}\.txt")
 
 
-def configure(ms_dir: Path) -> None:
-    """Point the build at a manuscript folder: its sources, exhibits/, submission/ and its set."""
+def configure(ms_dir: Path, out: Path | None = None) -> None:
+    """Point the build at a manuscript folder: its sources, exhibits/, its output folder (default
+    <folder>/submission) and its set."""
     global MS, EX, OUT, LAY
-    MS, EX, OUT = ms_dir, ms_dir / "exhibits", ms_dir / "submission"
+    MS, EX, OUT = ms_dir, ms_dir / "exhibits", out or ms_dir / "submission"
     LAY = LAYOUTS[profile_for(ms_dir)]
+
+
+def frozen(out: Path) -> list[str]:
+    """The SUBMITTED_ manifests in `out` (a submitted set, which the build must not overwrite)."""
+    return sorted(p.name for p in out.iterdir() if p.is_file() and SUBMITTED.fullmatch(p.name)) if out.is_dir() else []
 
 
 FONT = "Times New Roman"
@@ -194,8 +223,10 @@ def tables(names_from: str, names_to: str | None) -> list[str]:
     return [table_block(b) for b in blocks if b.startswith(("## Table ", "## Supplementary data "))]
 
 
-def manuscript_md() -> str:
-    ms = read("manuscript_src.md")
+def manuscript_md(blinded: bool = False) -> str:
+    """The manuscript, its tables and its figure legends; the source's blinding spans rendered
+    unblinded (the default) or blinded."""
+    ms = render(read("manuscript_src.md"), blinded=blinded)
     body = between(ms, "# ", "## References")
     refs = between(ms, "## References", "## Figure legends")
     legends = between(ms, "## Figure legends", None)
@@ -215,11 +246,15 @@ def title_page_md(doi: str | None) -> str:
     return fp
 
 
-def supplement_md() -> str:
+def supplement_md(text: str | None = None) -> str:
+    """The supplementary material: a heading, the title, `text` (the supplementary text, if any) and
+    Tables S1 onwards."""
     title = read("manuscript_src.md").splitlines()[0]
     if not title.startswith("# "):
         raise SystemExit("manuscript_src.md must start with its '# ' title")
     parts = ["# Supplementary material\n\n", title[2:].strip(), "\n"]
+    if text:
+        parts += ["\n", text.strip("\n"), "\n"]
     for i, t in enumerate(tables("## Table S1.", None)):
         parts += [PAGEBREAK, t]
     return "".join(parts)
@@ -312,11 +347,12 @@ def make_reference(path: Path) -> None:
     doc.save(str(path))
 
 
-def run_pandoc(md: str, out: Path, ref: Path, tmp: Path) -> None:
+def run_pandoc(md: str, out: Path, ref: Path, tmp: Path, resources: Path | None = None) -> None:
     src = tmp / (out.stem + ".md")
     src.write_text(md, encoding="utf-8")
+    extra = ["--resource-path", str(resources)] if resources else []
     subprocess.run(["pandoc", str(src), "-f", PANDOC_FROM, "--reference-doc", str(ref),
-                    "-o", str(out)], check=True)
+                    "-o", str(out)] + extra, check=True)
 
 
 # --------------------------------------------------------------------------------------
@@ -723,23 +759,27 @@ def postprocess(path: Path, *, landscape: bool = False, line_numbers: bool = Fal
 # --------------------------------------------------------------------------------------
 # Figures
 # --------------------------------------------------------------------------------------
-def figures() -> list[str]:
+def figures(ijtb: bool = False) -> list[str]:
+    """TIFF print masters rendered from the vector PDFs (and, except for the IJTB set, the PDFs
+    copied): <prefix>_figure<k>.tif/.pdf at TIFF_DPI, or <prefix>_Figure_<k>.tif at TIFF_DPI_IJTB."""
     import fitz  # PyMuPDF
     from PIL import Image
     Image.MAX_IMAGE_PIXELS = None
     lines = []
+    dpi = TIFF_DPI_IJTB if ijtb else TIFF_DPI
     for i, prefix in enumerate(LAY.figures, 1):
         pdf = EX / f"figure{i}.pdf"
-        shutil.copyfile(pdf, OUT / f"{prefix}_figure{i}.pdf")
+        if not ijtb:
+            shutil.copyfile(pdf, OUT / f"{prefix}_figure{i}.pdf")
         page = fitz.open(str(pdf))[0]
-        pix = page.get_pixmap(dpi=TIFF_DPI, alpha=False, colorspace=fitz.csRGB)
+        pix = page.get_pixmap(dpi=dpi, alpha=False, colorspace=fitz.csRGB)
         im = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
         r, g, b = im.split()
         grey = r.tobytes() == g.tobytes() == b.tobytes()
         if grey:
             im = r
-        tif = OUT / f"{prefix}_figure{i}.tif"
-        im.save(tif, format="TIFF", compression="tiff_lzw", dpi=(TIFF_DPI, TIFF_DPI))
+        tif = OUT / (f"{prefix}_Figure_{i}.tif" if ijtb else f"{prefix}_figure{i}.tif")
+        im.save(tif, format="TIFF", compression="tiff_lzw", dpi=(dpi, dpi))
         chk = Image.open(tif)
         w_in, h_in = page.rect.width / 72, page.rect.height / 72
         lines.append(f"{tif.name}: {chk.mode} {chk.size[0]}x{chk.size[1]} px, "
@@ -797,13 +837,98 @@ def word_counts(docx: Path) -> dict:
     subprocess.run(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
                     str(ROOT / "tools" / "word_count_word.ps1"), str(docx), str(out)], check=True)
     w = json.loads(out.read_text(encoding="utf-8-sig"))
-    w["counted_by"] = ("Microsoft Word (ComputeStatistics) on 02_manuscript_anonymised.docx: "
+    end = "Conclusions" if "Conclusions" in w.get("sections", {}) else "Discussion"
+    w["counted_by"] = (f"Microsoft Word (ComputeStatistics) on {docx.name}: "
                        "abstract = Abstract heading to Keywords; main text = Introduction to "
-                       "Discussion" + (" plus the text box (Box 1)" if "Box" in w.get("sections", {}) else "")
+                       f"{end}" + (" plus the text box (Box 1)" if "Box" in w.get("sections", {}) else "")
                        + ", headings excluded")
     w["source_md5"] = hashlib.md5(read("manuscript_src.md").encode("utf-8")).hexdigest()
     out.write_text(json.dumps(w, indent=1) + "\n", encoding="utf-8", newline="\n")
     return w
+
+
+# --------------------------------------------------------------------------------------
+# The IJTB set (profile "ijtb")
+# --------------------------------------------------------------------------------------
+IJTB_PREVIEW = "{n}_Figure_{k}_preview.png"
+
+
+def fill_doi(md: str, doi: str | None) -> str:
+    return md.replace(DOI_PLACEHOLDER, doi) if doi else md
+
+
+def captions_md() -> str:
+    """The title, then the figure legends, each under its PNG preview."""
+    ms = read("manuscript_src.md")
+    title = ms.splitlines()[0]
+    legends = between(ms, "## Figure legends", None)
+    head, *rest = re.split(r"(?m)^(?=\*\*Figure \d+\.\*\*)", legends)
+    parts = [title, "\n\n", head.rstrip("\n"), "\n\n"]
+    for k, leg in enumerate(rest, 1):
+        parts += [f"![]({IJTB_PREVIEW.format(n=91 + k, k=k)}){{width=6.3in}}\n\n", leg.rstrip("\n"), "\n\n"]
+    return "".join(parts)
+
+
+def previews() -> list[str]:
+    lines = []
+    for k in range(1, len(LAY.figures) + 1):
+        dst = OUT / IJTB_PREVIEW.format(n=91 + k, k=k)
+        shutil.copyfile(EX / f"figure{k}.png", dst)
+        lines.append(f"{dst.name}: copy of exhibits/figure{k}.png")
+    return lines
+
+
+def to_pdf(docx: Path, pdf: Path) -> None:
+    """Export a .docx to PDF through Word (tools/docx_to_pdf.ps1)."""
+    subprocess.run(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
+                    str(ROOT / "tools" / "docx_to_pdf.ps1"), str(docx), str(pdf)], check=True)
+
+
+def ijtb_jobs(doi: str | None) -> list[tuple[str, str, dict]]:
+    ph = dict(placeholder=not doi)
+    return [
+        ("01_Cover_Letter.docx", fill_doi(cover_letter_md(), doi), ph),
+        ("02_Title_Page.docx", title_page_md(doi), ph),
+        ("03_Manuscript.docx", fill_doi(manuscript_md(), doi), dict(line_numbers=True, **ph)),
+        ("04_Highlights.docx", read("highlights.md"), {}),
+        ("05_Figure_Captions.docx", captions_md(), {}),
+        ("06_Declarations.docx", fill_doi(read("declarations.md"), doi), ph),
+        ("07_Declaration_of_Interests.docx", read("declaration_of_interests.md"), {}),
+        ("08_Copyright_Transfer.docx", read("copyright_transfer.md"), {}),
+        ("09_Supplementary_Material.docx", supplement_md(read("supplement_text.md")), dict(landscape=True, table_pt=9)),
+        ("10_RECORD_Checklist.docx", read("record_checklist.md"), {}),
+        ("91_Manuscript_Blinded.docx", manuscript_md(blinded=True), dict(line_numbers=True)),
+    ]
+
+
+def build_ijtb(a) -> int:
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        ref = tmp / "reference.docx"
+        make_reference(ref)
+        for ln in previews():
+            print(ln)
+        jobs = ijtb_jobs(a.doi)
+        for name, md, kw in jobs:
+            out = OUT / name
+            run_pandoc(md, out, ref, tmp, resources=OUT)
+            postprocess(out, **kw)
+            print("built", name)
+    for ln in figures(ijtb=True):
+        print(ln)
+    made = {n for n, _, _ in jobs} | {f"{p}_Figure_{i}.tif" for i, p in enumerate(LAY.figures, 1)}
+    made |= {IJTB_PREVIEW.format(n=91 + k, k=k) for k in range(1, len(LAY.figures) + 1)}
+    made |= {"08_Copyright_Transfer.pdf", "15_Graphical_Abstract.tif"}
+    if not a.no_word:
+        to_pdf(OUT / "08_Copyright_Transfer.docx", OUT / "08_Copyright_Transfer.pdf")
+        print("built 08_Copyright_Transfer.pdf (Word)")
+        w = word_counts(OUT / "03_Manuscript.docx")
+        print(f"Word counts: abstract {w['abstract']}, main text {w['main_text']} (limits 250 and 3,000)")
+    for f in sorted(OUT.iterdir()):
+        if f.is_file() and f.name not in made:
+            print(f"note: {f.name} is not part of this set (left from an earlier build?); remove it")
+    print("built into", OUT)
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -812,14 +937,22 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--no-word", action="store_true", help="skip Word's word counts")
     ap.add_argument("--manuscript-dir", default=DEFAULT_MS_DIR,
                     help="the manuscript folder (default manuscript/ext; v1.0.0: manuscript/v1_audit)")
+    ap.add_argument("--out", help="the output folder (default <manuscript folder>/submission)")
     a = ap.parse_args(argv)
     if a.doi and not DOI_RE.match(a.doi):
         raise SystemExit(f"--doi must look like 10.5281/zenodo.NNNNNNN, not {a.doi!r}")
     d = Path(a.manuscript_dir)
-    configure(d if d.is_absolute() else ROOT / d)
+    o = Path(a.out) if a.out else None
+    configure(d if d.is_absolute() else ROOT / d, None if o is None else (o if o.is_absolute() else ROOT / o))
     if not MS.is_dir():
         raise SystemExit(f"{a.manuscript_dir} not present (it is private)")
+    if frozen(OUT):
+        raise SystemExit(f"{OUT} holds {', '.join(frozen(OUT))}: a submitted set is frozen; build into a new folder")
     OUT.mkdir(exist_ok=True)
+    if a.doi:  # the DOI this set is filled with; check_docx_tie holds every .docx to it
+        (MS / "release_doi.txt").write_text(a.doi + "\n", encoding="utf-8", newline="\n")
+    if profile_for(MS) == "ijtb":
+        return build_ijtb(a)
     print(f"profile {profile_for(MS)}: {len(LAY.figures)} figures, supplement {LAY.supplement}, "
           f"{'supplementary data files' if LAY.data else 'no data files'}")
     with tempfile.TemporaryDirectory() as td:

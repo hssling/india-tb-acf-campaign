@@ -35,3 +35,19 @@ Nothing is typed in the scripts. Every numeric table cell is recorded in `trace.
 | Table S8 | How to read official ACF figures (v1.0.0 consistency checks and reconciliation) | outputs/q2_summary_registered_vs_corrected.csv; outputs/q2_discrepancies_corrected.csv | `registered`, `corrected` by `metric`; `class_label` |
 
 Labels are plain language: no file names, section signs, variable names or internal identifiers appear in an exhibit (tested). Figures are greyscale, use U+2212 minus signs, and carry no creation dates, so rebuilding is byte-identical (tested).
+
+## The Indian Journal of Tuberculosis set (`--set ijtb`)
+
+`python -I exhibits/make_ext_tables.py --set ijtb --out manuscript/ext_v2/exhibits` builds the same tables plus two descriptive tables that read the same outputs (the default set is unchanged). Besides single cells, the trace records two derived kinds that `tests/test_ext_exhibits.py` re-derives: `count` (the number of rows matching filters) and `stat` (the median, minimum or maximum of a column over the rows matching filters). The number needed to screen is 100,000 ÷ a yield per 100,000 screened (formatter `nns0`).
+
+| Exhibit | Content | File | Columns or rule |
+|---|---|---|---|
+| Table 2 | States per intensity stratum; tiers within the stratum | outputs/ext/d1_tiers_by_intensity.csv | `count` of rows by `stratum` and `tier` |
+| Table 2 | People screened per 100 population per year: median (range) | outputs/ext/d1_tiers_by_intensity.csv | `stat` of `intensity` × 100 by `stratum` (all units for the all-States row) |
+| Table 2 | Split median (note) | outputs/ext/d1_intensity_strata.csv | `median` × 100 |
+| Table 2 | Pooled yield and number needed to screen by stratum | outputs/ext/d1_tiers_by_intensity.csv | `stratum_mu_per_100k`, `stratum_ci_*_per_100k` (and 100,000 ÷ each) |
+| Table 2 | All States | outputs/ext/d1_pooled.csv | `k`, `yield_per_100k`, `ci_*_per_100k` (and 100,000 ÷ each), `n_above`, `n_overlaps`, `n_below` (`2021-2023`) |
+| Table 2 | Elasticity by stratum and overall | outputs/ext/d1_elasticity.csv | `estimate`, `boot_lo`, `boot_hi` (`stratum low`, `stratum high`, `main`) |
+| Table S9 | Intensity and stratum | outputs/ext/d1_intensity_strata.csv | `intensity` × 100, `stratum` |
+| Table S9 | Registered tier, posterior yield and number needed to screen | outputs/ext/d1_states.csv | `tier`, `post_per_100k`, `post_*_per_100k` (and 100,000 ÷ `post_per_100k`) (`2021-2023`) |
+| Table S9 | Robust tier; tier within stratum | outputs/ext/d1_states_betweenyear.csv; outputs/ext/d1_tiers_by_intensity.csv | `tier_agrees`; `tier` |

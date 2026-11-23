@@ -1,11 +1,14 @@
 # New for the extension (v1.1.0); keeps the conventions of exhibits/make_tables.py (no typed numbers, every numeric cell traced to its output file, row and column, Markdown and CSV output, superscript letter footnotes)
 """Render the extension paper's tables (Table 1 and Tables S1-S8) from outputs/ext/ and outputs/.
 
-Run as: python -I exhibits/make_ext_tables.py [--out DIR]   (from the repository root)
+Run as: python -I exhibits/make_ext_tables.py [--out DIR] [--set ext|ijtb]   (from the repository root)
 
-The paper is programme guidance for Public Health: "Where does active case finding for TB still
-pay in India?". Its five main display items are Table 1 (here) and Figures 1-4
-(exhibits/make_ext_figures.py); everything else is supplementary (Tables S1-S8).
+Two table sets. "ext" (the default; the Public Health version): Table 1 (here) and Figures 1-4
+(exhibits/make_ext_figures.py) are the main display items, Tables S1-S8 the supplement. "ijtb"
+(the Indian Journal of Tuberculosis version): the same tables plus two descriptive tables that read
+the same outputs, Table 2 (yield, number needed to screen and elasticity by screening intensity)
+and Table S9 (the State programme table: intensity, tiers, robustness and number needed to
+screen). The "ext" set is unchanged by the "ijtb" additions.
 
 Standard library only. Reads outputs/ext/*.csv and outputs/*.csv only. Writes, to DIR (default
 manuscript/ext/exhibits/, git-ignored and local):
@@ -23,6 +26,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import statistics
 import sys
 from pathlib import Path
 
@@ -30,6 +34,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "manuscript" / "ext" / "exhibits"
 
 MAIN_TABLES = ["Table 1"]  # the main-text table; the figures are Figures 1-4 (make_ext_figures.py)
+MAIN_TABLES_IJTB = ["Table 1", "Table 2"]  # the "ijtb" set: Table 2 is descriptive (intensity strata)
 SUP = "ᵃᵇᶜᵈᵉᶠ"  # tools/build_submission.py sets these as superscript letters (at most six per table)
 MINUS = "−"
 
@@ -43,6 +48,7 @@ ST = "outputs/ext/d1_states.csv"
 STB = "outputs/ext/d1_states_betweenyear.csv"
 TBI = "outputs/ext/d1_tiers_by_intensity.csv"
 EXCL = "outputs/ext/d1_excluded.csv"
+INS = "outputs/ext/d1_intensity_strata.csv"
 AL = "outputs/ext/d2_alignment.csv"
 SH = "outputs/ext/d2_tier_shares.csv"
 SC = "outputs/ext/d2_scenario.csv"
@@ -113,9 +119,15 @@ def f_strata(raw: str) -> str:
     return f"{f_dec(2)(parts['high'])} (higher intensity), {f_dec(2)(parts['low'])} (lower intensity)"
 
 
+def f_nns(raw: str) -> str:
+    """Number needed to screen from a yield per 100,000 screened: 100,000 / yield, rounded."""
+    return f"{round(100000 / float(raw)):,}"
+
+
 FORMATTERS = {"dec0": f_dec(0), "dec1": f_dec(1), "dec2": f_dec(2), "dec3": f_dec(3),
               "round0": f_round0, "pct0": f_pct(0), "pct1": f_pct(1), "years": f_years,
-              "strata": f_strata, "raw": lambda s: s}
+              "strata": f_strata, "nns0": f_nns, "raw": lambda s: s}
+STATS = {"median": statistics.median, "min": min, "max": max}
 
 
 def dig(raw: str) -> str:
@@ -139,6 +151,24 @@ class Trace:
 
     def rng(self, file: str, i: int, lo: str, hi: str, fmt: str) -> str:
         return f"{self.value(file, i, lo, fmt)} to {self.value(file, i, hi, fmt)}"
+
+    def stat(self, file: str, filters: dict, column: str, op: str, fmt: str) -> str:
+        """A median, minimum or maximum of `column` over the rows matching `filters`."""
+        vals = [float(r[column]) for r in read(file) if all(r[k] == v for k, v in filters.items())]
+        if not vals:
+            raise ValueError(f"no rows of {file} for {filters}")
+        raw = repr(STATS[op](vals))
+        text = FORMATTERS[fmt](raw)
+        self.entries.append({"exhibit": self.exhibit, "kind": "stat", "file": file, "filters": filters,
+                             "column": column, "op": op, "raw": raw, "fmt": fmt, "text": text})
+        return text
+
+    def count(self, file: str, filters: dict) -> str:
+        """The number of rows matching `filters`."""
+        text = f"{sum(all(r[k] == v for k, v in filters.items()) for r in read(file)):,}"
+        self.entries.append({"exhibit": self.exhibit, "kind": "count", "file": file, "filters": filters,
+                             "text": text})
+        return text
 
     def interval(self, file: str, i: int, col: str, lo: str, hi: str, fmt: str) -> str:
         return f"{self.value(file, i, col, fmt)} ({self.rng(file, i, lo, hi, fmt)})"
@@ -645,6 +675,85 @@ def supp_reading(tr: Trace, fn: Notes):
 
 
 # --------------------------------------------------------------------------------------
+# "ijtb" set. Table 2: yield, number needed to screen and elasticity by screening intensity
+# --------------------------------------------------------------------------------------
+STRATUM = {"low": "Lower intensity", "high": "Higher intensity"}
+
+
+def first_row(rel: str, **kv) -> int:
+    """The first row of `rel` matching kv (a stratum-level value repeated on every row of the stratum)."""
+    return next(i for i, r in enumerate(read(rel)) if all(r[k] == v for k, v in kv.items()))
+
+
+def table2_intensity(tr: Trace, fn: Notes):
+    split = tr.value(INS, 0, "median", "pct1")
+    header = ["Intensity stratum", "States (n)",
+              "People screened per 100 population per year, median (range)" + fn.mark("int", f"Mean of people screened per head of the 2021 population over 2021–2023, times 100; States split at the median of all 35 States and Union Territories ({split}). The screened count of some States is a mapped or enumerated population, so a high value can reflect mass mapping rather than mass testing."),
+              "Pooled yield per 100,000 screened (95% CI)" + fn.mark("pool", "Random-effects mean of the States' pooled 2021–2023 log yields within the stratum (all States: the registered pooled mean), back-transformed."),
+              "Number needed to screen (95% CI)" + fn.mark("nns", "People screened per person diagnosed: 100,000 ÷ the pooled yield, and 100,000 ÷ its confidence limits."),
+              "Elasticity ε (95% interval)" + fn.mark("eps", "Within-State elasticity of ACF diagnoses to the number screened, five data years (2018 to 2023), cluster-bootstrap interval; strata as in Table 1."),
+              "Tiers within the stratum: above, overlaps, below (n)" + fn.mark("tier", "Each State's empirical-Bayes posterior interval against its stratum's pooled mean (all States: against the pooled mean of all States, as in Table S2).")]
+    rows = []
+    for s, a in (("low", "stratum low"), ("high", "stratum high")):
+        i = first_row(TBI, stratum=s)
+        e = row_index(EL, analysis=a)
+        rows.append([STRATUM[s], tr.count(TBI, {"stratum": s}),
+                     f"{tr.stat(TBI, {'stratum': s}, 'intensity', 'median', 'pct1')} "
+                     f"({tr.stat(TBI, {'stratum': s}, 'intensity', 'min', 'pct1')} to "
+                     f"{tr.stat(TBI, {'stratum': s}, 'intensity', 'max', 'pct1')})",
+                     tr.interval(TBI, i, "stratum_mu_per_100k", "stratum_ci_lo_per_100k", "stratum_ci_hi_per_100k", "dec1"),
+                     f"{tr.value(TBI, i, 'stratum_mu_per_100k', 'nns0')} ({tr.value(TBI, i, 'stratum_ci_hi_per_100k', 'nns0')} "
+                     f"to {tr.value(TBI, i, 'stratum_ci_lo_per_100k', 'nns0')})",
+                     tr.interval(EL, e, "estimate", "boot_lo", "boot_hi", "dec2"),
+                     ", ".join(tr.count(TBI, {"stratum": s, "tier": t}) for t in ("above", "overlaps", "below"))])
+    i = row_index(POOL, analysis="2021-2023")
+    e = row_index(EL, analysis="main")
+    rows.append(["All States", tr.value(POOL, i, "k", "round0"),
+                 f"{tr.stat(TBI, {}, 'intensity', 'median', 'pct1')} ({tr.stat(TBI, {}, 'intensity', 'min', 'pct1')} "
+                 f"to {tr.stat(TBI, {}, 'intensity', 'max', 'pct1')})",
+                 tr.interval(POOL, i, "yield_per_100k", "ci_lo_per_100k", "ci_hi_per_100k", "dec1"),
+                 f"{tr.value(POOL, i, 'yield_per_100k', 'nns0')} ({tr.value(POOL, i, 'ci_hi_per_100k', 'nns0')} "
+                 f"to {tr.value(POOL, i, 'ci_lo_per_100k', 'nns0')})",
+                 tr.interval(EL, e, "estimate", "boot_lo", "boot_hi", "dec2"),
+                 ", ".join(tr.value(POOL, i, c, "round0") for c in ("n_above", "n_overlaps", "n_below"))])
+    notes = ["Descriptive. States and Union Territories with a pooled 2021–2023 yield (Lakshadweep has none). "
+             "Intensity and yield share the number screened, so a lower yield where more people are screened is "
+             "partly arithmetic and partly a difference in who is counted as screened; the contrast is not causal."]
+    return header, rows, notes + fn.lettered()
+
+
+# --------------------------------------------------------------------------------------
+# "ijtb" set. Table S9: the State programme table
+# --------------------------------------------------------------------------------------
+def supp_programme(tr: Trace, fn: Notes):
+    header = ["State or Union Territory", "Intensity stratum",
+              "People screened per 100 population per year" + fn.mark("int", "Mean of people screened per head of the 2021 population over 2021–2023, times 100. States are split at the median into lower and higher intensity."),
+              "Registered tier", "Robust tier" + fn.mark("robust", "Yes if the registered and the between-year (post hoc) tiers agree (Table S2)."),
+              "Posterior yield per 100,000 screened (95% interval)" + fn.mark("post", "Registered empirical-Bayes posterior of the pooled 2021–2023 yield; plug-in interval (Table S2)."),
+              "Number needed to screen" + fn.mark("nns", "100,000 ÷ the posterior yield: people screened per person diagnosed."),
+              "Tier within stratum"]
+    st = {r["unit"]: i for i, r in enumerate(read(ST)) if r["analysis"] == "2021-2023"}
+    by = {r["unit"]: i for i, r in enumerate(read(STB))}
+    tbi = {r["unit"]: i for i, r in enumerate(read(TBI))}
+    rows = []
+    for k, r in sorted(enumerate(read(INS)), key=lambda x: state(x[1]["unit"])):
+        u = r["unit"]
+        lead = [state(u), {"high": "Higher", "low": "Lower"}[r["stratum"]], tr.value(INS, k, "intensity", "pct1")]
+        if u not in st:
+            rows.append([lead[0] + fn.mark("none", "No usable year in 2021–2023 (zero diagnoses in each), so no pooled value or tier.")]
+                        + lead[1:] + [TIER["no tier"], "", "", "", ""])
+            continue
+        i, j = st[u], by[u]
+        rows.append(lead + [TIER[read(ST)[i]["tier"]], YESNO[read(STB)[j]["tier_agrees"]],
+                            tr.interval(ST, i, "post_per_100k", "post_lo_per_100k", "post_hi_per_100k", "dec1"),
+                            tr.value(ST, i, "post_per_100k", "nns0"), TIER[read(TBI)[tbi[u]]["tier"]]])
+    notes = ["Descriptive, for programme planning; States in alphabetical order, not a ranking. Tiers compare "
+             "each State's posterior interval with the pooled mean (above, overlaps, below); only robust tiers are "
+             "read as robust."]
+    return header, rows, notes + fn.lettered()
+
+
+# --------------------------------------------------------------------------------------
 # Build and write
 # --------------------------------------------------------------------------------------
 TABLES = [
@@ -660,10 +769,18 @@ TABLES = [
 ]
 
 
-def build() -> tuple[dict, Trace]:
+TABLES_IJTB = TABLES[:1] + [
+    ("Table 2", "Yield, number needed to screen and elasticity by screening intensity, States and Union Territories, 2021–2023", table2_intensity, True),
+] + TABLES[1:] + [
+    ("Table S9", "State and Union Territory programme table: screening intensity, yield tier, robustness and number needed to screen, 2021–2023", supp_programme, False),
+]
+SETS = {"ext": TABLES, "ijtb": TABLES_IJTB}
+
+
+def build(which: str = "ext") -> tuple[dict, Trace]:
     tr = Trace()
     ex: dict[str, dict] = {}
-    for name, title, fn_, main in TABLES:
+    for name, title, fn_, main in SETS[which]:
         tr.exhibit = name
         h, r, n = fn_(tr, Notes())
         ex[name] = {"title": title, "panels": [(h, r)], "notes": n, "main": main}
@@ -680,9 +797,11 @@ def write_csv(out: Path, name: str, header: list[str], rows: list[list[str]]) ->
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--out", default=str(OUT), help="output folder (default manuscript/ext/exhibits)")
-    out = Path(ap.parse_args(argv).out)
+    ap.add_argument("--set", default="ext", choices=sorted(SETS), help="table set (default ext)")
+    a = ap.parse_args(argv)
+    out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
-    ex, tr = build()
+    ex, tr = build(a.set)
     md = ["# Tables\n"]
     for name, e in ex.items():
         md.append(f"## {name}. {e['title']}\n")

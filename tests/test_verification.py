@@ -627,7 +627,8 @@ def test_check_all_runs_every_check_and_pytest():
     names = [n for n, _ in check_all.STEPS]
     assert names == ["pytest -q", "check_plan_order", "check_deviations",
                      "check_extraction_totals", "check_inventory", "check_outputs",
-                     "check_ext_outputs", "check_manuscript_numbers", "check_docx_tie"]
+                     "check_ext_outputs", "check_manuscript_numbers", "check_docx_tie",
+                     "check_manuscript_numbers [ijtb]", "check_docx_tie [ijtb]"]
 
 
 def test_every_check_script_has_main_and_the_repository_root():

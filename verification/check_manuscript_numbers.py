@@ -12,7 +12,12 @@ holds neither manuscript_src.md nor section_phrases.json (as in a clone where th
 written <folder>/exhibits/). If one of those two files is present without the other, the check
 FAILS (exit 1): it never passes without its phrases.
 
-Profiles. Each folder is checked under one profile: "ext" (the extension paper: catalogue_ext()
+Profiles. Each folder is checked under one profile: "ijtb" (the Indian Journal of Tuberculosis
+version of the extension paper, manuscript/ext_v2: catalogue_ijtb() = catalogue_ext() plus the number
+needed to screen, the 2023 cascade, the national benchmarks and prevalence, the intensity strata and
+the registration commits; claims_ijtb(); Tables 1-2, Figures 1-4, Tables S1-S9, Box 1; the source is
+unblinded, with blinding spans, and the blinded rendering is checked for author markers; the
+highlights and the supplementary text are checked as sections of their own), "ext" (the extension paper: catalogue_ext()
 from outputs/ext/, outputs/ for the box and the national yield, the extension plan and both
 registration records; claims_ext(); Table 1, Figures 1-4, Tables S1-S8, Box 1) or "v1" (the
 v1.0.0 audit manuscript: catalogue_v1(), claims_v1(); Tables 1-3, Figures 1-2, Tables S1-S4 and
@@ -114,6 +119,16 @@ def day(iso: str) -> str:
     """'2025-02-22' -> '22 February 2025'."""
     d = date.fromisoformat(iso[:10])
     return f"{d.day} {MONTHS[d.month - 1]} {d.year}"
+
+
+BLIND_SPAN = re.compile(r"⟦([^⟧‖]*)(?:‖([^⟧]*))?⟧")
+
+
+def render(text: str, blinded: bool = False) -> str:
+    """The manuscript as sent (unblinded) or as the blinded copy: a span ⟦unblinded‖blinded⟧ keeps its
+    first part, or in the blinded copy its second part (empty when there is no ‖). A text without
+    spans is returned unchanged."""
+    return BLIND_SPAN.sub(lambda m: (m.group(2) or "") if blinded else m.group(1), text)
 
 
 def whole_or(x: float | str, dp: int) -> str:
@@ -920,6 +935,116 @@ def claims_ext(root: Path) -> list[str]:
     return out
 
 # --------------------------------------------------------------------------------------
+# The Indian Journal of Tuberculosis version (profile "ijtb", manuscript/ext_v2): the extension
+# catalogue plus the descriptive programme quantities, all read from outputs/ (and, for the
+# benchmarks printed in the India TB Report 2024, the inventory's record of that page)
+# --------------------------------------------------------------------------------------
+NTPS_PREVALENCE = ("312", "cited: National TB Prevalence Survey in India 2019-2021 (reference 15), PDF page 95, "
+                   "Table 21, all forms of TB, all ages, India; read from the local copy, SHA-256 884ffdd2...")
+
+
+def nns(y: float | str) -> str:
+    """Number needed to screen from a yield per 100,000 screened."""
+    return count(round(100000 / float(y)))
+
+
+def catalogue_ijtb(root: Path) -> dict[str, tuple[str, str]]:
+    c = dict(catalogue_ext(root))
+
+    def put(label: str, text: str, source: str) -> None:
+        if label in c:
+            raise ValueError(f"duplicate catalogue label {label}")
+        c[label] = (text, source)
+
+    for key, name in (("reg", "registration_event.json"), ("reg_ext", "registration_event_ext.json")):
+        r = json.loads((root / "docs" / name).read_text(encoding="utf-8"))
+        put(f"{key}.commit", r["registered_commit"], f"docs/{name}: registered_commit")
+    v = re.search(r'(?m)^version: "(\d+\.\d+\.\d+)"', (root / "CITATION.cff").read_text(encoding="utf-8")).group(1)
+    put("rel.version", f"version {v}", "CITATION.cff: version")
+    pooled = ext_csv(root, "d1_pooled")
+    for a in ("2018", "2023", "2021-2023"):
+        put(f"nns.pool.{a}", nns(one(pooled, "d1_pooled", analysis=a)["yield_per_100k"]),
+            f"outputs/ext/d1_pooled.csv: {a}, 100,000 / yield_per_100k")
+    q3 = read_csv(root, "outputs/q3_yield_summary.csv")
+    put("nns.national.2023", count(round(float(one(q3, "nns", state="India", year="2023", indicator="nns")["value"]))),
+        "outputs/q3_yield_summary.csv: India 2023 nns value")
+    cc = read_csv(root, "outputs/ext/crosscheck.csv")
+    r = one(cc, "tested 2023", section="national cascade", quantity="pct_tested_of_screened", panel_year="2023")
+    put("cc.tested_2023", num(r["panel_value"], 2) + "%",
+        "outputs/ext/crosscheck.csv: national 2023 pct_tested_of_screened, panel_value")
+    inv = one(read_csv(root, "data/extracted/inventory_scope_decisions.csv"), "benchmarks", doc="ITR2024", page="144")
+    figs = [x.strip() for x in inv["figures"].split(";")]
+    src = "data/extracted/inventory_scope_decisions.csv: ITR2024 page 144 (printed 114), benchmark figures as printed"
+    if figs[3:6] != ["≥4.8%", "≥5%", "≤1,538"]:
+        raise ValueError(f"benchmarks: {figs}")
+    put("bench.tested", figs[3][1:], src)
+    put("bench.positivity", figs[4][1:], src)
+    put("bench.nns", figs[5][1:], src)
+    put("ntps.prev", *NTPS_PREVALENCE)
+    ins = ext_csv(root, "d1_intensity_strata")
+    if len({r["median"] for r in ins}) != 1:
+        raise ValueError("intensity: the split median differs between rows")
+    put("int.split", num(100 * float(ins[0]["median"]), 1), "outputs/ext/d1_intensity_strata.csv: median x 100")
+    tbi = ext_csv(root, "d1_tiers_by_intensity")
+    for s_ in ("low", "high"):
+        r = next(x for x in tbi if x["stratum"] == s_)
+        f = f"outputs/ext/d1_tiers_by_intensity.csv: stratum {s_}"
+        put(f"int.{s_}.n", count(r["stratum_k"]), f + ", stratum_k")
+        put(f"int.{s_}.yield", num(r["stratum_mu_per_100k"], 1), f + ", stratum_mu_per_100k")
+        put(f"int.{s_}.ci", rng(num(r["stratum_ci_lo_per_100k"], 1), num(r["stratum_ci_hi_per_100k"], 1)),
+            f + ", stratum_ci_*_per_100k")
+        put(f"int.{s_}.nns", nns(r["stratum_mu_per_100k"]), f + ", 100,000 / stratum_mu_per_100k")
+    stratum = {r["unit"]: r["stratum"] for r in ins}
+    bys = ext_csv(root, "d1_states_betweenyear")
+    for t, s_ in (("above", "low"), ("below", "high")):
+        put(f"int.robust_{t}_{s_}", count(sum(r["tier_registered"] == t and r["tier_agrees"] == "yes"
+                                                and stratum[r["unit"]] == s_ for r in bys)),
+            f"outputs/ext/d1_states_betweenyear.csv robust {t} units in the {s_} stratum of d1_intensity_strata.csv")
+    mh = one(ext_csv(root, "d2_scenario_units"), "Maharashtra", analysis="main", unit="Maharashtra")
+    put("sc.mh_screened", f"{float(mh['screened_2023']) / 1e6:.1f} million",
+        "outputs/ext/d2_scenario_units.csv: main, Maharashtra, screened_2023 / 1,000,000")
+    return c
+
+
+def claims_ijtb(root: Path) -> list[str]:
+    """The extension claims, and the statements the IJTB text adds, re-tested on the outputs."""
+    out = claims_ext(root)
+
+    def need(ok: bool, msg: str) -> None:
+        if not ok:
+            out.append(f"CLAIM fails: {msg}")
+
+    prev = float(NTPS_PREVALENCE[0])
+    pooled = {r["analysis"]: float(r["yield_per_100k"]) for r in ext_csv(root, "d1_pooled")}
+    q3 = read_csv(root, "outputs/q3_yield_summary.csv")
+    nat = float(one(q3, "y", state="India", year="2023", indicator="yield_diagnosed_per_100000")["value"])
+    need(pooled["2023"] < prev / 10 and nat < prev / 10, "both 2023 yields are under a tenth of the prevalence")
+    n_nat = float(one(q3, "nns", state="India", year="2023", indicator="nns")["value"])
+    need(3 < n_nat / 1538 < 4, "the national NNS is more than three (and under four) times the benchmark")
+    cc = read_csv(root, "outputs/ext/crosscheck.csv")
+    t = float(one(cc, "t", section="national cascade", quantity="pct_tested_of_screened", panel_year="2023")["panel_value"])
+    need(0.5 <= t <= 1.5, "about one in a hundred people screened was tested in 2023")
+    ins = {r["unit"]: r for r in ext_csv(root, "d1_intensity_strata")}
+    need(all(ins[u]["stratum"] == "low" for u in ("Delhi", "Kerala", "Tamil Nadu", "Telangana")),
+         "Delhi, Kerala, Tamil Nadu and Telangana are lower-intensity States")
+    need(all(ins[u]["stratum"] == "high" for u in ("Gujarat", "Himachal Pradesh", "Maharashtra")),
+         "Gujarat, Himachal Pradesh and Maharashtra are higher-intensity States")
+    need(0.2 <= float(ins["Gujarat"]["intensity"]) < 0.25 and float(ins["Himachal Pradesh"]["intensity"]) > 2 / 3,
+         "Gujarat screened nearly a quarter and Himachal Pradesh over two-thirds of its population a year")
+    tbi = ext_csv(root, "d1_tiers_by_intensity")
+    mu = {s_: float(next(x for x in tbi if x["stratum"] == s_)["stratum_mu_per_100k"]) for s_ in ("low", "high")}
+    need(mu["low"] > mu["high"], "lower-intensity States have the higher pooled yield")
+    need(abs(100000 / mu["low"] / 1538 - 1) < 0.1, "the lower-intensity NNS is close to the benchmark")
+    bys = ext_csv(root, "d1_states_betweenyear")
+    ra = [r["unit"] for r in bys if r["tier_registered"] == "above" and r["tier_agrees"] == "yes"]
+    need(ra and all(ins[u]["stratum"] == "low" for u in ra), "every robustly above-tier State is a lower-intensity State")
+    s = one(ext_csv(root, "d1_elasticity_samedef"), "s", analysis="same screened definition (post hoc)")
+    need(float(s["estimate"]) < 1, "the same-definition elasticity is below 1")
+    need(float(s["boot_lo"]) < 0 < float(s["boot_hi"]), "the same-definition interval is imprecise (includes 0)")
+    return out
+
+
+# --------------------------------------------------------------------------------------
 # Section phrases: private, read at run time from <manuscript folder>/section_phrases.json
 # --------------------------------------------------------------------------------------
 def load_phrase_file(ms_dir: Path) -> dict:
@@ -982,6 +1107,18 @@ FIXED_EXT: list[tuple[str, str]] = [
     ("year", r"(?<![\d.,])20(?:1[89]|2[0-6])(?![\d]|[.,]\d)"),
 ]
 
+SUPPLEMENT_IJTB = [f"S{k}" for k in range(1, 10)]  # the IJTB version: Tables S1-S9
+FIXED_IJTB: list[tuple[str, str]] = [
+    ("exhibit", r"\bTables? S\d and S\d\b"),
+] + FIXED_EXT + [
+    ("doi", r"10\.5281/zenodo\.(?:\d+|X+)"),
+    ("scale", r"\bper 100 population\b|per 100,000 population|\b100,000 divided by\b"),
+    ("hash", r"\bSHA-256\b"),
+]
+# Extra files read as sections of their own (the highlights and the supplementary text), after the
+# manuscript; None keeps the file's own '## ' headings.
+EXTRA_SECTIONS_IJTB = {"highlights.md": "Highlights", "supplement_text.md": None}
+
 
 class Profile(NamedTuple):
     """What a manuscript of one framing must contain: its catalogue, its claims, its fixed number
@@ -993,11 +1130,15 @@ class Profile(NamedTuple):
     figures: list
     supplement: list
     supp_data: list
+    max_refs: int = 50
+    extra: dict | None = None
 
 
 PROFILES: dict[str, Profile] = {
     "v1": Profile(catalogue_v1, claims_v1, FIXED_V1, [1, 2, 3], [1, 2], SUPPLEMENT_V1, SUPP_DATA_V1),
     "ext": Profile(catalogue_ext, claims_ext, FIXED_EXT, [1], [1, 2, 3, 4], SUPPLEMENT_EXT, []),
+    "ijtb": Profile(catalogue_ijtb, claims_ijtb, FIXED_IJTB, [1, 2], [1, 2, 3, 4], SUPPLEMENT_IJTB, [], 40,
+                    EXTRA_SECTIONS_IJTB),
 }
 DEFAULT_PROFILE = "ext"
 
@@ -1138,11 +1279,12 @@ def skeleton_problems(now: dict[str, list[dict]], gold: dict[str, list[dict]] | 
 # --------------------------------------------------------------------------------------
 # Exhibits, references, blinding and wording
 # --------------------------------------------------------------------------------------
-def exhibit_problems(text: str, profile: str = "ext") -> list[str]:
+def exhibit_problems(text: str, profile: str = "ext", skip: tuple = ()) -> list[str]:
+    """`skip`: further sections left out (the highlights and supplementary text of the ijtb profile)."""
     pr = PROFILES[profile]
     SUPPLEMENT, SUPP_DATA = pr.supplement, pr.supp_data
     secs = sections(text)
-    body = " ".join(v for k, v in secs.items() if k not in ("Title", "Abstract", "Figure legends"))
+    body = " ".join(v for k, v in secs.items() if k not in ("Title", "Abstract", "Figure legends") + tuple(skip))
     out = []
     for kind, want in (("Table", pr.tables), ("Figure", pr.figures)):
         seen = [int(n) for n in re.findall(rf"\b{kind}s? ([1-9])[A-D]?\b", body)]
@@ -1181,7 +1323,7 @@ def exhibit_problems(text: str, profile: str = "ext") -> list[str]:
     return out
 
 
-def reference_problems(text: str) -> list[str]:
+def reference_problems(text: str, max_refs: int = 50) -> list[str]:
     refs = text.split("\n## References", 1)
     if len(refs) != 2:
         return ["REFERENCES: no '## References' section"]
@@ -1204,8 +1346,8 @@ def reference_problems(text: str) -> list[str]:
     never = sorted(set(range(1, n + 1)) - set(order))
     if never:
         out.append(f"REFERENCES: never cited: {never}")
-    if n > 50:
-        out.append(f"REFERENCES: {n} references, the journal allows at most 50")
+    if n > max_refs:
+        out.append(f"REFERENCES: {n} references, the journal allows at most {max_refs}")
     return out
 
 
@@ -1220,6 +1362,23 @@ BANNED = [
 AMERICAN = [r"\banalyz", r"\bstandardiz", r"(?<!World Health )\borganiz", r"\bprogram\b", r"\bprograms\b", r"\bcolor",
             r"\bcenter", r"\bbehavior", r"\bmodeling\b", r"\blabeled\b", r"\bminimiz", r"\bprioritiz",
             r"\brecogniz", r"\butiliz", r"\bcategoriz", r"\bhospitaliz", r"\bemphasiz"]
+
+
+BANNED_IJTB = [
+    (r"(?i)\bpre-?registered\b|\bpre-?registration\b", "'pre-registered' wording (say: time-stamped in a public repository)"),
+    (r"(?i)\bstill pays?\b", "'still pay' wording"),
+    (r"(?i)\b(?:is|was|are|were) the first\b|\bfor the first time\b|\bfirst to\b", "a 'first' claim"),
+]
+# Proper names and MeSH terms in American spelling, left out of the spelling check.
+AMERICAN_OK = ["Program Evaluation", "Evaluation and Program Planning"]
+
+
+def spelling_text(text: str) -> str:
+    """Text for the spelling check: the keywords line (MeSH terms) and listed proper names removed."""
+    text = "\n".join(ln for ln in text.splitlines() if not ln.startswith("**Keywords:**"))
+    for name in AMERICAN_OK:
+        text = text.replace(name, " ")
+    return text
 
 
 def author_markers(root: Path) -> list[str]:
@@ -1255,20 +1414,32 @@ OTHER_FILES = {  # file in manuscript/ -> blinded?
     "first_page_src.md": False,
     "cover_letter.md": False,
 }
+OTHER_FILES_IJTB = dict(OTHER_FILES, **{
+    "highlights.md": False,
+    "supplement_text.md": True,
+    "declarations.md": False,
+    "declaration_of_interests.md": False,
+    "copyright_transfer.md": False,
+    "record_checklist.md": False,
+})
 
 
-def other_file_problems(name: str, text: str, root: Path, blinded: bool) -> list[str]:
+def other_files(profile: str) -> dict[str, bool]:
+    return OTHER_FILES_IJTB if profile == "ijtb" else OTHER_FILES
+
+
+def other_file_problems(name: str, text: str, root: Path, blinded: bool, profile: str = "ext") -> list[str]:
     """Internal identifiers, American spellings, process text and (for blinded files) unblinding,
     in a manuscript file other than manuscript_src.md."""
     out = []
     body = text
     if name == "exhibits/tables.md":
         body = "\n".join(ln for ln in text.splitlines() if not ln.startswith("# Tables (generated"))
-    for pat, what in BANNED:
+    for pat, what in BANNED + (BANNED_IJTB if profile == "ijtb" else []):
         for m in re.finditer(pat, body):
             out.append(f"WORDING in {name}: {what}: {m.group()!r}")
     for pat in AMERICAN:
-        for m in re.finditer(pat, body, re.I):
+        for m in re.finditer(pat, spelling_text(body) if profile == "ijtb" else body, re.I):
             out.append(f"SPELLING in {name}: American form {m.group()!r}")
     if blinded:
         for mk in author_markers(root):
@@ -1281,6 +1452,38 @@ def other_file_problems(name: str, text: str, root: Path, blinded: bool) -> list
                 out.append(f"PROCESS in {name}: {what}: {m.group()!r}")
         if name == "first_page_src.md" and body.count(DOI_PLACEHOLDER) != 1:
             out.append(f"PROCESS in {name}: the single Zenodo DOI placeholder {DOI_PLACEHOLDER!r} is missing")
+    return out
+
+
+def wording_problems_ijtb(text: str, root: Path) -> list[str]:
+    """The ijtb source is unblinded with blinding spans: the unblinded rendering must carry the
+    repository and both registration commits, the blinded rendering no author marker and the
+    blinding placeholder; internal identifiers, banned wording and American spellings are checked on
+    the unblinded body (before the References)."""
+    out = []
+    if text.count("⟦") != text.count("⟧") or len(BLIND_SPAN.findall(text)) != text.count("⟦"):
+        out.append("BLINDING: unbalanced or nested blinding spans")
+    unbl, bl = render(text), render(text, blinded=True)
+    low = bl.lower()
+    for m in author_markers(root):
+        if m.lower() in low:
+            out.append(f"BLINDING: the blinded rendering contains {m!r}")
+    if "[repository link removed for blinded review]" not in bl:
+        out.append("BLINDING: the placeholder '[repository link removed for blinded review]' is missing from the blinded rendering")
+    reg = [json.loads((root / "docs" / n).read_text(encoding="utf-8"))
+           for n in ("registration_event.json", "registration_event_ext.json")]
+    for want in [reg[0]["repository"]] + [r["registered_commit"] for r in reg]:
+        if want not in unbl:
+            out.append(f"UNBLINDED: the manuscript does not give {want!r}")
+    if "10.5281/zenodo." not in unbl:
+        out.append("UNBLINDED: the manuscript does not give the Zenodo DOI")
+    body = unbl.split("\n## References", 1)[0]
+    for pat, what in BANNED + BANNED_IJTB:
+        for m in re.finditer(pat, body):
+            out.append(f"WORDING: {what}: {m.group()!r}")
+    for pat in AMERICAN:
+        for m in re.finditer(pat, spelling_text(body), re.I):
+            out.append(f"SPELLING: American form {m.group()!r}")
     return out
 
 
@@ -1348,30 +1551,66 @@ def declaration_problems(text: str, title_page: str) -> list[str]:
 def load_others(ms_dir: Path) -> dict[str, str]:
     """The other manuscript files of the folder that exist, by name (none in a fresh clone)."""
     out = {}
-    for name in OTHER_FILES:
+    for name in other_files(profile_for(ms_dir)):
         p = ms_dir / name
         if p.exists():
             out[name] = p.read_text(encoding="utf-8")
     return out
 
 
+def analysed(text: str, others: dict[str, str] | None, profile: str) -> str:
+    """The text whose numbers are checked: the manuscript (unblinded rendering), then, for a profile
+    with extra sections, each extra file as a section of its own."""
+    out = render(text)
+    for name, title in (PROFILES[profile].extra or {}).items():
+        if others and name in others:
+            body = others[name]
+            if title:
+                body = f"## {title}\n\n" + "\n".join(ln for ln in body.splitlines() if not ln.startswith("# "))
+            out = out.rstrip("\n") + "\n\n" + body.strip("\n") + "\n"
+    return out
+
+
+def extra_section_names(others: dict[str, str] | None, profile: str) -> tuple[str, ...]:
+    names = []
+    for name, title in (PROFILES[profile].extra or {}).items():
+        if others and name in others:
+            names += [title] if title else [ln[3:].strip() for ln in others[name].splitlines() if ln.startswith("## ")]
+    return tuple(names)
+
+
 def problems(root: Path, text: str, gold: dict | None, others: dict[str, str] | None = None, *,
              required: dict[str, list[str]], profile: str = "ext") -> list[str]:
     """Every problem of the manuscript text; `required` is the section phrases (section_phrases());
-    `profile` is "ext" (the extension paper) or "v1" (the v1.0.0 audit manuscript)."""
+    `profile` is "ijtb" (the IJTB version), "ext" (the extension paper) or "v1" (the v1.0.0 audit
+    manuscript). For ijtb, `text` is the source with its blinding spans."""
     if not required:
         return [f"PHRASES: no section phrases ({PHRASES} missing or empty)"]
-    now, out = skeleton(text, root, required, profile)
+    full = analysed(text, others, profile)
+    now, out = skeleton(full, root, required, profile)
+    files = other_files(profile)
     for name, body in (others or {}).items():
-        out += other_file_problems(name, body, root, OTHER_FILES[name])
+        out += other_file_problems(name, body, root, files[name], profile)
     if others and "first_page_src.md" in others:
-        out += declaration_problems(text, others["first_page_src.md"])
+        out += declaration_problems(render(text), others["first_page_src.md"])
     out += skeleton_problems(now, gold, root, profile)
     out += PROFILES[profile].claims(root)
-    out += exhibit_problems(text, profile)
-    out += reference_problems(text)
-    out += wording_problems(text, root)
+    out += exhibit_problems(full, profile, extra_section_names(others, profile))
+    out += reference_problems(full, PROFILES[profile].max_refs)
+    out += wording_problems_ijtb(text, root) if profile == "ijtb" else wording_problems(text, root)
+    if profile == "ijtb" and others and "first_page_src.md" in others:
+        out += author_block_problems(text, others["first_page_src.md"])
     return out
+
+
+def author_block_problems(text: str, title_page: str) -> list[str]:
+    """The unblinded manuscript's author block agrees with the title page: each e-mail address,
+    ORCID and 6-digit postal code of the title page occurs in it."""
+    unbl = render(text)
+    want = set(re.findall(r"[\w.+-]+@[\w-]+\.[\w.]+", title_page) + re.findall(r"\b\d{6}(?=,)", title_page)
+               + re.findall(r"\b\d{4}-\d{4}-\d{4}-\d{3}[\dX]\b", title_page))
+    return [f"AUTHOR BLOCK: {m!r} (title page) is not in the unblinded manuscript" for m in sorted(want)
+            if m.rstrip(".") not in unbl]
 
 
 def golden(text: str, root: Path, required: dict[str, list[str]], profile: str = "ext") -> dict:
@@ -1413,7 +1652,7 @@ def main(root: Path = ROOT, argv: list[str] | None = None) -> int:
     profile = profile_for(ms_dir)
     text = ms.read_text(encoding="utf-8")
     if "--regenerate" in argv:
-        g = golden(text, root, required, profile)
+        g = golden(analysed(text, load_others(ms_dir), profile), root, required, profile)
         (ms_dir / SKELETON).write_text(json.dumps(g, indent=1, ensure_ascii=False) + "\n",
                                        encoding="utf-8", newline="\n")
         n = sum(len(v) for v in g["sections"].values())

@@ -206,6 +206,8 @@ def test_builder_layouts_agree_with_the_tie():
     bs = pytest.importorskip("tools.build_submission")
     for prof, lay in tie.LAYOUTS.items():
         b = bs.LAYOUTS[prof]
+        if prof == "ijtb":  # its own file names (tested below)
+            continue
         assert tie.figure_files(list(b.figures)) == lay.figures
         assert {b.supplement, b.cover, b.record, b.declaration} | {
             "01_title_page.docx", "02_manuscript_anonymised.docx"} == set(lay.spec)
@@ -404,3 +406,34 @@ def test_spanning_row_ties_to_one_merged_cell():
     assert tie.row_unit(["A", "", "B", ""]) == "A |  | B"
     assert tie.md_units("| **Class 1 and 2 entry pairs (corrected set)** |  |  |\n") == [
         "Class 1 and 2 entry pairs (corrected set)"]
+
+
+def test_ijtb_layout_agrees_with_the_builder():
+    bs = pytest.importorskip("tools.build_submission")
+    lay, b = tie.LAYOUTS["ijtb"], bs.LAYOUTS["ijtb"]
+    assert lay.figures == tuple(f"{p}_Figure_{k}.tif" for k, p in enumerate(b.figures, 1))
+    assert set(lay.spec) == {"01_Cover_Letter.docx", "02_Title_Page.docx", "03_Manuscript.docx", "04_Highlights.docx",
+                             "05_Figure_Captions.docx", "06_Declarations.docx", "07_Declaration_of_Interests.docx",
+                             "08_Copyright_Transfer.docx", "09_Supplementary_Material.docx",
+                             "10_RECORD_Checklist.docx", "91_Manuscript_Blinded.docx"}
+    assert {b.supplement, b.cover, b.record, b.declaration} <= set(lay.spec)
+    assert lay.blinded == ("91_Manuscript_Blinded.docx", "09_Supplementary_Material.docx")
+    assert lay.title == "02_Title_Page.docx" and lay.manuscripts[0] == "03_Manuscript.docx"
+    assert {bs.IJTB_PREVIEW.format(n=91 + k, k=k) for k in range(1, 5)} | {"08_Copyright_Transfer.pdf"} == set(lay.extras)
+    assert lay.optional == ("15_Graphical_Abstract.tif",)
+
+
+def test_render_keeps_or_replaces_blinding_spans():
+    src = "A ⟦(https://x, commit 1a)‖[repository link removed for blinded review]⟧. B⟦ (c)‖⟧."
+    assert cmn.render(src) == "A (https://x, commit 1a). B (c)."
+    assert cmn.render(src, blinded=True) == "A [repository link removed for blinded review]. B."
+    assert cmn.render("no spans") == "no spans"
+
+
+def test_portal_pdf_allowed_only_beside_a_submitted_manifest(ext_dir):
+    sub = ext_dir / "submission"
+    (sub / "PUHE-S-26-07384.pdf").write_bytes(b"x")
+    assert tie.problems(ext_dir, ROOT) == [
+        "EXTRA: PUHE-S-26-07384.pdf is not part of the ext submission set"]
+    (sub / "SUBMITTED_2026-11-20.txt").write_text("manifest", encoding="utf-8")
+    assert tie.problems(ext_dir, ROOT) == []

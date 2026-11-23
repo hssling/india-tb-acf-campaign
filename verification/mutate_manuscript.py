@@ -3,7 +3,8 @@
 
 Run as: python -I verification/mutate_manuscript.py [--manuscript-dir DIR] [--sweep]
 
-The manuscript folder DIR (default manuscript/ext; manuscript/v1_audit for v1.0.0; git-ignored)
+The manuscript folder DIR (default manuscript/ext; manuscript/v1_audit for v1.0.0; manuscript/ext_v2 for
+the Indian Journal of Tuberculosis version, profile ijtb; git-ignored)
 is copied to a temporary folder for every mutation; the real files are never written. Each named
 mutation (MUTATION_SETS[profile], the profile of the folder) changes one thing in the copy, and both
 checks are run on it: check_manuscript_numbers.problems (on the copied Markdown, against the
@@ -59,6 +60,11 @@ DATA_09 = "submission/" + _V1.data[0][0]                  # v1: supplementary da
 DATA_10 = "submission/" + _V1.data[1][0]                  # v1: supplementary data S1b (CSV)
 XLSX_11 = "submission/" + _V1.xlsx                        # v1: both, one sheet each
 SUP_07 = "submission/" + _EXT.supplement                  # ext: 07_supplementary_material.docx
+_IJ = tie.LAYOUTS["ijtb"]
+MS_03 = "submission/" + _IJ.manuscripts[0]                # ijtb: 03_Manuscript.docx (unblinded)
+MS_91 = "submission/" + _IJ.manuscripts[1]                # ijtb: 91_Manuscript_Blinded.docx
+TITLE_02 = "submission/" + _IJ.title                      # ijtb: 02_Title_Page.docx
+SUP_09 = "submission/" + _IJ.supplement                   # ijtb: 09_Supplementary_Material.docx
 
 
 class NotApplied(Exception):
@@ -366,7 +372,115 @@ MUTATIONS_EXT: list[Mutation] = [
      lambda d: drop_italic(d / MS_02)),
 ]
 
-MUTATION_SETS: dict[str, list[Mutation]] = {"v1": MUTATIONS_V1, "ext": MUTATIONS_EXT}
+# The Indian Journal of Tuberculosis version (manuscript/ext_v2): an unblinded manuscript (03) built
+# from a source with blinding spans, a blinded copy (91), the supplementary material (09) and the
+# highlights; the blinding marks themselves, the wording the journal version bans, and the author
+# block are mutated as well.
+MUTATIONS_IJTB: list[Mutation] = [
+    ("1a", "number, docx only", "03 Results: the pooled mean yield of 2021-2023 changed in its last digit",
+     change(edit_docx, MS_03, "1a", bumped)),
+    ("1b", "number, docx only", "02 title page: abstract word count increased by 1",
+     change(edit_docx, TITLE_02, "1b", bumped)),
+    ("1c", "number, docx only", "91 (blinded) Results: the pooled mean yield changed in its last digit",
+     change(edit_docx, MS_91, "1a", bumped)),
+    ("2a", "number, markdown only", "manuscript_src.md Results: the scenario's added diagnoses increased by 1",
+     change(edit_text, cmn.MS_NAME, "2a", bumped)),
+    ("2b", "number, markdown only", "manuscript_src.md Abstract: the lower-intensity NNS changed in its last digit",
+     change(edit_text, cmn.MS_NAME, "2b", bumped)),
+    ("2c", "number, markdown only", "manuscript_src.md Abstract: the share of people screened who were tested changed",
+     change(edit_text, cmn.MS_NAME, "2c", bumped)),
+    ("2d", "number, markdown only", "highlights.md: the 2023 number needed to screen changed in its last digit",
+     change(edit_text, "highlights.md", "11a", bumped)),
+    ("3a", "author name, blinded docx", "91 Discussion text: the author's name inserted",
+     insert(edit_docx, MS_91, "3a", lambda d: f" ({author_name()})")),
+    ("3b", "author name, blinded docx", "91 document properties: author (dc:creator) set to the name",
+     lambda d: set_creator(d / MS_91, author_name())),
+    ("3c", "author e-mail, blinded docx", "09 note under Table S2: the author's e-mail inserted",
+     insert(edit_docx, SUP_09, "3c", lambda d: marker(lambda m: "@" in m, d) + " ", before=True)),
+    ("3d", "repository URL, blinded docx", "91 Methods: the blinding placeholder replaced by the URL",
+     lambda d: edit_docx(d / MS_91, "[repository link removed for blinded review]",
+                         marker(lambda m: m.startswith("http"), d))),
+    ("3e", "author name, blinded docx", "09 document properties: author (dc:creator) set to the name",
+     lambda d: set_creator(d / SUP_09, author_name())),
+    ("3f", "blinding span, markdown", "manuscript_src.md Methods: the blinded alternative of the repository span removed",
+     lambda d: edit_text(d / cmn.MS_NAME, "‖[repository link removed for blinded review]", "")),
+    ("3g", "blinding span, markdown", "manuscript_src.md: a blinding span left unclosed",
+     lambda d: edit_text(d / cmn.MS_NAME, "‖[repository link removed for blinded review]⟧",
+                         "‖[repository link removed for blinded review]")),
+    ("3h", "repository URL, unblinded docx", "03 Methods: the repository address removed",
+     lambda d: edit_docx(d / MS_03, "https://github.com/hssling/india-tb-acf-campaign, commit", "commit")),
+    ("3j", "release DOI, docx only", "03 Data availability: the Zenodo DOI changed in its last digit",
+     lambda d: edit_docx(d / MS_03, *(lambda x: (x, x[:-1] + str((int(x[-1]) + 1) % 10)))(
+         (d / tie.RELEASE_DOI).read_text(encoding="utf-8").strip()))),
+    ("3i", "author block, markdown","manuscript_src.md author block: the ORCID changed in its last digit",
+     lambda d: edit_text(d / cmn.MS_NAME, "ORCID 0000-0002-4771-8285.", "ORCID 0000-0002-4771-8286.")),
+    ("4a", "reference number, markdown", "manuscript_src.md Methods: a citation number increased by 1",
+     change(edit_text, cmn.MS_NAME, "4a", bumped)),
+    ("4b", "reference number, docx only", "03 Methods: a superscript citation number increased by 1",
+     lambda d: swap_superscript(d / MS_03, anchor(d, "4b"), bumped(anchor(d, "4b")))),
+    ("4c", "reference number, docx only", "03 References: entries 2 and 3 renumbered 3 and 2",
+     renumber_pair(MS_03, "4c")),
+    ("5a", "table cell, docx only", "03 Table 1: a sample size increased by 1",
+     change(edit_docx, MS_03, "5a", bumped)),
+    ("5b", "table cell, docx only", "09 Table S2: a posterior yield changed in its last digit",
+     change(edit_docx, SUP_09, "5b", bumped)),
+    ("5c", "table cell, markdown only", "tables.md Table 1: a sample size increased by 1",
+     change(edit_text, "exhibits/tables.md", "5c", bumped)),
+    ("5d", "table cell, markdown only", "tables.md Table 2: a stratum's number of States increased by 1",
+     change(edit_text, "exhibits/tables.md", "5d", lambda a: a.replace("| 17 |", "| 18 |"))),
+    ("5e", "table cell, docx only", "03 Table 2: a number needed to screen changed in its last digit",
+     change(edit_docx, MS_03, "5e", bumped)),
+    ("6a", "sign, markdown", "manuscript_src.md Results: the sign of the unweighted rho reversed",
+     change(edit_text, cmn.MS_NAME, "6a", flipped)),
+    ("6b", "sign, docx only", "03 Results: the sign of the main theta reversed",
+     change(edit_docx, MS_03, "6b", flipped)),
+    ("6c", "sign, docx only", "09 Table S3: the sign of an interval limit of the decomposition reversed",
+     change(edit_docx, SUP_09, "6c", flipped)),
+    ("7a", "internal identifier, markdown", "manuscript_src.md Methods: '(RS Q1216)' inserted",
+     insert(edit_text, cmn.MS_NAME, "7a", lambda d: " (RS Q1216)")),
+    ("7b", "internal identifier, docx only", "91 Discussion: '(Task 7)' inserted",
+     insert(edit_docx, MS_91, "7b", lambda d: " (Task 7)")),
+    ("7c", "internal identifier, docx only", "09 note under Table S2: 'ITR2024' inserted",
+     insert(edit_docx, SUP_09, "7c", lambda d: "ITR2024 ", before=True)),
+    ("7d", "banned wording, markdown", "manuscript_src.md Introduction: 'pre-registered' inserted",
+     insert(edit_text, cmn.MS_NAME, "7d", lambda d: " They were pre-registered.")),
+    ("8a", "label, markdown", "manuscript_src.md Abstract: the elasticity's label 'supported' -> 'not established'",
+     swap(edit_text, cmn.MS_NAME, "8a")),
+    ("8b", "label, markdown", "manuscript_src.md Results: the correlation's label 'not established' -> 'supported'",
+     swap(edit_text, cmn.MS_NAME, "8b")),
+    ("8c", "label, docx only", "03 Discussion: the number of estimates meeting the criterion changed",
+     swap(edit_docx, MS_03, "8c")),
+    ("8d", "label, docx only", "03 Table 1: the elasticity's label 'Supported' -> 'Not established'",
+     swap(edit_docx, MS_03, "8d")),
+    ("9a", "caveat, markdown", "manuscript_src.md Results: '(post hoc)' removed from the robust-tier scenario",
+     swap(edit_text, cmn.MS_NAME, "9a")),
+    ("9b", "caveat, markdown", "manuscript_src.md Results: 'an illustration, not a forecast' removed",
+     swap(edit_text, cmn.MS_NAME, "9b")),
+    ("9c", "caveat, markdown", "manuscript_src.md Results: 'post hoc' removed from the between-year tiers",
+     swap(edit_text, cmn.MS_NAME, "9c")),
+    ("9d", "caveat, markdown", "manuscript_src.md Results: 'this was not tested ...' removed",
+     swap(edit_text, cmn.MS_NAME, "9d")),
+    ("9e", "caveat, markdown", "manuscript_src.md Figure 3 legend: 'not a forecast' removed",
+     swap(edit_text, cmn.MS_NAME, "9e")),
+    ("9f", "caveat, docx only", "03 Discussion: 'it is not a forecast' removed",
+     swap(edit_docx, MS_03, "9f")),
+    ("9g", "caveat, docx only", "09 Table S2 title: '(post hoc)' removed",
+     swap(edit_docx, SUP_09, "9g")),
+    ("9h", "caveat, markdown", "manuscript_src.md Results: '(post hoc)' removed from the same-definition elasticity",
+     swap(edit_text, cmn.MS_NAME, "9h")),
+    ("9i", "caveat, docx only", "09 Table S3: '(post hoc)' removed from the same-definition row",
+     swap(edit_docx, SUP_09, "9i")),
+    ("9j", "caveat, markdown", "manuscript_src.md Discussion: the hypothesis restated as a finding of the elasticity",
+     swap(edit_text, cmn.MS_NAME, "9j")),
+    ("10a", "AMA italics, docx only", "03 References: italics removed from the first journal title",
+     lambda d: drop_italic(d / MS_03)),
+    ("10b", "AMA italics, docx only", "91 References: italics removed from the first journal title",
+     lambda d: drop_italic(d / MS_91)),
+    ("11a", "example States, markdown", "manuscript_src.md Results: a lower-intensity example State replaced",
+     change(edit_text, cmn.MS_NAME, "11b", lambda a: a.replace("Tamil Nadu", "Gujarat"))),
+]
+
+MUTATION_SETS: dict[str, list[Mutation]] = {"v1": MUTATIONS_V1, "ext": MUTATIONS_EXT, "ijtb": MUTATIONS_IJTB}
 
 
 # --------------------------------------------------------------------------------------
@@ -378,11 +492,14 @@ def copy_manuscript(src: Path, dst_root: Path) -> Path:
     dst = dst_root / src.name
 
     def ignore(d: str, names: list[str]) -> set[str]:
-        out = {n for n in names if n in ("_render", "__pycache__") or n.endswith(".png")}
+        out = {n for n in names if n in ("_render", "__pycache__", "_pre_strengthen")}
         if Path(d).name == "exhibits":
-            out |= {n for n in names if n.endswith((".tif", ".pdf"))}
+            out |= {n for n in names if n.endswith((".tif", ".pdf", ".png"))}
+        elif Path(d).name != "submission":  # the IJTB set's previews (92_...png) are part of it
+            out |= {n for n in names if n.endswith(".png")}
         return out
-    shutil.copytree(src, dst, ignore=ignore)
+    # copyfile, not copy2: a submitted (frozen) set is read-only, and its copy must be writable
+    shutil.copytree(src, dst, ignore=ignore, copy_function=shutil.copyfile)
     return dst
 
 
@@ -390,7 +507,7 @@ def cmn_problems(ms_dir: Path) -> list[str]:
     text = (ms_dir / cmn.MS_NAME).read_text(encoding="utf-8")
     sk = ms_dir / cmn.SKELETON
     gold = json.loads(sk.read_text(encoding="utf-8"))["sections"] if sk.exists() else None
-    others = {n: (ms_dir / n).read_text(encoding="utf-8") for n in cmn.OTHER_FILES if (ms_dir / n).exists()}
+    others = cmn.load_others(ms_dir)
     if not (ms_dir / cmn.PHRASES).exists():
         return [f"PHRASES: {cmn.PHRASES} missing"]
     return cmn.problems(ROOT, text, gold, others, required=cmn.section_phrases(ms_dir),
@@ -477,8 +594,9 @@ def docx_token_spans(xml: str) -> list[tuple[int, int]]:
     return out
 
 
-def sweep_docx(path: Path, want: list[str]) -> tuple[int, int, list[str]]:
-    """Bump every number token of the .docx text; the tie must report a difference each time."""
+def sweep_docx(path: Path, want: list[str], doi: str | None = None) -> tuple[int, int, list[str]]:
+    """Bump every number token of the .docx text; the tie must report a difference each time (with
+    `doi`, the release DOI recorded for the folder, a changed DOI is a difference too)."""
     with zipfile.ZipFile(path) as z:
         xml = z.read(DOC).decode("utf-8")
     spans = docx_token_spans(xml)
@@ -488,7 +606,7 @@ def sweep_docx(path: Path, want: list[str]) -> tuple[int, int, list[str]]:
         for a, b in spans:
             shutil.copyfile(path, tmp)
             rewrite_part(tmp, DOC, lambda _x, a=a, b=b: xml[:a] + bump(xml[a:b]) + xml[b:])
-            if tie.compare(path.name, tie.docx_units(tmp), want):
+            if tie.compare(path.name, tie.docx_units(tmp), want) or (doi and tie.doi_file_problems(tmp, doi)):
                 caught += 1
             else:
                 escaped.append(xml[max(0, a - 40):b + 10])
@@ -530,9 +648,10 @@ def main(argv: list[str] | None = None, root: Path = ROOT) -> int:
         print(f"sweep, manuscript_src.md number tokens (check_manuscript_numbers): caught {c} of {t}")
         for x in e:
             print("  UNCAUGHT", x)
-        p = ms / MS_02
+        p = ms / (MS_03 if prof == "ijtb" else MS_02)
         want, _ = tie.expected(ms, p.name)
-        c2, t2, e2 = sweep_docx(p, want)
+        rec = ms / tie.RELEASE_DOI
+        c2, t2, e2 = sweep_docx(p, want, rec.read_text(encoding="utf-8").strip() if rec.exists() else None)
         print(f"sweep, {p.name} number tokens (check_docx_tie): caught {c2} of {t2}")
         for x in e2:
             print("  UNCAUGHT", x)

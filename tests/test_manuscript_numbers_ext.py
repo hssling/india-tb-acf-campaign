@@ -99,7 +99,7 @@ def probs(t: str, g: dict | None, others: dict | None = None) -> list[str]:
 # ------------------------------------------------------------------ profiles
 
 def test_profiles_and_the_default():
-    assert cmn.DEFAULT_PROFILE == "ext" and set(cmn.PROFILES) == {"v1", "ext"}
+    assert cmn.DEFAULT_PROFILE == "ext" and set(cmn.PROFILES) == {"v1", "ext", "ijtb"}
     ext = cmn.PROFILES["ext"]
     assert ext.tables == [1] and ext.figures == [1, 2, 3, 4]
     assert ext.supplement == [f"S{k}" for k in range(1, 9)] and ext.supp_data == []

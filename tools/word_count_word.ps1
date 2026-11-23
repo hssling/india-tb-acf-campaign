@@ -4,7 +4,7 @@
 # Opens its own Word instance (read-only, hidden) and quits only that instance.
 # Abstract: the paragraphs between the "Abstract" heading and the Keywords line (its run-in
 # headings Objectives ... Conclusions included, Keywords excluded).
-# Main text: Introduction to Discussion, headings excluded, run-in bold subheadings included,
+# Main text: Introduction to Discussion (and Conclusions, as in the IJTB set), headings excluded, run-in bold subheadings included,
 # plus the text of a text box (a heading "Box N. ...", counted under "Box"); it ends at any
 # other heading (Acknowledgements). Tables and the placement markers ("[Table 1 about here]")
 # are not counted.
@@ -20,7 +20,7 @@ try {
     $isHeading = $p.OutlineLevel -lt 10
     if ($isHeading) {
       if ($t -eq "Abstract") { $state = "abs" }
-      elseif ($t -in @("Introduction", "Methods", "Results", "Discussion")) { $state = "main"; $cur = $t; $sec[$t] = 0 }
+      elseif ($t -in @("Introduction", "Methods", "Results", "Discussion", "Conclusions")) { $state = "main"; $cur = $t; $sec[$t] = 0 }
       elseif ($t -match '^Box \d+\.') { $state = "main"; $cur = "Box"; $sec["Box"] = 0 }
       else { $state = "" }
       continue
